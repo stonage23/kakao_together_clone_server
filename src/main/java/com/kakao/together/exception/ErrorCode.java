@@ -20,7 +20,10 @@ public enum ErrorCode {
     INVALID_INPUT_VALUES("INVALID_INPUT_VALUES", "입력 정보에 문제가 존재합니다.", HttpStatus.BAD_REQUEST),
 
     // 메일
-    INTERNAL_MAIL_ERROR("INTERNAL_MAIL_ERROR", "이메일을 발송하던 중 에러가 발생하였습니다. 서버측에 문의해주세요", HttpStatus.INTERNAL_SERVER_ERROR);
+    INTERNAL_MAIL_ERROR("INTERNAL_MAIL_ERROR", "이메일을 발송하던 중 에러가 발생하였습니다. 서버측에 문의해주세요", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // redis
+    REDIS_EXCEPTION("REDIS_EXCEPTION", "redis 데이터 조작 중 예외가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
     private final String message;
