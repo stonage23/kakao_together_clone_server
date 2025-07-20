@@ -1,5 +1,6 @@
 package com.kakao.together.service.member.impl;
 
+import com.kakao.together.domain.entity.member.Authority;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
@@ -31,7 +32,13 @@ public class MemberServiceImpl implements MemberService {
                     log.error("이미 존재하는 이메일로 계정생성 시도: " + member.getEmail());
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
                 });
-        Member member = request.toEntity();
+        Member member = Member.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .age(request.getAge())
+                .address(request.getAddress())
+                .authority(Authority.USER)
+                .build();
         memberRepository.save(member);
     }
 
@@ -45,7 +52,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean isPresentEmail (String email) {
+    public boolean isPresentEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
+
+    @Override
+    public boolean isEqualPassword(String username, String password) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        return passwordEncoder.matches(password, member.getPassword());
+    }
+
+
 }

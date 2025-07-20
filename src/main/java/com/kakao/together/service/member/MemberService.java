@@ -13,4 +13,6 @@ public interface MemberService {
     MemberData findMemberByEmail(String email);
 
     boolean isPresentEmail(String email);
+
+    boolean isEqualPassword(String username, String password);
 }

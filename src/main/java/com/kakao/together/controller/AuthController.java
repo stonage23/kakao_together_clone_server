@@ -1,10 +1,13 @@
 package com.kakao.together.controller;
 
+import com.kakao.together.controller.dto.AuthDto.LoginRequest;
 import com.kakao.together.controller.dto.AuthDto.SignupByEmailRequest;
 import com.kakao.together.facade.AuthFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +28,20 @@ public class AuthController {
     @PostMapping("/auth/validation/{code}")
     public ResponseEntity signupValidate(@PathVariable("code") String code) {
         authFacade.validateSignup(code);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody LoginRequest requestDto) {
+        TokenContainer tokenContainer = authFacade.login(requestDto);
+        return ResponseEntity.ok()
+                .headers(tokenContainer.getHttpHeaders())
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity logout(@AuthenticationPrincipal UserDetails principal) {
+        authFacade.logout(principal.getUsername());
         return ResponseEntity.ok().build();
     }
 }
