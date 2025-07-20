@@ -1,5 +1,6 @@
 package com.kakao.together.service.member.impl;
 
+import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
 import com.kakao.together.domain.entity.member.Authority;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
@@ -62,6 +63,14 @@ public class MemberServiceImpl implements MemberService {
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
         return passwordEncoder.matches(password, member.getPassword());
+    }
+
+    @Override
+    public void updatePassword(ResetPasswordRequest reqeustDto) {
+        Member member = memberRepository.findByEmail(reqeustDto.getEmail()).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        member.updatePassword(passwordEncoder.encode(reqeustDto.getPassword()));
     }
 
 

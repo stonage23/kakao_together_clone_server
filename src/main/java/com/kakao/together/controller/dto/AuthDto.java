@@ -3,6 +3,8 @@ package com.kakao.together.controller.dto;
 import com.kakao.together.domain.entity.member.Authority;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.domain.entity.member.Profile;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -65,6 +67,25 @@ public class AuthDto {
                     .email(this.username)
                     .password(this.password)
                     .build();
+        }
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class ResetPasswordRequest {
+        @NotBlank
+        private String email;
+        @NotBlank
+        private String code;
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+        @NotBlank(message = "확인 비밀번호를 입력해주세요.")
+        private String checkPassword;
+
+        public void checkPasswordMatch() {
+            if (!this.password.equals(this.checkPassword)) throw new CustomException(ErrorCode.NOT_MATCH_CHECKPASSWORD);
         }
     }
 }

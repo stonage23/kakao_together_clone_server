@@ -16,6 +16,8 @@ public enum ErrorCode {
     // 유저
     NOT_FOUND_USER("NOT_FOUND_USER", "유저가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     NOT_FOUND_PROFILE("NOT_FOUND_PROFILE", "프로필이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    NOT_FOUND_PWD_CODE("NOT_FOUND_PWD_CODE", "비밀번호 변경 토큰이 존재하지 않습니다.", HttpStatus.GONE),
+    NOT_AUTHENTICATE_USER("NOT_AUTHENTICATE_USER", "인증된 유저가 보낸 요청이 아닙니다.", HttpStatus.FORBIDDEN),
     DUPLICATE_EMAIL("DUPLICATE_EMAIL", "중복된 이메일입니다.", HttpStatus.CONFLICT),
     INVALID_INPUT_VALUES("INVALID_INPUT_VALUES", "입력 정보에 문제가 존재합니다.", HttpStatus.BAD_REQUEST),
     NOT_MATCH_CHECKPASSWORD("NOT_MATCH_CHECKPASSWORD", "비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
