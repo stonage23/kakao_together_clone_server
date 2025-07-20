@@ -6,9 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-// NOTE Jwt 인증을 위한 임시 MemberRepository
-// TODO MemberService 구현 이후 실제 사용할 MemberRepository로 교체
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String username);
+
+    boolean existsByEmail(String email);
 }
