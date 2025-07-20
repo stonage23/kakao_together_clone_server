@@ -1,8 +1,12 @@
 package com.kakao.together.jwt;
 
+import com.kakao.together.controller.TokenContainer;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,21 @@ public class JwtService {
     private final SecretKey secretKey;
     private final JwtParser jwtParser;
 
+
+    @Value("${jwt.access.expiration}")
+    private Long accessTokenExpirationPeriod;
+    @Value("${jwt.refresh.expiration}")
+    private Long refreshTokenExpirationPeriod;
+    @Value("${jwt.access.header}")
+    private String accessHeader;
+    @Value("${jwt.refresh.header}")
+    private String refreshHeader;
+
+
+    private static final String BEARER = "Bearer ";
+    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
+    private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
+
     /**
      * Secret key는 보안 및 일관성을 위해 외부에서 주입받아 Key 객체로 변환 후 사용
      *
@@ -32,7 +51,7 @@ public class JwtService {
 
     public SecretKey getSecretKey() {return this.secretKey;}
 
-    public String buildToken(Map<String, Object> claims, String subject, Long expirationPeriod) {
+    private String buildToken(Map<String, Object> claims, String subject, Long expirationPeriod) {
         Date now = new Date();
         return Jwts.builder()
                 .header()
@@ -47,11 +66,27 @@ public class JwtService {
                 .compact();
     }
 
+    private String createAccessToken(Map<String, Object> claims) {
+        return buildToken(claims, ACCESS_TOKEN_SUBJECT, accessTokenExpirationPeriod);
+    }
+
+    private String createRefreshToken(Map<String, Object> claims) {
+        return buildToken(claims, REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod);
+    }
+
+    public String createBearerAccessToken(Map<String, Object> claims) { return withBearerPrefix(createAccessToken(claims)); }
+
+    public String createBearerRefreshToken(Map<String, Object> claims) { return withBearerPrefix(createRefreshToken(claims)); }
+
+    public TokenContainer generateTokenContainerWithCommonClaims(Map<String, Object> claims) {
+        String accessToken = createAccessToken(claims);
+        String refreshToken = createRefreshToken(claims);
+        return new TokenContainer(accessHeader, refreshHeader, accessToken, refreshToken);
+    }
+
     private Jws<Claims> parseToken(String token) {
         try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
+            return jwtParser
                     .parseSignedClaims(token);
         } catch (UnsupportedJwtException e) {
             throw new UnsupportedJwtException("서명되지 않은 jwt토큰: token = {}"+ token, e);
@@ -62,6 +97,18 @@ public class JwtService {
         } catch (RuntimeException e) {
             throw new RuntimeException("토큰 유효성 확인 도중 알 수 없는 에러 발생", e);
         }
+    }
+
+    public String withBearerPrefix(String token) {
+        return BEARER + token;
+    }
+
+    public String removeBearerPrefix(@NotNull String token) {
+        if (!token.startsWith(BEARER)) {
+            log.error("Bearer prefix가 없는 토큰");
+            throw new CustomException(ErrorCode.NOT_MATCH_BEARER);
+        }
+        return token.replace(BEARER, "");
     }
 
     public Claims extractAllClaims(String token) {

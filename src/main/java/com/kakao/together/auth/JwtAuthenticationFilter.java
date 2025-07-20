@@ -33,21 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AbstractRefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
 
+    private static String[] noCheckUri = {"/auth/login", "/favicon.ico"};
+    private static final String PARAM_USERNAME = "username";
+
     @Value("${jwt.access.header}")
     private String accessHeader;
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
-    @Value("${jwt.access.expiration}")
-    private Long accessTokenExpirationPeriod;
-    @Value("${jwt.refresh.expiration}")
-    private Long refreshTokenExpirationPeriod;
-
-    private static String[] noCheckUri = {"/auth/login", "/favicon.ico"};
-
-    private static final String BEARER = "Bearer ";
-    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
-    private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String PARAM_USERNAME = "username";
 
 
     /**
@@ -93,24 +85,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private String createAccessToken(Map<String, Object> claims) {
-        return jwtService.buildToken(claims, ACCESS_TOKEN_SUBJECT, accessTokenExpirationPeriod);
-    }
-
-    private String createRefreshToken(Map<String, Object> claims) {
-        return jwtService.buildToken(claims, REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod);
-    }
-
     private Optional<String> extractRefreshToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(refreshHeader))
-                .filter(accessToken -> accessToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+                .map(jwtService::removeBearerPrefix);
     }
 
     private Optional<String> extractAccessToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(accessHeader))
-                .filter(accessToken -> accessToken.startsWith(BEARER))
-                .map(accessToken -> accessToken.replace(BEARER, ""));
+                .map(jwtService::removeBearerPrefix);
     }
 
     private String checkAccessTokenAndAuthentication(HttpServletRequest request) {
@@ -126,27 +108,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String reIssueRefreshToken(Map<String, Object> claims) {
-        String reIssuedRefreshToken = createRefreshToken(claims);
+        String reIssuedRefreshToken = jwtService.createBearerRefreshToken(claims);
         refreshTokenService.saveRefreshToken(reIssuedRefreshToken);
         return reIssuedRefreshToken;
     }
 
     private void reIssueRefreshAndAccessToken(HttpServletResponse response, String refreshToken) {
         String username = validateRefreshToken(refreshToken);
-        sendAccessAndRefreshToken(response, createAccessToken(Map.of(PARAM_USERNAME, username)), reIssueRefreshToken(Map.of(PARAM_USERNAME, username)));
+        sendAccessAndRefreshToken(response, jwtService.createBearerAccessToken(Map.of(PARAM_USERNAME, username)), reIssueRefreshToken(Map.of(PARAM_USERNAME, username)));
     }
 
     private void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(accessHeader, BEARER + accessToken);
+        response.setHeader(accessHeader, jwtService.withBearerPrefix(accessToken));
     }
 
     private void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(refreshHeader, BEARER + refreshToken);
+        response.setHeader(refreshHeader, jwtService.withBearerPrefix(refreshToken));
     }
 
     private void sendAccessToken(HttpServletResponse response, String accessToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(accessHeader, BEARER + accessToken);
+        response.setHeader(accessHeader, jwtService.withBearerPrefix(accessToken));
     }
 
     private void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {

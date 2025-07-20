@@ -19,6 +19,8 @@ public enum ErrorCode {
     DUPLICATE_EMAIL("DUPLICATE_EMAIL", "중복된 이메일입니다.", HttpStatus.CONFLICT),
     INVALID_INPUT_VALUES("INVALID_INPUT_VALUES", "입력 정보에 문제가 존재합니다.", HttpStatus.BAD_REQUEST),
 
+    // 토큰
+    NOT_MATCH_BEARER("NOT_MATCH_BEARER", "Bearer prefix가 없는 토큰", HttpStatus.INTERNAL_SERVER_ERROR),
     // 메일
     INTERNAL_MAIL_ERROR("INTERNAL_MAIL_ERROR", "이메일을 발송하던 중 에러가 발생하였습니다. 서버측에 문의해주세요", HttpStatus.INTERNAL_SERVER_ERROR),
 
