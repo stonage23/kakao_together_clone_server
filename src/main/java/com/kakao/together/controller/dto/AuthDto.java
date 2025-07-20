@@ -88,4 +88,12 @@ public class AuthDto {
             if (!this.password.equals(this.checkPassword)) throw new CustomException(ErrorCode.NOT_MATCH_CHECKPASSWORD);
         }
     }
+
+    @AllArgsConstructor
+    @Getter
+    public static class DeleteMemberRequest {
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+    }
 }

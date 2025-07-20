@@ -1,5 +1,6 @@
 package com.kakao.together.service.member;
 
+import com.kakao.together.controller.dto.AuthDto;
 import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
 import org.springframework.stereotype.Service;
 
@@ -18,4 +19,6 @@ public interface MemberService {
     boolean isEqualPassword(String username, String password);
 
     void updatePassword(ResetPasswordRequest reqeustDto);
+
+    void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto);
 }

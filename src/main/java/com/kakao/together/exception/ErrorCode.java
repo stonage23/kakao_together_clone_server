@@ -21,6 +21,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIL("DUPLICATE_EMAIL", "중복된 이메일입니다.", HttpStatus.CONFLICT),
     INVALID_INPUT_VALUES("INVALID_INPUT_VALUES", "입력 정보에 문제가 존재합니다.", HttpStatus.BAD_REQUEST),
     NOT_MATCH_CHECKPASSWORD("NOT_MATCH_CHECKPASSWORD", "비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    NOT_MATCH_PASSWORD("NOT_MATCH_PASSWORD", "틀린 비밀번호입니다.", HttpStatus.NOT_FOUND),
     FAILED_DELETE_MEMBER("FAILED_DELETE_MEMBER", "유저를 DB에서 삭제하는 과정에 문제가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_LOGIN_INFO("INVALID_LOGIN_INFO", "아이디 또는 비밀번호를 확인해주세요", HttpStatus.NOT_FOUND),
 

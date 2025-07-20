@@ -1,5 +1,6 @@
 package com.kakao.together.service.member.impl;
 
+import com.kakao.together.controller.dto.AuthDto;
 import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
 import com.kakao.together.domain.entity.member.Authority;
 import com.kakao.together.domain.entity.member.Member;
@@ -71,6 +72,15 @@ public class MemberServiceImpl implements MemberService {
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
         member.updatePassword(passwordEncoder.encode(reqeustDto.getPassword()));
+    }
+
+    @Override
+    public void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        if (passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+        memberRepository.delete(member);
     }
 
 

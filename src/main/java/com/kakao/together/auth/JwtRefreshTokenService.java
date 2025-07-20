@@ -1,7 +1,7 @@
 package com.kakao.together.auth;
 
-import com.kakao.together.controller.dto.MemberDto.MemberInfo;
 import com.kakao.together.auth.JwtAuthExceptions.RefreshTokenUserNotFoundException;
+import com.kakao.together.controller.dto.MemberDto.MemberData;
 import com.kakao.together.repository.MemberRepository;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class JwtRefreshTokenService extends AbstractRefreshTokenService<String, 
 
     @Override
     public String getUsername(String username) {
-        return repository.findByEmail(username).map(MemberInfo::fromEntity)
+        return repository.findByEmail(username).map(MemberData::fromEntity)
                 .orElseThrow(() -> new RefreshTokenUserNotFoundException("refreshtoken에서 얻은 유저 정보로 DB 유저 조회 실패; username: " + username))
                 .getEmail();
     }

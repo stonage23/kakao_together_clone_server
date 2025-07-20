@@ -109,4 +109,13 @@ public class AuthFacade {
         }
         memberService.updatePassword(reqeustDto);
     }
+
+    public void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto) {
+        try {
+            memberService.deleteMember(username, requestDto);
+        } catch (Exception e) {
+            log.error("회원정보 삭제 도중 예상치 못한 예외 발생");
+            throw new CustomException(ErrorCode.FAILED_DELETE_MEMBER, e.getCause().getMessage());
+        }
+    }
 }
