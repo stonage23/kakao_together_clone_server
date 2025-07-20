@@ -20,7 +20,7 @@ public class RedisTestContainersConfig {
     private static final int REDIS_PORT = 6379;
 
     @Container
-    private static final GenericContainer<?> redisContainer = new GenericContainer<>("redis-docker")
+    private static final GenericContainer<?> redisContainer = new GenericContainer<>("redis:5.0.3-alpine")
             .withExposedPorts(REDIS_PORT)
             .waitingFor(Wait.forListeningPort())
             .withStartupTimeout(Duration.ofSeconds(60));

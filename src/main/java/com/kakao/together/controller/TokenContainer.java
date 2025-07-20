@@ -36,4 +36,5 @@ public class TokenContainer {
     }
 
     public HttpHeaders getHttpHeaders() {return this.httpHeaders;}
+    public String getRefreshToken() {return this.refreshToken;}
 }
