@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum ContentType {
-    TEXT("text"),
-    IMAGE("image"),
-    TITLE("title"),
-    SUBTITLE("subtitle");
+    TEXT("TEXT"),
+    IMAGE("IMAGE"),
+    TITLE("TITLE"),
+    SUBTITLE("SUBTITLE");
 
     private String value;
     ContentType(final String value) {this.value = value;}

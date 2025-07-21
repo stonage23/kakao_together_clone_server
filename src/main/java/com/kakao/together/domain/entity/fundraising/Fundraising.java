@@ -2,12 +2,15 @@ package com.kakao.together.domain.entity.fundraising;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.document.Document;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table (name = "Fundraising")
@@ -48,7 +51,10 @@ public class Fundraising extends BaseTimeEntity {
     @JoinColumn(name = "document_id")
     private Document document;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "fundraising_status_id")
+    @OneToMany(mappedBy = "fundraising", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @Embedded
     private FundraisingStatus fundraisingStatus;
 }
+

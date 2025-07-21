@@ -6,17 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Embeddable
 public class FundraisingStatus {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "fundraising_status_id")
-    private Long id;
     @Column(nullable = false)
     private Integer currentAmount;
     @Column(nullable = false)
@@ -24,9 +20,7 @@ public class FundraisingStatus {
     @Column(nullable = false)
     private Integer indirectDonatorCount;
     @Column(nullable = false)
-    private Integer directDonationAmound;
+    private Integer directDonationAmount;
     @Column(nullable = false)
-    private Integer indirectDonationAmound;
-    @Column(nullable = false)
-    private Integer sharedCount;
+    private Integer indirectDonationAmount;
 }

@@ -1,11 +1,16 @@
 package com.kakao.together.domain.entity.member;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
+import com.kakao.together.domain.entity.comment.Comment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -27,9 +32,16 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Authority authority;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private LocalDateTime deletedAt;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
     private Profile profile;
+
+    @OneToMany(mappedBy = "member", orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Comment> comments = new ArrayList<>();
 
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
