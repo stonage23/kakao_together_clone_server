@@ -34,4 +34,9 @@ public class Member extends BaseTimeEntity {
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    public void updateProfile(Profile updatedProfile) {
+        Profile profile = getProfile();
+        profile.updateProfile(updatedProfile);
+    }
 }

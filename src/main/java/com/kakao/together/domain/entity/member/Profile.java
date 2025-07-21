@@ -20,4 +20,7 @@ public class Profile {
     @Column(nullable = false)
     private String nickname;
 
+    public void updateProfile(Profile profile) {
+        this.nickname = profile.getNickname();
+    }
 }

@@ -2,8 +2,10 @@ package com.kakao.together.service.member.impl;
 
 import com.kakao.together.controller.dto.AuthDto;
 import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.domain.entity.member.Authority;
+import com.kakao.together.controller.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.member.Member;
+import com.kakao.together.domain.entity.member.Profile;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.repository.MemberRepository;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.NoSuchElementException;
 
 import static com.kakao.together.controller.dto.AuthDto.SignupByEmailRequest;
 import static com.kakao.together.controller.dto.MemberDto.MemberData;
@@ -34,13 +38,7 @@ public class MemberServiceImpl implements MemberService {
                     log.error("이미 존재하는 이메일로 계정생성 시도: " + member.getEmail());
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
                 });
-        Member member = Member.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .age(request.getAge())
-                .address(request.getAddress())
-                .authority(Authority.USER)
-                .build();
+        Member member = request.toEntity();
         memberRepository.save(member);
     }
 
@@ -67,6 +65,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void updatePassword(ResetPasswordRequest reqeustDto) {
         Member member = memberRepository.findByEmail(reqeustDto.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
@@ -75,6 +74,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto) {
         Member member = memberRepository.findByEmail(username).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
@@ -83,5 +83,31 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.delete(member);
     }
 
+    @Override
+    public boolean isPresentNickname(String nickname) {
+        return memberRepository.existsByProfile_Nickname(nickname);
+    }
 
+    @Override
+    public MyProfileResponse getProfile(String username) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        try {
+            Profile profile = member.getProfile();
+            return MyProfileResponse.fromEntity(profile);
+        } catch (NoSuchElementException e) {
+            log.error("##### 존재해야하는 Profile이 존재하지 않음");
+            throw new CustomException(ErrorCode.NOT_FOUND_PROFILE);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateProfile(String username, ProfileUpdateRequest profileReq) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        member.updateProfile(profileReq.toEntity());
+    }
 }
