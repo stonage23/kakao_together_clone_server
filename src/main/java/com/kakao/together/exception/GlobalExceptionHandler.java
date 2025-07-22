@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ CustomException.class })
     protected ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-        log.info("##### 전역 예외처리 : CustomException");
+        log.info("##### 전역 예외처리 : CustomException; {}: {}", e.getErrorCode(), e.getMessage());
         ErrorResponse response = ErrorResponse.of(e);
         return new ResponseEntity<>(response, e.getErrorCode().getHttpStatus());
     }

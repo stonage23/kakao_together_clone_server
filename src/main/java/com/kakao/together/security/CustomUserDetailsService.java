@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                         User.builder()
                                 .username(member.getEmail())
                                 .password(member.getPassword())
-                                .authorities(new SimpleGrantedAuthority(member.getAuthority().toString()))
+                                .authorities(new SimpleGrantedAuthority(member.getAuthority().getRole()))
                                 .build()
                 ).orElseThrow(
                         () -> new UsernameNotFoundException("사용자를 찾을수 없습니다.")

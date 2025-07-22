@@ -44,7 +44,7 @@ public class AuthDto {
                     .age(this.age)
                     .address(this.address)
                     .profile(profile)
-                    .authority(Authority.USER)
+                    .authority(Authority.MEMBER)
                     .build();
         }
     }
