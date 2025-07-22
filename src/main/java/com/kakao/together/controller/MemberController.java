@@ -18,6 +18,11 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @GetMapping("/check-duplicate/{email}")
+    public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable String email) {
+        return ResponseEntity.ok(memberService.isPresentEmail(email));
+    }
+
     @GetMapping("/check-duplicate/{nickname}")
     public ResponseEntity<Boolean> checkDuplicateNickname(@PathVariable String nickname) {
         return ResponseEntity.ok(memberService.isPresentNickname(nickname));
