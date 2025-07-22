@@ -12,6 +12,7 @@ public enum ErrorCode {
     TEST_ERROR("TEST_ERROR", "test ErrorCode", HttpStatus.BAD_REQUEST),
 
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "서버 에러이므로 서버 팀에 연락주세요.", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNAUTHENTICATED_REQUEST("UNAUTHENTICATED_REQUEST", "인증된 계정만 접근이 가능한 요청입니다.", HttpStatus.FORBIDDEN),
 
     // 유저
     NOT_FOUND_USER("NOT_FOUND_USER", "유저가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
@@ -24,6 +25,9 @@ public enum ErrorCode {
     NOT_MATCH_PASSWORD("NOT_MATCH_PASSWORD", "틀린 비밀번호입니다.", HttpStatus.NOT_FOUND),
     FAILED_DELETE_MEMBER("FAILED_DELETE_MEMBER", "유저를 DB에서 삭제하는 과정에 문제가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_LOGIN_INFO("INVALID_LOGIN_INFO", "아이디 또는 비밀번호를 확인해주세요", HttpStatus.NOT_FOUND),
+
+    // 관리자
+    ONLY_ADMIN_EXCEPTION("ONLY_ADMIN_EXCEPTION", "Admin 계정만 접근할 수 있는 요청입니다.", HttpStatus.FORBIDDEN),
 
     // 토큰
     NOT_MATCH_BEARER("NOT_MATCH_BEARER", "Bearer prefix가 없는 토큰", HttpStatus.INTERNAL_SERVER_ERROR),
