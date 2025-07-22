@@ -15,5 +15,5 @@ import lombok.*;
 public class TextContent extends Content {
 
     @Lob
-    private String value;
+    private String text;
 }

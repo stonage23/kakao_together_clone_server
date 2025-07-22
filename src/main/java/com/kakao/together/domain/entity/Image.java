@@ -18,4 +18,5 @@ public class Image extends BaseTimeEntity {
 
     private String url;
     private String originalName;
+    private String realName;
 }

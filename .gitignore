@@ -33,7 +33,6 @@ out/
 /.nb-gradle/
 
 # 패키징된 애플리케이션 파일
-*.jar
 *.war
 *.zip
 *.tar.gz

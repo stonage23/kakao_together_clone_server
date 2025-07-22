@@ -1,14 +1,12 @@
 package com.kakao.together.domain.entity.content.extend;
 
+import com.kakao.together.domain.entity.Image;
 import com.kakao.together.domain.entity.content.Content;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Entity
@@ -19,14 +17,9 @@ import java.util.Set;
 @Getter
 public class ImageContent extends Content {
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "ImageContent_Image", joinColumns = @JoinColumn(name = "content_id"))
-    private Set<Image> images = new HashSet<>();
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    @JoinColumn(name = "image_id")
+    private Image image;
 
-    @Embeddable
-    public static class Image {
-        private String url;
-        private String originalName;
-        private String realName;
-    }
+    private String caption;
 }

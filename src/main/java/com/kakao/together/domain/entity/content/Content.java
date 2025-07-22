@@ -19,9 +19,11 @@ public abstract class Content {
 
     @Column(name = "content_type", insertable = false, updatable = false, nullable = false)
     @Enumerated(EnumType.STRING)
-    private ContentType contentType;
+    private ContentType type;
 
     @ManyToOne
     @JoinColumn(name = "document_id")
     private Document document;
+
+    private Integer order;
 }

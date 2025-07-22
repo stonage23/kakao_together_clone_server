@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class SubTitleContent extends Content {
-    private String value;
+    private String subtitle;
 }
