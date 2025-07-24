@@ -56,7 +56,7 @@ public class ErrorResponse {
 	}
 
 	public static ErrorResponse of(final CustomException e) {
-		if(e.getMessage().isEmpty()) return new ErrorResponse(e.getErrorCode());
+		if(e.getMessage() == null) return new ErrorResponse(e.getErrorCode());
 		return new ErrorResponse(e.getErrorCode(), e.getMessage());
 	}
 

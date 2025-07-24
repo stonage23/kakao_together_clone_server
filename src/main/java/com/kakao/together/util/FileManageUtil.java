@@ -1,5 +1,6 @@
 package com.kakao.together.util;
 
+import com.kakao.together.exception.CustomException;
 import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
@@ -16,9 +17,9 @@ public class FileManageUtil {
             Path path = Paths.get(dirName).toAbsolutePath();
             if (!Files.exists(path)) Files.createDirectories(path);
         } catch (FileAlreadyExistsException e) {
-            throw new RuntimeException("해당 위치에 동일한 이름의 파일이 이미 존재", e);
+            throw new CustomException("해당 위치에 동일한 이름의 파일이 이미 존재", e);
         } catch (IOException e) {
-            throw new RuntimeException("이미지 업로드 디렉토리 생성 실패", e);
+            throw new CustomException("이미지 업로드 디렉토리 생성 실패", e);
         }
     }
 }

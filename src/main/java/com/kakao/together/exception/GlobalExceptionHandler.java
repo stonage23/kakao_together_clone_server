@@ -33,7 +33,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ CustomException.class })
     protected ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+
         log.info("##### 전역 예외처리 : CustomException; {}: {}", e.getErrorCode(), e.getMessage());
+        if (e.getCause() != null)
+            log.info("##### 실제 발생한 예외: {}; {}", e.getCause().getClass().getName(), e.getMessage());
         ErrorResponse response = ErrorResponse.of(e);
         return new ResponseEntity<>(response, e.getErrorCode().getHttpStatus());
     }
@@ -42,6 +45,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ NullPointerException.class })
     protected  ResponseEntity<ErrorResponse> nullPointerException(NullPointerException e) {
         log.info("##### 전역 예외 처리 : NullPointerException; {}", e.getMessage());
+        e.printStackTrace();
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, INTERNAL_SERVER_ERROR);
     }
@@ -49,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ RuntimeException.class })
     protected  ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
         log.info("##### 전역 예외 처리 : RuntimeException; {}", e.getMessage());
-        log.error("{}; {}", e.getCause().getClass().getName(), e.getMessage());
+        log.error("{}; {}", e.getClass().getName(), e.getMessage());
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, INTERNAL_SERVER_ERROR);
     }
@@ -57,7 +61,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ Exception.class })
     protected  ResponseEntity<ErrorResponse> exception(Exception e) {
         log.info("##### 전역 예외처리 : Exception");
-        log.error("예상치 못한 예외 발생: {}; {}", e.getClass(), e.getMessage());
+        log.error("예상치 못한 예외 발생: {}; {};", e.getClass(), e.getMessage());
+        e.printStackTrace();
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, INTERNAL_SERVER_ERROR);
     }

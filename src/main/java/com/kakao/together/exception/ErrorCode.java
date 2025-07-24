@@ -29,6 +29,9 @@ public enum ErrorCode {
     // 관리자
     ONLY_ADMIN_EXCEPTION("ONLY_ADMIN_EXCEPTION", "Admin 계정만 접근할 수 있는 요청입니다.", HttpStatus.FORBIDDEN),
 
+    // 파일
+    NOT_FOUND_VALUE("NOT_FOUND_VALUE", "필요한 값이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+
     // 토큰
     NOT_MATCH_BEARER("NOT_MATCH_BEARER", "Bearer prefix가 없는 토큰", HttpStatus.INTERNAL_SERVER_ERROR),
     // 메일
