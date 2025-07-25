@@ -3,7 +3,7 @@ package com.kakao.together.domain.entity.fundraising;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.Image;
 import com.kakao.together.domain.entity.comment.Comment;
-import com.kakao.together.domain.entity.document.Document;
+import com.kakao.together.domain.entity.document.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -49,7 +49,7 @@ public class Fundraising extends BaseTimeEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
-    private Document document;
+    private Post post;
 
     @OneToMany(mappedBy = "fundraising", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();

@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-public class Document {
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
