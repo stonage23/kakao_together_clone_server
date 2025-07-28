@@ -13,14 +13,14 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class FundraisingStatus {
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private Integer currentAmount;
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private Integer directDonatorCount;
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private Integer indirectDonatorCount;
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private Integer directDonationAmount;
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private Integer indirectDonationAmount;
 }

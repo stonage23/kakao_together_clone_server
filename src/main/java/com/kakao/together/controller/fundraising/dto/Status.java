@@ -4,6 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum Status {
+    PAUSE("PAUSE"),
+    ONGOING("ONGOING"),
     TEMPORARY("TEMPORARY"),
     CREATED("CREATED"),
     ENDED("ENDED");

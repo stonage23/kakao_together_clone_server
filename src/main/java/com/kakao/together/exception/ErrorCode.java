@@ -13,6 +13,7 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR("서버 에러이므로 서버 팀에 연락주세요.", "INTERNAL_SERVER_ERROR", HttpStatus.INTERNAL_SERVER_ERROR),
     UNAUTHENTICATED_REQUEST("인증된 계정만 접근이 가능한 요청입니다.", "UNAUTHENTICATED_REQUEST", HttpStatus.FORBIDDEN),
+    NOT_FOUND_ENTITY("요청한 Entity가 존재하지 않습니다.", "NOT_FOUND_ENTITY", HttpStatus.NOT_FOUND),
 
     // 유저
     NOT_FOUND_USER("유저가 존재하지 않습니다.", "NOT_FOUND_USER", HttpStatus.NOT_FOUND),

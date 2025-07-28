@@ -2,7 +2,7 @@ package com.kakao.together.domain.entity.content.extend;
 
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
-import com.kakao.together.domain.entity.document.Post;
+import com.kakao.together.domain.entity.post.Post;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
@@ -20,7 +20,7 @@ public class TextContent extends Content {
     @Builder
     public TextContent(Integer order, String text, Post post) {
         this.setContentType(ContentType.TEXT);
-        this.setOrder(order);
+        this.setOrderIndex(order);
         this.setPost(post);
         this.text = text;
     }

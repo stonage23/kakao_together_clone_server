@@ -2,7 +2,7 @@ package com.kakao.together.domain.entity.content.extend;
 
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
-import com.kakao.together.domain.entity.document.Post;
+import com.kakao.together.domain.entity.post.Post;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Builder;
@@ -19,7 +19,7 @@ public class SubTitleContent extends Content {
     @Builder
     public SubTitleContent(Integer order, String subtitle, Post post) {
         this.setContentType(ContentType.SUBTITLE);
-        this.setOrder(order);
+        this.setOrderIndex(order);
         this.setPost(post);
         this.subtitle = subtitle;
     }

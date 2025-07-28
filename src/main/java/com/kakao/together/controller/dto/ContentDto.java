@@ -4,7 +4,7 @@ import com.kakao.together.domain.entity.Image;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.document.Post;
+import com.kakao.together.domain.entity.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class ContentDto {
                     .caption(this.caption)
                     .image(this.image)
                     .order(this.order)
-                    .document(post)
+                    .post(post)
                     .build();
         }
     }
@@ -52,7 +52,7 @@ public class ContentDto {
             return SubTitleContent.builder()
                     .subtitle(this.subtitle)
                     .order(this.order)
-                    .document(this.post)
+                    .post(this.post)
                     .build();
         }
     }
@@ -68,7 +68,7 @@ public class ContentDto {
         public TextContent toEntity() {
             return TextContent.builder()
                     .text(this.text)
-                    .document(this.post)
+                    .post(this.post)
                     .order(this.order)
                     .build();
         }

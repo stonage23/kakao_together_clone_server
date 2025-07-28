@@ -1,20 +1,30 @@
 package com.kakao.together.service.fundraising;
 
-import com.kakao.together.controller.fundraising.dto.FundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FundraisingService {
 
-    FundraisingResponse findFundraising(Long id);
+    Fundraising createTempFundraising(Fundraising fundrasing);
 
-    Fundraising createFundraising(FundraisingDto.EditFundraisingDto requestDto);
+    Fundraising createFundraising(Fundraising fundraising);
 
-    Optional<Fundraising> getFundraisingEntity(Long fundraisingId);
+    FundraisingResponse getOngoingFundraisingResponse(Long fundraisingId);
 
-    Fundraising createTempFundraising(FundraisingDto.EditFundraisingDto requestDto);
+    Optional<Fundraising> findFundraisingNullable(Long fundraisingId);
 
-    Fundraising transTempToUpload(FundraisingDto.EditFundraisingDto requestDto);
+    Fundraising findFundraisingNullCheck(Long fundraisingId);
+
+    List<FundraisingResponse> findFundraisingsExpiringInThreeDaysLimit(int limit);
+
+    List<FundraisingResponse> findFundraisingsTopLimit(int limit);
+
+    void deleteIfExists(Long fundraisingId);
+
+    Fundraising findTempFundraisingById(Long id);
+
+    List<Fundraising> findAllTempFundraisings();
 }

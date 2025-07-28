@@ -1,9 +1,10 @@
 package com.kakao.together.domain.entity.fundraising;
 
+import com.kakao.together.controller.fundraising.dto.Status;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.Image;
 import com.kakao.together.domain.entity.comment.Comment;
-import com.kakao.together.domain.entity.document.Post;
+import com.kakao.together.domain.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,16 +30,18 @@ public class Fundraising extends BaseTimeEntity {
     @Column (nullable = false)
     private String title;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
+    private Integer targetAmount;
+
     @Column(length = 12)
-    private String  status = "CREATED";
+    private Status status;
 
     @OneToOne(fetch = FetchType.LAZY)
     private Agency agency;
@@ -48,7 +51,7 @@ public class Fundraising extends BaseTimeEntity {
     private Image thumbnail;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id")
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @OneToMany(mappedBy = "fundraising", fetch = FetchType.LAZY, orphanRemoval = true)

@@ -1,6 +1,6 @@
 package com.kakao.together.domain.entity.content;
 
-import com.kakao.together.domain.entity.document.Post;
+import com.kakao.together.domain.entity.post.Post;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,9 +9,6 @@ import lombok.*;
 @DiscriminatorColumn(name = "content_type")
 @Getter
 @ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public abstract class Content {
 
     @Id
@@ -24,17 +21,17 @@ public abstract class Content {
     private ContentType type;
 
     @ManyToOne
-    @JoinColumn(name = "document_id")
+    @JoinColumn(name = "post_id")
     private Post post;
 
-    private Integer order;
+    private Integer orderIndex;
 
     protected void setContentType(ContentType contentType) {
         this.type = contentType;
     }
 
-    protected void setOrder(Integer order) {
-        this.order = order;
+    protected void setOrderIndex(Integer order) {
+        this.orderIndex = order;
     }
 
     protected void setPost(Post post) {
