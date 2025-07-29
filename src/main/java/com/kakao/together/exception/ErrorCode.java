@@ -35,6 +35,7 @@ public enum ErrorCode {
 
     // 파일
     NOT_FOUND_VALUE("필요한 값이 존재하지 않습니다.", "NOT_FOUND_VALUE", HttpStatus.BAD_REQUEST),
+    NOT_VALID_FORMAT("사용가능한 파일 확장자가 아닙니다.", "NOT_VALID_FORMAT", HttpStatus.BAD_REQUEST),
 
     // 토큰
     NOT_MATCH_BEARER("Bearer prefix가 없는 토큰", "NOT_MATCH_BEARER", HttpStatus.INTERNAL_SERVER_ERROR),

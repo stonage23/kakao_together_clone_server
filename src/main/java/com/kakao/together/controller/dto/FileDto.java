@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class FileDto {
-    private String fileName;
-    private String filePath;
+    private String originalName;
+    private String realName;
+    private String url;
 }

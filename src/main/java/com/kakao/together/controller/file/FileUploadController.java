@@ -22,17 +22,17 @@ public class FileUploadController {
 
     @PostMapping("/images/temp")
     public ResponseEntity<Object> tempImage(@RequestParam MultipartFile file) {
-        return ResponseEntity.ok(imageService.saveFile(file, null));
+        return ResponseEntity.ok(imageService.saveFile(file));
     }
 
     @PostMapping("/images/upload")
     public ResponseEntity<Void> uploadImage(@RequestBody List<ImageDto> images) {
-        imageService.moveFile(images, null);
+        imageService.moveFile(images);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/files/temp")
     public ResponseEntity<Object> tempFile(@RequestParam MultipartFile file) {
-        return ResponseEntity.ok(fileService.saveFile(file, null));
+        return ResponseEntity.ok(fileService.saveFile(file));
     }
 }
