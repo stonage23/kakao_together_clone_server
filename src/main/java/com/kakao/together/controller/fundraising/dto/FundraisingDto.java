@@ -11,10 +11,8 @@ import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.post.Post;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -65,6 +63,7 @@ public class FundraisingDto {
     @Builder
     @AllArgsConstructor
     @Getter
+    @ToString
     public static class EditFundraisingDto {
 
         public interface UpdateDraft {}
@@ -81,6 +80,10 @@ public class FundraisingDto {
         @NotBlank(groups = {Save.class, Update.class})
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
+        @NotBlank(groups = {Save.class, Update.class})
+        private Integer TargetAmount;
+        @NotBlank(groups = {Save.class, Update.class})
+        private Status status;
         @NotBlank(groups = {Save.class, Update.class})
         private ImageDto thumbnail;
         @NotBlank(groups = {Save.class, Update.class})
@@ -111,10 +114,10 @@ public class FundraisingDto {
                     .title(fundraising.getTitle())
                     .startDate(fundraising.getStartDate())
                     .endDate(fundraising.getEndDate())
-                    .thumbnail(ImageDto.fromEntity(fundraising.getThumbnail()))
+                    .thumbnail(fundraising.getThumbnail() != null ? ImageDto.fromEntity(fundraising.getThumbnail()) : null)
                     .html(buildedHtml)
-                    .postId(fundraising.getPost().getId())
-                    .agencyId(fundraising.getAgency().getId())
+                    .postId(fundraising.getPost() != null ? fundraising.getPost().getId() : null)
+                    .agencyId(fundraising.getAgency() != null ? fundraising.getAgency().getId() : null)
                     .build();
         }
     }

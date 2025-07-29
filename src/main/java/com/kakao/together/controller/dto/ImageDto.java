@@ -12,14 +12,23 @@ public class ImageDto {
 
     private Long imageId;
     private String originalName;
-    private String savedPath;
-
+    private String realName;
+    private String url;
 
     public static ImageDto fromEntity(Image image) {
         return ImageDto.builder()
                 .imageId(image.getId())
                 .originalName(image.getOriginalName())
-                .savedPath(image.getUrl())
+                .realName(image.getRealName())
+                .url(image.getUrl())
+                .build();
+    }
+
+    public Image toEntity() {
+        return Image.builder()
+                .originalName(this.originalName)
+                .realName(this.realName)
+                .url(this.url)
                 .build();
     }
 }

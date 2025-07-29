@@ -2,9 +2,13 @@ package com.kakao.together.facade;
 
 import com.kakao.together.controller.dto.ContentDto.SubtitleContentDto;
 import com.kakao.together.controller.dto.ContentDto.TextContentDto;
+import com.kakao.together.controller.dto.ImageDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleEditFundraisingResponse;
 import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.content.extend.ImageContent;
+import com.kakao.together.domain.entity.content.extend.SubTitleContent;
+import com.kakao.together.domain.entity.content.extend.TextContent;
 import com.kakao.together.domain.entity.fundraising.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.post.Post;
@@ -14,16 +18,21 @@ import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.ContentService;
 import com.kakao.together.service.ImageService;
 import com.kakao.together.service.agency.AgencyService;
+import com.kakao.together.service.file.FileService;
 import com.kakao.together.service.fundraising.FundraisingService;
+import com.kakao.together.service.fundraising.impl.FundraisingServiceImpl;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -31,6 +40,7 @@ import static com.kakao.together.controller.dto.ContentDto.ImageContentDto;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FundraisingAdminFacade {
 
     private final FundraisingService fundraisingService;
@@ -38,10 +48,12 @@ public class FundraisingAdminFacade {
     private final ContentService contentService;
     private final AgencyService agencyService;
     private final PostService postService;
+    private final FileService<ImageDto> imageFileService;
 
     private static final String SUBTITILE_TAG = "h2";
     private static final String TEXT_TAG = "p";
     private static final String IMAGE_TAG = "img";
+    private final FundraisingServiceImpl fundraisingServiceImpl;
 
     @Transactional
     public void createTempFundraising(EditFundraisingDto requestDto) {
@@ -61,6 +73,8 @@ public class FundraisingAdminFacade {
         }
 
         Post createdPost = buildPost(buildElements(requestDto.getHtml()), null);
+
+        checkImageContentsChange(requestDto.getHtml(), createdPost);
 
         fundraisingService.createTempFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
     }
@@ -82,12 +96,14 @@ public class FundraisingAdminFacade {
             }
         }
 
-        fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
+        Fundraising fundraising = fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING, "작성중인 글을 찾을 수 없습니다."));
 
         Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
 
-        fundraisingService.createTempFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
+        checkImageContentsChange(requestDto.getHtml(), createdPost);
+
+        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
     }
 
     @Transactional
@@ -100,6 +116,8 @@ public class FundraisingAdminFacade {
             fundraisingService.deleteIfExists(requestDto.getFundraisingId());
 
         Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
+
+        checkImageContentsChange(requestDto.getHtml(), createdPost);
 
         fundraisingService.createFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
     }
@@ -124,12 +142,14 @@ public class FundraisingAdminFacade {
             throw new CustomException("모금 수정 실패", e);
         }
 
-        fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING, "해당 모금을 찾을 수 없어 수정을 완료할 수 없습니다."));
+        Fundraising fundraising = fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING, "작성중인 글을 찾을 수 없습니다."));
 
         Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
 
-        fundraisingService.createFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
+        checkImageContentsChange(requestDto.getHtml(), createdPost);
+
+        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
     }
 
     private Elements buildElements(String html) {
@@ -175,8 +195,7 @@ public class FundraisingAdminFacade {
                                 .order(currentOrder)
                                 .build());
                         case IMAGE_TAG -> {
-                            String src = element.attr("src");
-                            Image image = imageService.createIfSrcNotExist(src);
+                            Image image = imageService.createIfSrcNotExist(parseImageTag(element));
                             String caption = element.attr("caption");
                             contentService.createImageContent(ImageContentDto.builder()
                                     .image(image)
@@ -193,13 +212,79 @@ public class FundraisingAdminFacade {
         return createdPost;
     }
 
+    public ImageDto parseImageTag(Element element) {
+        return ImageDto.builder()
+                .realName(element.attr("realName"))
+                .originalName(element.attr("originalName"))
+                .url((element.attr("src")))
+                .build();
+    }
+
     public List<SimpleEditFundraisingResponse> getTempFundraisings() {
         return fundraisingService.findAllTempFundraisings().stream()
                 .map(SimpleEditFundraisingResponse::fromEntity).collect(Collectors.toList());
     }
 
+    @Transactional
     public EditFundraisingDto findTemporaryFundraisingById(Long id) {
         Fundraising fundraising = fundraisingService.findTempFundraisingById(id);
-        return EditFundraisingDto.fromEntity(fundraising, postService.postToHtml(fundraising.getPost()));
+        String buildedHtml = renderHtmlAndDeleteContents(fundraising.getPost());
+        return EditFundraisingDto.fromEntity(fundraising, buildedHtml);
+    }
+
+    private String renderHtmlAndDeleteContents(Post post) {
+        String buildedHtml = postService.postToHtml(post);
+        deleteContentsInPost(post);
+        return buildedHtml;
+    }
+
+    private void deleteContentsInPost(Post post) {
+        post.getContents().forEach(content -> {
+            if (content instanceof SubTitleContent subtitleContent) {
+                contentService.deleteContent(subtitleContent.getId());
+            } else if (content instanceof TextContent textContent) {
+                contentService.deleteContent(textContent.getId());
+            } else if (content instanceof ImageContent imageContent) {
+                contentService.deleteContent(imageContent.getId());
+            } else throw new CustomException(ErrorCode.NOT_VALID_TAG, "허용하지 않는 유형의 Post content 태그");
+        });
+    }
+
+    private void checkImageContentsChange(String html, Post post) {
+        Set<Long> removedIds = extractRemovedImageIds(html, post);
+        deleteImagesByIds(removedIds);
+    }
+
+    private Set<Long> extractRemovedImageIds(String html, Post post) {
+        Set<Long> currentIds = Jsoup.parseBodyFragment(html)
+                .select("img")
+                .stream()
+                .map(img -> Long.valueOf(img.attr("imageId")))
+                .collect(Collectors.toSet());
+
+        Set<Long> previousIds = contentService.getImageContentsByPost(post)
+                .stream()
+                .map(ic -> ic.getImage().getId())
+                .collect(Collectors.toSet());
+
+        previousIds.removeAll(currentIds);
+        return previousIds;
+    }
+
+    private void deleteImagesByIds(Set<Long> imageIds) {
+        for (Long id : imageIds) {
+            ImageContent imgContent = contentService.findImageContentByImageId(id);
+            if (imgContent != null) {
+                if (imgContent.getImage() != null) {
+                    imageFileService.deleteFile(imgContent.getImage().getUrl());
+                }
+                contentService.deleteContent(imgContent.getId());
+            } else {
+                imageService.findImageById(id).ifPresent(image -> {
+                    imageService.delete(image);
+                    imageFileService.deleteFile(image.getUrl());
+                });
+            }
+        }
     }
 }

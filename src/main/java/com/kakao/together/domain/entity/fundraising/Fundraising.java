@@ -1,5 +1,6 @@
 package com.kakao.together.domain.entity.fundraising;
 
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
 import com.kakao.together.controller.fundraising.dto.Status;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.Image;
@@ -59,5 +60,16 @@ public class Fundraising extends BaseTimeEntity {
 
     @Embedded
     private FundraisingStatus fundraisingStatus;
+
+    public void updateFundraising(EditFundraisingDto dto, Agency agency, Image thumbnail, Post post) {
+        this.title = dto.getTitle();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.targetAmount = dto.getTargetAmount();
+        this.status = dto.getStatus();
+        this.agency = agency;
+        this.thumbnail = thumbnail;
+        this.post = post;
+    }
 }
 
