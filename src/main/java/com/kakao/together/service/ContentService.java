@@ -1,11 +1,12 @@
 package com.kakao.together.service;
 
-import com.kakao.together.controller.dto.ContentDto;
 import com.kakao.together.controller.dto.ContentDto.ImageContentDto;
 import com.kakao.together.controller.dto.ContentDto.TextContentDto;
 import com.kakao.together.repository.ContentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static com.kakao.together.controller.dto.ContentDto.SubtitleContentDto;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +14,7 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
 
-    public void createSubtitleContent(ContentDto.SubtitleContentDto subtitleContentDto) {
+    public void createSubtitleContent(SubtitleContentDto subtitleContentDto) {
         contentRepository.save(subtitleContentDto.toEntity());
     }
 
