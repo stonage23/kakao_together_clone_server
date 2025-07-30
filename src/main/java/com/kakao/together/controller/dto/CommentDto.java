@@ -16,7 +16,6 @@ public class CommentDto {
     @AllArgsConstructor
     @Getter
     public static class CommentRequest {
-        private Long memberId;
         private Long fundraisingId;
         private String comment;
 
@@ -33,18 +32,25 @@ public class CommentDto {
     @AllArgsConstructor
     @Getter
     public static class CommentResponse {
-        private Long id;
+        private Long commentId;
         private Writer writer;
         private Long fundraisingId;
         private String comment;
 
         public CommentResponse fromEntity(Comment comment) {
             return CommentResponse.builder()
-                    .id(comment.getId())
+                    .commentId(comment.getId())
                     .writer(Writer.fromEntity(comment.getWriter(), comment.getWriter().getProfile()))
                     .fundraisingId(comment.getFundraising().getId())
                     .comment(comment.getComment())
                     .build();
         }
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class CommentUpdateRequest {
+        private String comment;
     }
 }

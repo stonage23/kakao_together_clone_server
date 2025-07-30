@@ -26,6 +26,7 @@ public enum ErrorCode {
     NOT_MATCH_PASSWORD("틀린 비밀번호입니다.", "NOT_MATCH_PASSWORD", HttpStatus.NOT_FOUND),
     FAILED_DELETE_MEMBER("유저를 DB에서 삭제하는 과정에 문제가 발생하였습니다.", "FAILED_DELETE_MEMBER", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_LOGIN_INFO("아이디 또는 비밀번호를 확인해주세요", "INVALID_LOGIN_INFO", HttpStatus.NOT_FOUND),
+    ACCESS_DENIED("해당 작업을 하기위한 권한이 없습니다.", "ACCESS_DENIED", HttpStatus.FORBIDDEN),
 
     // 모금 포스트
     NOT_FOUND_FUNDRAISING("요청하신 모금을 찾을 수 없습니다.", "NOT_FOUND_FUNDRAISING", HttpStatus.NOT_FOUND),

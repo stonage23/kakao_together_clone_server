@@ -1,5 +1,6 @@
 package com.kakao.together.domain.entity.comment;
 
+import com.kakao.together.controller.dto.CommentDto.CommentUpdateRequest;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
@@ -30,4 +31,8 @@ public class Comment extends BaseTimeEntity {
     private Fundraising fundraising;
 
     private String comment;
+
+    public void updateComment(CommentUpdateRequest updateRequest) {
+        this.comment = updateRequest.getComment();
+    }
 }
