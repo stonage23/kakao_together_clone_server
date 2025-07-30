@@ -62,4 +62,23 @@ public class CommentServiceImpl implements CommentService {
         }
         comment.updateComment(requestDto);
     }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long authenticatedMemberId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> {
+                    log.error("존재해야하는 댓글 엔티티가 존재하지 않음; commentId: {}", commentId);
+                    return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "삭제할 댓글이 존재하지 않습니다.");
+                }
+        );
+        Member writer = memberRepository.findById(comment.getWriter().getId()).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        if (!writer.getId().equals(authenticatedMemberId)) {
+            log.warn("인증받은 유저가 다른 유저가 작성한 댓글 삭제 시도");
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+        commentRepository.delete(comment);
+    }
 }

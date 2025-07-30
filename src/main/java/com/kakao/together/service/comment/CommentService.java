@@ -9,4 +9,6 @@ public interface CommentService {
     void createComment(Long writerId, CommentRequest requestDto);
 
     void updateComment(Long authenticatedMemberId, Long commentId, CommentUpdateRequest requestDto);
+
+    void deleteComment(Long authenticatedMemberId, Long commentId);
 }
