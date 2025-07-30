@@ -82,4 +82,21 @@ public class MemberDto {
                     .build();
         }
     }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public class Writer {
+        private Long id;
+        private String writerName;
+        private String profileUrl;
+
+        public static Writer fromEntity(Member member, Profile profile) {
+            return Writer.builder()
+                    .id(member.getId())
+                    .writerName(profile.getNickname())
+                    .profileUrl(profile.getProfileImage().getUrl())
+                    .build();
+        }
+    }
 }

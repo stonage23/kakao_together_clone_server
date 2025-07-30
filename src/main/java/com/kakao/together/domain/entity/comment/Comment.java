@@ -4,8 +4,16 @@ import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -15,7 +23,7 @@ public class Comment extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fundraising_id")

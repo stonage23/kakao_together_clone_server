@@ -40,7 +40,7 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
-    @OneToMany(mappedBy = "member", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "writer", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
     public void updatePassword(String encodedPassword) {
