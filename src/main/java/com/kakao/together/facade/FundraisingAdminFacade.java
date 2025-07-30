@@ -20,7 +20,6 @@ import com.kakao.together.service.ImageService;
 import com.kakao.together.service.agency.AgencyService;
 import com.kakao.together.service.file.FileService;
 import com.kakao.together.service.fundraising.FundraisingService;
-import com.kakao.together.service.fundraising.impl.FundraisingServiceImpl;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +52,6 @@ public class FundraisingAdminFacade {
     private static final String SUBTITILE_TAG = "h2";
     private static final String TEXT_TAG = "p";
     private static final String IMAGE_TAG = "img";
-    private final FundraisingServiceImpl fundraisingServiceImpl;
 
     @Transactional
     public void createTempFundraising(EditFundraisingDto requestDto) {

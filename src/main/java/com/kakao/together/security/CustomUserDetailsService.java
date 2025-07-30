@@ -1,13 +1,16 @@
 package com.kakao.together.security;
 
+import com.kakao.together.domain.entity.member.MemberStatus;
 import com.kakao.together.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -16,15 +19,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         return this.memberRepository.findByEmail(username)
-                .map(member ->
-                        User.builder()
-                                .username(member.getEmail())
-                                .password(member.getPassword())
-                                .authorities(new SimpleGrantedAuthority(member.getAuthority().getRole()))
-                                .build()
+                .map(member -> {
+                    Set<GrantedAuthority> authorities = new HashSet<>();
+                    authorities.add(new SimpleGrantedAuthority(member.getRole().toAuthority()));
+                            return new CustomUserDetails(
+                                    member.getEmail()
+                                    , member.getPassword()
+                                    , member.getId()
+                                    , member.getEmail()
+                                    , authorities
+                                    , (member.getMemberStatus() != MemberStatus.LOCKED)
+                                    , (member.getMemberStatus() == MemberStatus.ACTIVE));
+                        }
                 ).orElseThrow(
                         () -> new UsernameNotFoundException("사용자를 찾을수 없습니다.")
                 );

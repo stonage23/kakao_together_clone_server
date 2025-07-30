@@ -5,11 +5,15 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Authority {
+public enum Role {
 
 	GUEST("ROLE_GUEST"),
 	MEMBER("ROLE_MEMBER"),
 	ADMIN("ROLE_ADMIN");
+
+	public String toAuthority() {
+		return "ROLE_" + this.role;
+	}
 
 	private final String role;
 }

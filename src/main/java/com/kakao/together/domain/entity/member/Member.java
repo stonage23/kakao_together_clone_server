@@ -31,9 +31,9 @@ public class Member extends BaseTimeEntity {
     private String address;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Authority authority;
+    private Role role;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private MemberStatus memberStatus;
     private LocalDateTime deletedAt;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

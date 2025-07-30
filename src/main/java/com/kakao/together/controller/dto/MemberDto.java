@@ -86,7 +86,7 @@ public class MemberDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    public class Writer {
+    public static class Writer {
         private Long id;
         private String writerName;
         private String profileUrl;

@@ -1,6 +1,6 @@
 package com.kakao.together.controller.dto;
 
-import com.kakao.together.domain.entity.member.Authority;
+import com.kakao.together.domain.entity.member.Role;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.domain.entity.member.Profile;
 import com.kakao.together.exception.CustomException;
@@ -44,7 +44,7 @@ public class AuthDto {
                     .age(this.age)
                     .address(this.address)
                     .profile(profile)
-                    .authority(Authority.MEMBER)
+                    .role(Role.MEMBER)
                     .build();
         }
     }

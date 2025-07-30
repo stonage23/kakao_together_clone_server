@@ -2,7 +2,7 @@ package com.kakao.together.interceptor;
 
 import com.kakao.together.annotation.Admin;
 import com.kakao.together.annotation.Member;
-import com.kakao.together.domain.entity.member.Authority;
+import com.kakao.together.domain.entity.member.Role;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,21 +26,21 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
         if (this.checkAnnotation(handler, Admin.class)) {
             if (authentication == null)
                 throw new CustomException(ErrorCode.UNAUTHENTICATED_REQUEST);
-            validateAuthority(authentication, Authority.ADMIN);
+            validateAuthority(authentication, Role.ADMIN);
         }
 
         if (this.checkAnnotation(handler, Member.class)) {
             if (authentication == null)
                 throw new CustomException(ErrorCode.UNAUTHENTICATED_REQUEST);
-            validateAuthority(authentication, Authority.MEMBER);
+            validateAuthority(authentication, Role.MEMBER);
         }
 
         return true;
     }
 
-    private void validateAuthority(Authentication authentication, Authority authority) {
+    private void validateAuthority(Authentication authentication, Role role) {
         boolean hasRole = authentication.getAuthorities().stream()
-                .anyMatch(result -> result.getAuthority().equals(authority.getRole())
+                .anyMatch(result -> result.getAuthority().equals(role.getRole())
         );
         if (!hasRole)
             throw new CustomException(ErrorCode.ONLY_ADMIN_EXCEPTION);
