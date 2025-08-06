@@ -46,6 +46,9 @@ public enum ErrorCode {
     // redis
     REDIS_EXCEPTION("redis 데이터 조작 중 예외가 발생하였습니다.", "REDIS_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // 결제
+    DUPLICATE_PAYMENT("해당 merchantUid을 가진 결제 내역이 이미 DB에 존재합니다.", "DUPLICATE_PAYMENT", HttpStatus.CONFLICT),
+
     // html 파싱
     NOT_VALID_TAG("적절하지 않은 tag가 포함되어 있습니다.", "NOT_VALID_TAG", HttpStatus.BAD_REQUEST),
     ;
