@@ -1,6 +1,6 @@
 package com.kakao.together.controller.dto;
 
-import com.kakao.together.payment.Payment;
+import com.kakao.together.payment.PaymentTransaction;
 import com.kakao.together.payment.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,8 +15,8 @@ public class PaymentDto {
         private String merchantUid;
         private BigDecimal amount;
 
-        public Payment toEntity() {
-            return Payment.builder()
+        public PaymentTransaction toEntity() {
+            return PaymentTransaction.builder()
                     .merchantUid(this.merchantUid)
                     .amount(this.amount)
                     .status(PaymentStatus.PENDING)

@@ -1,10 +1,10 @@
 package com.kakao.together.repository;
 
-import com.kakao.together.payment.Payment;
+import com.kakao.together.payment.PaymentTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByMerchantUid(String merchantUid);
+public interface PaymentRepository extends JpaRepository<PaymentTransaction, Long> {
+    Optional<PaymentTransaction> findByMerchantUid(String merchantUid);
 }

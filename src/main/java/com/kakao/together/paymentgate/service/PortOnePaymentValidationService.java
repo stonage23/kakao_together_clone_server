@@ -1,7 +1,7 @@
 package com.kakao.together.paymentgate.service;
 
+import com.kakao.together.payment.PaymentResponseMapper;
 import com.kakao.together.paymentgate.PaymentDetails;
-import com.kakao.together.paymentgate.PortOnePaymentResponse;
 import com.kakao.together.paymentgate.cache.PortOneTokenProvider;
 import com.kakao.together.paymentgate.exception.PaymentCancelException;
 import com.kakao.together.paymentgate.exception.PaymentGateException;
@@ -10,6 +10,7 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.AccessToken;
 import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,19 +22,22 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 public class PortOnePaymentValidationService {
 
     private final PortOneTokenProvider portOneTokenProvider;
     private final PaymentDetailsService paymentDetailsService;
+    private final PaymentResponseMapper<Payment> iamportPaymentMapper;
     private final IamportClient iamportClient;
 
     private static final String BASE_URL = IamportClient.API_URL;
     private static final Logger log = LoggerFactory.getLogger(PortOnePaymentValidationService.class);
 
-    public PortOnePaymentValidationService(final PortOneTokenProvider portOneTokenProvider, @Value("${imp.api.key}") final String key, @Value("${imp.api.secret}") final String secret, final PaymentDetailsService paymentDetailsService) {
+    public PortOnePaymentValidationService(final PortOneTokenProvider portOneTokenProvider, @Value("${imp.api.key}") final String key, @Value("${imp.api.secret}") final String secret, final PaymentDetailsService paymentDetailsService, PaymentResponseMapper<Payment> iamportPaymentMapper) {
         this.portOneTokenProvider = portOneTokenProvider;
+        this.iamportPaymentMapper = iamportPaymentMapper;
         this.iamportClient = new IamportClient(key, secret);
         this.paymentDetailsService = paymentDetailsService;
     }
@@ -55,25 +59,27 @@ public class PortOnePaymentValidationService {
 
     public void verifyPayment(String impUid) {
 
-        PortOnePaymentResponse response = getPaymentDetails(impUid);
+        Payment pgPayment = getPaymentDetails(impUid);
 
-        PaymentDetails paymentDetails = paymentDetailsService.loadPaymentByMerchantUid(response.getGetMerchantUid());
-
-        if (!response.getPrice().equals(paymentDetails.getAmount())) {
+        if (pgPayment == null || pgPayment.getMerchantUid() == null) {
+            log.error("PG 데이터 조회 실패 또는 merchantUid가 존재하지 않음; impUid: {}", impUid);
             refundPayment(impUid);
             return;
         }
 
-        String merchantUid = paymentDetails.getMerchantUid();
-        if (merchantUid == null) {
-            log.error("결제 검증은 완료되었지만 다른 이유로 검증 완료 처리 불가; merchantUid 가 null; impUid: {}", impUid);
+        String merchantUid = pgPayment.getMerchantUid();
+        PaymentDetails paymentDetails = paymentDetailsService.loadPaymentByMerchantUid(merchantUid);
+
+        if (!Objects.equals(pgPayment.getAmount(), paymentDetails.getAmount())) {
+            log.error("결제 금액이 일치하지 않음; impUid: {}, merchantUid: {}", impUid, merchantUid);
             refundPayment(impUid);
+            return;
         }
 
-        paymentDetailsService.updatePaymentApproval(paymentDetails.getMerchantUid());
+        paymentDetailsService.completePayment(iamportPaymentMapper.toPaymentResponse(pgPayment));
     }
 
-    private PortOnePaymentResponse getPaymentDetails(String impUid) {
+    private Payment getPaymentDetails(String impUid) {
         WebClient webClient = WebClient.builder()
                 .baseUrl(BASE_URL)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.getToken())
@@ -82,7 +88,7 @@ public class PortOnePaymentValidationService {
         return webClient.get()
                 .uri("/payments/{impUid}", impUid)
                 .retrieve()
-                .bodyToMono(PortOnePaymentResponse.class)
+                .bodyToMono(Payment.class)
                 .block();
     }
 
