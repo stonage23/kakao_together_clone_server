@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 public abstract class PaymentTransactionDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_transaction_detail_id")
+    @Column(name = "payment_transaction_detail_id", unique = true)
     private Long id;
 }

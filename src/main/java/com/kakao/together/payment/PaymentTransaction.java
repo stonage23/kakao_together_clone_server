@@ -21,6 +21,7 @@ public class PaymentTransaction extends BaseTimeEntity {
     @Column(name = "payment_transaction_id")
     private Long id;
     private String merchantUid;
+    @Column(precision = 15, scale = 2)
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;

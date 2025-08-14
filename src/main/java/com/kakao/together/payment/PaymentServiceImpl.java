@@ -1,6 +1,8 @@
 package com.kakao.together.payment;
 
+import com.kakao.together.controller.dto.PaymentDto.CardPaymentTransactionDetailResponse;
 import com.kakao.together.controller.dto.PaymentDto.PaymentPendingDto;
+import com.kakao.together.controller.dto.PaymentDto.PaymentTransactionDetailResponse;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.paymentgate.PaymentDetails;
@@ -66,5 +68,21 @@ public class PaymentServiceImpl implements PaymentService {
                 },
                 () -> paymentRepository.save(requestDto.toEntity())
         );
+    }
+
+    @Override
+    public PaymentTransactionDetailResponse findOnlyApprovalPaymentTransaction(String merchantUid) {
+        PaymentTransaction paymentTransaction = paymentRepository.findByMerchantUidAndStatus(merchantUid, PaymentStatus.APPROVAL).orElseThrow(
+                () -> {
+                    log.error("존재하지 않는 거래내역 또는 승인되지 않은 결제내역 조회 시도; merchantUid: {}", merchantUid);
+                    throw new CustomException(ErrorCode.NOT_FOUND_ENTITY, "존재하지 않는 거래내역입니다.");
+                }
+        );
+        if (paymentTransaction.getPaymentTransactionDetail() instanceof CardPaymentTransactionDetail cardPaymentTransactionDetail) {
+            return CardPaymentTransactionDetailResponse.fromEntity(cardPaymentTransactionDetail);
+        } else {
+            log.error("정의된 결제 방식 어느 것에도 매칭되지 않아 발생한 예외; merchantUid: {}", merchantUid);
+            throw new CustomException(ErrorCode.NOT_VALID_FORMAT, "정의되지 않은 결제 방식 에러");
+        }
     }
 }

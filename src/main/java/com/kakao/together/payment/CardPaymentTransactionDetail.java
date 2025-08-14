@@ -21,18 +21,18 @@ public class CardPaymentTransactionDetail extends PaymentTransactionDetail {
     private Integer cardType;
     private Instant paidAt;
     private Instant failAt;
-    private Instant canccelledAt;
+    private Instant cancelledAt;
 
 
     @Builder
-    public CardPaymentTransactionDetail(String cardCode, String cardName, String cardNumber, Integer cardType, Instant paidAt, Instant failAt, Instant canccelledAt) {
+    public CardPaymentTransactionDetail(String cardCode, String cardName, String cardNumber, Integer cardType, Instant paidAt, Instant failAt, Instant cancelledAt) {
         this.cardCode = cardCode;
         this.cardName = cardName;
         this.cardNumber = cardNumber;
         this.cardType = cardType;
         this.paidAt = paidAt;
         this.failAt = failAt;
-        this.canccelledAt = canccelledAt;
+        this.cancelledAt = cancelledAt;
     }
 
     public static CardPaymentTransactionDetail fromPaymentResponse(PaymentResponse paymentResponse) {
@@ -43,7 +43,7 @@ public class CardPaymentTransactionDetail extends PaymentTransactionDetail {
                 .cardType(paymentResponse.getCardType())
                 .paidAt(paymentResponse.getPaidAt())
                 .failAt(paymentResponse.getFailAt())
-                .canccelledAt(paymentResponse.getCancelledAt())
+                .cancelledAt(paymentResponse.getCancelledAt())
                 .build();
     }
 }
