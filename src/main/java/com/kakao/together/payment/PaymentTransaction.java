@@ -1,6 +1,8 @@
 package com.kakao.together.payment;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,7 @@ public class PaymentTransaction extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_transaction_id")
     private Long id;
+    private String impUid;
     private String merchantUid;
     @Column(precision = 15, scale = 2)
     private BigDecimal amount;
@@ -36,5 +39,12 @@ public class PaymentTransaction extends BaseTimeEntity {
 
     public void setPaymentTransactionDetail (PaymentTransactionDetail paymentTransactionDetail) {
         this.paymentTransactionDetail = paymentTransactionDetail;
+    }
+
+    public void setImpUid(String impUid) {
+        if (this.impUid != null) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "impUid 상태 충돌; impUid는 최초 1회만 값을 넣을 수 있습니다.");
+        }
+        this.impUid = impUid;
     }
 }

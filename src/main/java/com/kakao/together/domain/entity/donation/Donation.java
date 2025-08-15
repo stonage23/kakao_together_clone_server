@@ -21,9 +21,6 @@ public class Donation extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "donation_id")
     private Integer id;
-
-    @Column(nullable = false)
-    private Integer amount;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DonationStatus status;
@@ -33,8 +30,13 @@ public class Donation extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fundraising_id", nullable = false)
     private Fundraising fundraising;
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private DonationType type;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "payment_transaction_id", unique = true, nullable = true)
     private PaymentTransaction paymentTransaction;
+
+    public void updateStatus(DonationStatus status) {
+        this.status = status;
+    }
 }

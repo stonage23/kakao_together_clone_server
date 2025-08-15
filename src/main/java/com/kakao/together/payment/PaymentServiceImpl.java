@@ -42,6 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
         );
 
         paymentTransaction.updateStatus(PaymentStatus.APPROVAL);
+        paymentTransaction.setImpUid(payment.getImpUid());
 
         switch (payment.getPayMethod()) {
             case "card" ->
