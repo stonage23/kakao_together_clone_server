@@ -1,12 +1,17 @@
 package com.kakao.together.facade;
 
+import com.kakao.together.controller.dto.CommentDto.CommentRequest;
+import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
+import com.kakao.together.controller.dto.DonationDto.DonationCreateWithCommentWrapper;
 import com.kakao.together.controller.dto.DonationDto.DonationRequest;
 import com.kakao.together.domain.entity.donation.Donation;
+import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.payment.PaymentTransaction;
 import com.kakao.together.paymentgate.service.PortOnePaymentValidationService;
 import com.kakao.together.security.CustomUserDetails;
+import com.kakao.together.service.comment.CommentService;
 import com.kakao.together.service.donation.DonationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ public class DonationFacade {
 
     private final DonationService donationService;
     private final PortOnePaymentValidationService portOnePaymentValidationService;
+    private final CommentService commentService;
 
     @Transactional
     public void createDonation(CustomUserDetails userDetails, DonationRequest request) {
@@ -37,5 +43,18 @@ public class DonationFacade {
         }
         portOnePaymentValidationService.refundPayment(paymentTransaction.getImpUid());
         donationService.cancelDonationById(donationId);
+    }
+
+    @Transactional
+    public void createCommentDonation(CustomUserDetails userDetails, DonationCreateWithCommentWrapper request) {
+        CommentDonationRequest donationCreateRequest = request.getDonationRequest();
+        CommentRequest commentCreateRequest = request.getCommentRequest();
+
+        boolean isPresent = donationService.isPresentValidDonation(donationCreateRequest.getFundraisingId(), userDetails.getId(), DonationType.COMMENT);
+
+        if (!isPresent) {
+            donationService.createCommentDonation(userDetails. getId(), donationCreateRequest);
+        }
+        commentService.createComment(userDetails.getId(), commentCreateRequest);
     }
 }

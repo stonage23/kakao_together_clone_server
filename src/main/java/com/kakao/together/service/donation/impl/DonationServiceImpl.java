@@ -1,8 +1,10 @@
 package com.kakao.together.service.donation.impl;
 
+import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
 import com.kakao.together.controller.dto.DonationDto.DonationRequest;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
+import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
@@ -69,5 +71,36 @@ public class DonationServiceImpl implements DonationService {
                 () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; donationId: " + donationId)
         );
         donation.updateStatus(DonationStatus.CANCELLED);
+    }
+
+    @Override
+    public boolean isPresentValidDonation(Long fundraisingId, Long memberId, DonationType type) {
+        return donationRepository.existsByMemberIdAndFundraisingIdAndStatusAndType(memberId, fundraisingId, DonationStatus.COMPLETE, type);
+    }
+
+    @Override
+    @Transactional
+    public void createCommentDonation(Long donorId, CommentDonationRequest donationCreateRequest) {
+        Fundraising fundraising = fundraisingRepository.findById(donationCreateRequest.getFundraisingId()).orElseThrow(
+                () -> {
+                    log.error("전달 받은 fundraisingId와 일치하는 모금 정보 없음; fundraisingId: {}", donationCreateRequest.getFundraisingId());
+                    return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "모금 정보 DB에서 조회 실패");
+                }
+        );
+
+        Member doner = memberRepository.findById(donorId).orElseThrow(
+                () -> {
+                    log.error("전달 받은 donorId와 일치하는 유저 정보 없음; donorId: {}", donorId);
+                    return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "기부자 정보 DB에서 조회 실패");
+                }
+        );
+
+        Donation donation = Donation.builder()
+                .fundraising(fundraising)
+                .status(DonationStatus.COMPLETE)
+                .type(DonationType.COMMENT)
+                .member(doner)
+                .build();
+        donationRepository.save(donation);
     }
 }

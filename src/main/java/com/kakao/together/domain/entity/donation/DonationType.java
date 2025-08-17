@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DonationType {
     DIRECT("DIRECT"),
-    INDIRECT("INDIRECT");
+    COMMENT("COMMENT");
 
     private final String value;
 
