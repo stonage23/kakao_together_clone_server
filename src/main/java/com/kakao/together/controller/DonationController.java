@@ -2,12 +2,15 @@ package com.kakao.together.controller;
 
 import com.kakao.together.controller.dto.DonationDto.DonationCreateWithCommentWrapper;
 import com.kakao.together.controller.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
 import com.kakao.together.facade.DonationFacade;
 import com.kakao.together.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/donations")
@@ -32,5 +35,11 @@ public class DonationController {
     public ResponseEntity<Void> createCommentDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DonationCreateWithCommentWrapper request) {
         donationFacade.createCommentDonation(userDetails, request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<DonationsResponse>> getAllMyDonations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<DonationsResponse> response = donationFacade.getAllMyDonations(userDetails);
+        return ResponseEntity.ok(response);
     }
 }

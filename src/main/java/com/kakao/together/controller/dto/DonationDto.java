@@ -57,4 +57,25 @@ public class DonationDto {
     public static class CommentDonationRequest {
         private Long fundraisingId;
     }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class DonationsResponse {
+        private Long id;
+        private String status;
+        private String type;
+        private BigDecimal amount;
+        private FundraisingSummaryResponse fundraising;
+
+        public static DonationsResponse fromEntity(Donation donation) {
+            return DonationsResponse.builder()
+                    .id(donation.getId())
+                    .status(donation.getStatus().getValue())
+                    .type(donation.getType().getValue())
+                    .amount(donation.getPaymentTransaction().getAmount())
+                    .fundraising(FundraisingSummaryResponse.fromEntity(donation.getFundraising()))
+                    .build();
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.kakao.together.service.donation.impl;
 
 import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
 import com.kakao.together.controller.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
@@ -19,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -102,5 +106,11 @@ public class DonationServiceImpl implements DonationService {
                 .member(doner)
                 .build();
         donationRepository.save(donation);
+    }
+
+    @Override
+    public List<DonationsResponse> getAllDonationsForDonor(Long donorId) {
+        List<Donation> donations = donationRepository.findAllByMemberId(donorId);
+        return donations.stream().map(DonationsResponse::fromEntity).collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.kakao.together.domain.entity.fundraising;
 
+import com.kakao.together.domain.entity.Image;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,4 +27,7 @@ public class Agency {
     private String address;
     @Column(nullable = false)
     private String organizationType;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "image_id")
+    private Image logo;
 }

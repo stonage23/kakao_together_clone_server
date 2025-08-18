@@ -4,6 +4,7 @@ import com.kakao.together.controller.dto.CommentDto.CommentRequest;
 import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
 import com.kakao.together.controller.dto.DonationDto.DonationCreateWithCommentWrapper;
 import com.kakao.together.controller.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.exception.CustomException;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +59,9 @@ public class DonationFacade {
             donationService.createCommentDonation(userDetails. getId(), donationCreateRequest);
         }
         commentService.createComment(userDetails.getId(), commentCreateRequest);
+    }
+
+    public List<DonationsResponse> getAllMyDonations(CustomUserDetails userDetails) {
+        return donationService.getAllDonationsForDonor(userDetails.getId());
     }
 }

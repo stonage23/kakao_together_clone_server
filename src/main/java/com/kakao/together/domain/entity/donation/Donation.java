@@ -20,7 +20,7 @@ public class Donation extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "donation_id")
-    private Integer id;
+    private Long id;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DonationStatus status;

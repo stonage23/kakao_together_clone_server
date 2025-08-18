@@ -5,4 +5,8 @@ public enum DonationStatus {
     CANCELLED("CANCELLED");
     private String value;
     private DonationStatus(String value) {this.value = value;}
+
+    public String getValue() {
+        return this.value;
+    }
 }
