@@ -1,6 +1,6 @@
 package com.kakao.together.payment;
 
-import com.kakao.together.paymentgate.PaymentResponse;
+import com.kakao.together.api.paymentgate.PaymentResponse;
 import com.siot.IamportRestClient.response.Payment;
 import org.springframework.stereotype.Component;
 

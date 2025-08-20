@@ -1,13 +1,13 @@
 package com.kakao.together.service.member;
 
-import com.kakao.together.controller.dto.AuthDto;
-import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.dto.MemberDto.MyProfileResponse;
-import com.kakao.together.controller.dto.MemberDto.ProfileUpdateRequest;
+import com.kakao.together.controller.auth.dto.AuthDto;
+import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
+import com.kakao.together.controller.member.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import org.springframework.stereotype.Service;
 
-import static com.kakao.together.controller.dto.AuthDto.SignupByEmailRequest;
-import static com.kakao.together.controller.dto.MemberDto.MemberData;
+import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
+import static com.kakao.together.controller.member.dto.MemberDto.MemberData;
 
 @Service
 public interface MemberService {

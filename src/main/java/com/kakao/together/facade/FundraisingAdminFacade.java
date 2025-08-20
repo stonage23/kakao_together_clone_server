@@ -1,22 +1,22 @@
 package com.kakao.together.facade;
 
-import com.kakao.together.controller.dto.ContentDto.SubtitleContentDto;
-import com.kakao.together.controller.dto.ContentDto.TextContentDto;
+import com.kakao.together.controller.dto.ContentDto.ContentCommand;
+import com.kakao.together.controller.dto.ContentDto.SubtitleContentCommand;
+import com.kakao.together.controller.dto.ContentDto.TextContentCommand;
 import com.kakao.together.controller.dto.ImageDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleEditFundraisingResponse;
-import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.image.Image;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.fundraising.Agency;
+import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.post.Post;
-import com.kakao.together.domain.entity.post.PostType;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.service.ContentService;
-import com.kakao.together.service.ImageService;
+import com.kakao.together.service.content.ContentService;
+import com.kakao.together.service.image.ImageService;
 import com.kakao.together.service.agency.AgencyService;
 import com.kakao.together.service.file.FileService;
 import com.kakao.together.service.fundraising.FundraisingService;
@@ -30,12 +30,13 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.kakao.together.controller.dto.ContentDto.ImageContentDto;
+import static com.kakao.together.controller.dto.ContentDto.ImageContentCommand;
 
 @Service
 @RequiredArgsConstructor
@@ -55,29 +56,18 @@ public class FundraisingAdminFacade {
 
     @Transactional
     public void createTempFundraising(EditFundraisingDto requestDto) {
-        Agency agency = null;
-        Image thumbnail = null;
 
-        if (requestDto.getAgencyId() != null) {
-            agency = agencyService.getAgencyEntityById(requestDto.getAgencyId());
-        }
+        List<ContentCommand> contentCommands = elementsToContents(buildElements(requestDto.getHtml()));
 
-        if (requestDto.getThumbnail() != null && requestDto.getThumbnail().getImageId() != null) {
-            try {
-                thumbnail = imageService.getImageEntityById(requestDto.getThumbnail().getImageId());
-            } catch (CustomException e) {
-                throw new CustomException(e.getErrorCode(), "임시저장에 사용할 이미지를 서버에서 찾을 수 없습니다.");
-            }
-        }
+        Long createdPostId = postService.buildPost(requestDto.getPostId(), contentCommands);
 
-        Post createdPost = buildPost(buildElements(requestDto.getHtml()), null);
+        checkImageContentsChange(requestDto.getHtml(), createdPostId);
 
-        checkImageContentsChange(requestDto.getHtml(), createdPost);
-
-        fundraisingService.createTempFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
+        fundraisingService.createTempFundraising(requestDto, createdPostId);
     }
 
     @Transactional
+    // TODO 임시 주석 해결
     public void updateTempFundraising(EditFundraisingDto requestDto) {
         Agency agency = null;
         Image thumbnail = null;
@@ -97,14 +87,15 @@ public class FundraisingAdminFacade {
         Fundraising fundraising = fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING, "작성중인 글을 찾을 수 없습니다."));
 
-        Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
-
-        checkImageContentsChange(requestDto.getHtml(), createdPost);
-
-        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
+//        Post createdPost = elementsToContents(buildElements(requestDto.getHtml()), requestDto.getPostId());
+//
+//        checkImageContentsChange(requestDto.getHtml(), createdPost);
+//
+//        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
     }
 
     @Transactional
+    // TODO 임시 주석 해결
     public void createFundraising(EditFundraisingDto requestDto) {
 
         Agency agency = agencyService.getAgencyEntityById(requestDto.getAgencyId());
@@ -113,14 +104,15 @@ public class FundraisingAdminFacade {
         if (requestDto.getFundraisingId() != null)
             fundraisingService.deleteIfExists(requestDto.getFundraisingId());
 
-        Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
-
-        checkImageContentsChange(requestDto.getHtml(), createdPost);
-
-        fundraisingService.createFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
+//        Post createdPost = elementsToContents(buildElements(requestDto.getHtml()), requestDto.getPostId());
+//
+//        checkImageContentsChange(requestDto.getHtml(), createdPost);
+//
+//        fundraisingService.createFundraising(requestDto.toEntity(agency, thumbnail, createdPost));
     }
 
     @Transactional
+    // TODO 임시 주석 해결
     public void updateFundraising(EditFundraisingDto requestDto) {
         Agency agency;
         Image thumbnail;
@@ -143,11 +135,11 @@ public class FundraisingAdminFacade {
         Fundraising fundraising = fundraisingService.findFundraisingNullable(requestDto.getFundraisingId()).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING, "작성중인 글을 찾을 수 없습니다."));
 
-        Post createdPost = buildPost(buildElements(requestDto.getHtml()), requestDto.getPostId());
-
-        checkImageContentsChange(requestDto.getHtml(), createdPost);
-
-        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
+//        Post createdPost = elementsToContents(buildElements(requestDto.getHtml()), requestDto.getPostId());
+//
+//        checkImageContentsChange(requestDto.getHtml(), createdPost);
+//
+//        fundraising.updateFundraising(requestDto, agency, thumbnail, createdPost);
     }
 
     private Elements buildElements(String html) {
@@ -161,53 +153,48 @@ public class FundraisingAdminFacade {
      * @param elements
      */
     // TODO Image 처리 수정 필요해보임
-    private Post buildPost(Elements elements, Long postId) {
-
-        Post post;
-        Post createdPost = null;
-
-        if (postId == null) {
-            post = Post.builder()
-                    .type(PostType.STORY)
-                    .build();
-            createdPost = postService.createPost(post);
-        } else {
-            createdPost = postService.findPostById(postId);
-        }
-
-        final Post finalCreatedPost = createdPost;
+    // TODO Elements을 각 Command으로 나누고 post서비스로 전달 후 저장 로직은 애플리케이션 서비스에서 책임
+    private List<ContentCommand> elementsToContents(Elements elements) {
 
         AtomicInteger order = new AtomicInteger(0);
+        List<ContentCommand> contentCommands = new ArrayList<>();
 
         elements.forEach(element -> {
                     int currentOrder = order.getAndIncrement();
                     switch (element.tagName()) {
-                        case SUBTITILE_TAG -> contentService.createSubtitleContent(SubtitleContentDto.builder()
+                        case SUBTITILE_TAG -> {
+                            SubtitleContentCommand subtitleContentCommand = SubtitleContentCommand.builder()
                                 .subtitle(element.text())
-                                .post(finalCreatedPost)
+//                                .post(finalCreatedPost)
                                 .order(currentOrder)
-                                .build());
-                        case TEXT_TAG -> contentService.createTextContent(TextContentDto.builder()
+                                    .build();
+                            contentCommands.add(subtitleContentCommand);
+                        }
+                        case TEXT_TAG -> {
+                            TextContentCommand textContentCommand = TextContentCommand.builder()
                                 .text(element.text())
-                                .post(finalCreatedPost)
+//                                .post(finalCreatedPost)
                                 .order(currentOrder)
-                                .build());
+                                    .build();
+                            contentCommands.add(textContentCommand);
+                        }
                         case IMAGE_TAG -> {
                             Image image = imageService.createIfSrcNotExist(parseImageTag(element));
                             String caption = element.attr("caption");
-                            contentService.createImageContent(ImageContentDto.builder()
+                            ImageContentCommand imageContentCommand = ImageContentCommand.builder()
                                     .image(image)
                                     .caption(caption)
                                     .order(currentOrder)
-                                    .post(finalCreatedPost)
-                                    .build());
+//                                    .post(finalCreatedPost)
+                                    .build();
+                            contentCommands.add(imageContentCommand);
                         }
                         default -> throw new CustomException(ErrorCode.NOT_VALID_TAG);
                     }
                 }
         );
 
-        return createdPost;
+        return contentCommands;
     }
 
     public ImageDto parseImageTag(Element element) {
@@ -248,19 +235,19 @@ public class FundraisingAdminFacade {
         });
     }
 
-    private void checkImageContentsChange(String html, Post post) {
-        Set<Long> removedIds = extractRemovedImageIds(html, post);
+    private void checkImageContentsChange(String html, Long postId) {
+        Set<Long> removedIds = extractRemovedImageIds(html, postId);
         deleteImagesByIds(removedIds);
     }
 
-    private Set<Long> extractRemovedImageIds(String html, Post post) {
+    private Set<Long> extractRemovedImageIds(String html, Long postId) {
         Set<Long> currentIds = Jsoup.parseBodyFragment(html)
                 .select("img")
                 .stream()
                 .map(img -> Long.valueOf(img.attr("imageId")))
                 .collect(Collectors.toSet());
 
-        Set<Long> previousIds = contentService.getImageContentsByPost(post)
+        Set<Long> previousIds = contentService.getImageContentsByPost(postId)
                 .stream()
                 .map(ic -> ic.getImage().getId())
                 .collect(Collectors.toSet());

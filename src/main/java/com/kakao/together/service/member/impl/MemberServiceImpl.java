@@ -1,14 +1,14 @@
 package com.kakao.together.service.member.impl;
 
-import com.kakao.together.controller.dto.AuthDto;
-import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.dto.MemberDto.MyProfileResponse;
-import com.kakao.together.controller.dto.MemberDto.ProfileUpdateRequest;
+import com.kakao.together.controller.auth.dto.AuthDto;
+import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
+import com.kakao.together.controller.member.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.domain.entity.member.Profile;
+import com.kakao.together.domain.entity.profile.Profile;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.repository.MemberRepository;
+import com.kakao.together.domain.repository.MemberRepository;
 import com.kakao.together.service.member.MemberService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
-import static com.kakao.together.controller.dto.AuthDto.SignupByEmailRequest;
-import static com.kakao.together.controller.dto.MemberDto.MemberData;
+import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
+import static com.kakao.together.controller.member.dto.MemberDto.MemberData;
 
 @Service
 @RequiredArgsConstructor

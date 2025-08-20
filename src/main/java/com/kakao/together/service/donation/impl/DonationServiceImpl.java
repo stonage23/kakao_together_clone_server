@@ -1,8 +1,8 @@
 package com.kakao.together.service.donation.impl;
 
-import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
@@ -11,10 +11,10 @@ import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.payment.PaymentTransaction;
-import com.kakao.together.repository.DonationRepository;
-import com.kakao.together.repository.FundraisingRepository;
-import com.kakao.together.repository.MemberRepository;
-import com.kakao.together.repository.PaymentRepository;
+import com.kakao.together.domain.repository.DonationRepository;
+import com.kakao.together.domain.repository.FundraisingRepository;
+import com.kakao.together.domain.repository.MemberRepository;
+import com.kakao.together.domain.repository.PaymentRepository;
 import com.kakao.together.service.donation.DonationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

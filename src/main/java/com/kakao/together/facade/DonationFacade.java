@@ -1,16 +1,16 @@
 package com.kakao.together.facade;
 
-import com.kakao.together.controller.dto.CommentDto.CommentRequest;
-import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationCreateWithCommentWrapper;
-import com.kakao.together.controller.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationCreateWithCommentWrapper;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.payment.PaymentTransaction;
-import com.kakao.together.paymentgate.service.PortOnePaymentValidationService;
+import com.kakao.together.api.paymentgate.service.PortOnePaymentValidationService;
 import com.kakao.together.security.CustomUserDetails;
 import com.kakao.together.service.comment.CommentService;
 import com.kakao.together.service.donation.DonationService;

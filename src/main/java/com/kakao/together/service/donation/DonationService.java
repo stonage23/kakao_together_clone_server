@@ -1,8 +1,8 @@
 package com.kakao.together.service.donation;
 
-import com.kakao.together.controller.dto.DonationDto.CommentDonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
 

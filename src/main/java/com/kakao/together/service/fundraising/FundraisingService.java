@@ -1,5 +1,6 @@
 package com.kakao.together.service.fundraising;
 
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 
@@ -8,7 +9,7 @@ import java.util.Optional;
 
 public interface FundraisingService {
 
-    Fundraising createTempFundraising(Fundraising fundrasing);
+    void createTempFundraising(EditFundraisingDto request, Long postId);
 
     Fundraising createFundraising(Fundraising fundraising);
 

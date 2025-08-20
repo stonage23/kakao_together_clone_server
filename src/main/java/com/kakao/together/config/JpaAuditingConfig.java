@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = "com.kakao.together.repository")
+@EnableJpaRepositories(basePackages = "com.kakao.together.domain.repository")
 public class JpaAuditingConfig {
 }

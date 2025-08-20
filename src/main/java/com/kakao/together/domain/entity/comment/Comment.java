@@ -1,6 +1,6 @@
 package com.kakao.together.domain.entity.comment;
 
-import com.kakao.together.controller.dto.CommentDto.CommentUpdateRequest;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentUpdateRequest;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;

@@ -1,9 +1,9 @@
 package com.kakao.together.service.agency.impl;
 
-import com.kakao.together.domain.entity.fundraising.Agency;
+import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.repository.AgencyRepository;
+import com.kakao.together.domain.repository.AgencyRepository;
 import com.kakao.together.service.agency.AgencyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class AgencyServiceImpl implements AgencyService {
 
     private final AgencyRepository agencyRepository;
+
     @Override
     public Agency getAgencyEntityById(Long agencyId) {
         return agencyRepository.findById(agencyId).orElseThrow(

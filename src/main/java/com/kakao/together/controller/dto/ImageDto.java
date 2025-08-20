@@ -1,6 +1,6 @@
 package com.kakao.together.controller.dto;
 
-import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.image.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

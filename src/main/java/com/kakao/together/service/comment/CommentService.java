@@ -1,7 +1,7 @@
 package com.kakao.together.service.comment;
 
-import com.kakao.together.controller.dto.CommentDto.CommentRequest;
-import com.kakao.together.controller.dto.CommentDto.CommentUpdateRequest;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentRequest;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentUpdateRequest;
 import org.springframework.stereotype.Service;
 
 @Service

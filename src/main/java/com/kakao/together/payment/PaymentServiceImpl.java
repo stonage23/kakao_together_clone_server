@@ -1,15 +1,15 @@
 package com.kakao.together.payment;
 
+import com.kakao.together.api.paymentgate.PaymentDetails;
+import com.kakao.together.api.paymentgate.PaymentResponse;
+import com.kakao.together.api.paymentgate.exception.PaymentNotFoundException;
+import com.kakao.together.api.paymentgate.service.DefaultPaymentDetails;
 import com.kakao.together.controller.dto.PaymentDto.CardPaymentTransactionDetailResponse;
 import com.kakao.together.controller.dto.PaymentDto.PaymentPendingDto;
 import com.kakao.together.controller.dto.PaymentDto.PaymentTransactionDetailResponse;
+import com.kakao.together.domain.repository.PaymentRepository;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.paymentgate.PaymentDetails;
-import com.kakao.together.paymentgate.PaymentResponse;
-import com.kakao.together.paymentgate.exception.PaymentNotFoundException;
-import com.kakao.together.paymentgate.service.DefaultPaymentDetails;
-import com.kakao.together.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

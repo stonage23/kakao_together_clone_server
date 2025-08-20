@@ -1,15 +1,15 @@
 package com.kakao.together.service.comment.impl;
 
-import com.kakao.together.controller.dto.CommentDto.CommentRequest;
-import com.kakao.together.controller.dto.CommentDto.CommentUpdateRequest;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentRequest;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentUpdateRequest;
 import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.repository.CommentRepository;
-import com.kakao.together.repository.FundraisingRepository;
-import com.kakao.together.repository.MemberRepository;
+import com.kakao.together.domain.repository.CommentRepository;
+import com.kakao.together.domain.repository.FundraisingRepository;
+import com.kakao.together.domain.repository.MemberRepository;
 import com.kakao.together.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

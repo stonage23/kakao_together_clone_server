@@ -1,7 +1,7 @@
 package com.kakao.together.security;
 
 import com.kakao.together.domain.entity.member.MemberStatus;
-import com.kakao.together.repository.MemberRepository;
+import com.kakao.together.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

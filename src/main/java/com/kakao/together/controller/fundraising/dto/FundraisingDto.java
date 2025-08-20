@@ -1,17 +1,18 @@
 package com.kakao.together.controller.fundraising.dto;
 
-import com.kakao.together.controller.dto.AgencyDto;
+import com.kakao.together.controller.agency.dto.AgencyDto;
 import com.kakao.together.controller.dto.ImageDto;
-import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.fundraising.FundraisingCurrent;
+import com.kakao.together.domain.entity.image.Image;
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.fundraising.Agency;
+import com.kakao.together.domain.entity.fundraising.FundraisingStatus;
+import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.post.Post;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,7 +33,7 @@ public class FundraisingDto {
         private Integer targetAmount;
         private LocalDate startDate;
         private LocalDate endDate;
-        private Status status;
+        private FundraisingCurrent fundraisingStatus;
         private AgencyDto agency;
         private Integer currentAmount;
         private Integer directDonatorCount;
@@ -49,13 +50,13 @@ public class FundraisingDto {
                     .targetAmount(fundraising.getTargetAmount())
                     .startDate(fundraising.getStartDate())
                     .endDate(fundraising.getEndDate())
-                    .status(fundraising.getStatus())
+                    .fundraisingStatus(fundraising.getFundraisingCurrent())
                     .agency(AgencyDto.fromEntity(fundraising.getAgency()))
-                    .currentAmount(fundraising.getFundraisingStatus().getCurrentAmount())
-                    .directDonationAmount(fundraising.getFundraisingStatus().getDirectDonationAmount())
-                    .indirectDonationAmount(fundraising.getFundraisingStatus().getIndirectDonationAmount())
-                    .directDonationAmount(fundraising.getFundraisingStatus().getDirectDonationAmount())
-                    .indirectDonationAmount(fundraising.getFundraisingStatus().getIndirectDonationAmount())
+                    .currentAmount(fundraising.getFundraisingCurrent().getCurrentAmount())
+                    .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
+                    .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
+                    .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
+                    .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
                     .build();
         }
     }
@@ -83,7 +84,7 @@ public class FundraisingDto {
         @NotBlank(groups = {Save.class, Update.class})
         private Integer TargetAmount;
         @NotBlank(groups = {Save.class, Update.class})
-        private Status status;
+        private FundraisingStatus fundraisingStatus;
         @NotBlank(groups = {Save.class, Update.class})
         private ImageDto thumbnail;
         @NotBlank(groups = {Save.class, Update.class})
@@ -93,12 +94,12 @@ public class FundraisingDto {
         @NotBlank(groups = {Save.class, Update.class})
         private Long postId;
 
-        public Fundraising toEntity(@Nullable Agency agency, @Nullable Image thumbnail, @Nullable Post post) {
+        public Fundraising toEntity(Agency agency, @Nullable Image thumbnail, @Nullable Post post) {
             Fundraising.FundraisingBuilder builder = Fundraising.builder()
                     .title(this.title)
                     .startDate(this.startDate)
                     .endDate(this.endDate)
-                    .status(Status.TEMPORARY)
+                    .fundraisingStatus(FundraisingStatus.TEMPORARY)
                     .agency(agency)
                     .post(post)
                     .thumbnail(thumbnail);

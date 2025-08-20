@@ -1,6 +1,7 @@
 package com.kakao.together.domain.entity.member;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
+import com.kakao.together.domain.entity.profile.Profile;
 import com.kakao.together.domain.entity.comment.Comment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,6 @@ public class Member extends BaseTimeEntity {
 
     public void updateProfile(Profile updatedProfile) {
         Profile profile = getProfile();
-        profile.updateProfile(updatedProfile);
+        updateProfile(updatedProfile);
     }
 }

@@ -1,6 +1,6 @@
 package com.kakao.together.service.file.impl;
 
-import com.kakao.together.controller.dto.FileDto;
+import com.kakao.together.controller.file.dto.FileDto;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.file.FileService;

@@ -1,6 +1,7 @@
 package com.kakao.together.controller.dto;
 
-import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.image.Image;
+import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
@@ -21,16 +22,21 @@ public class ContentDto {
     private Image image;
     private Integer order;
 
+    public interface ContentCommand {
+        Content toEntity(Post post);
+    }
+
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class ImageContentDto {
+    public static class ImageContentCommand implements ContentCommand{
         private String caption;
         private Image image;
         private Integer order;
         private Post post;
 
-        public ImageContent toEntity() {
+        @Override
+        public ImageContent toEntity(Post post) {
             return ImageContent.builder()
                     .caption(this.caption)
                     .image(this.image)
@@ -43,16 +49,17 @@ public class ContentDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class SubtitleContentDto {
+    public static class SubtitleContentCommand implements ContentCommand{
         private String subtitle;
         private Integer order;
         private Post post;
 
-        public SubTitleContent toEntity() {
+        @Override
+        public SubTitleContent toEntity(Post post) {
             return SubTitleContent.builder()
                     .subtitle(this.subtitle)
                     .order(this.order)
-                    .post(this.post)
+                    .post(post)
                     .build();
         }
     }
@@ -60,15 +67,16 @@ public class ContentDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class TextContentDto {
+    public static class TextContentCommand implements ContentCommand{
         private String text;
         private Integer order;
         private Post post;
 
-        public TextContent toEntity() {
+        @Override
+        public TextContent toEntity(Post post) {
             return TextContent.builder()
                     .text(this.text)
-                    .post(this.post)
+                    .post(post)
                     .order(this.order)
                     .build();
         }

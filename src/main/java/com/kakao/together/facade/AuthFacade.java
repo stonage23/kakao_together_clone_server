@@ -1,15 +1,15 @@
 package com.kakao.together.facade;
 
-import com.kakao.together.controller.TokenContainer;
-import com.kakao.together.controller.dto.AuthDto;
-import com.kakao.together.controller.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.dto.EmailTemplateDto;
-import com.kakao.together.email.EmailBuilder;
-import com.kakao.together.email.EmailService;
+import com.kakao.together.controller.dto.TokenContainer;
+import com.kakao.together.controller.auth.dto.AuthDto;
+import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
+import com.kakao.together.util.EmailTemplate;
+import com.kakao.together.api.email.EmailBuilder;
+import com.kakao.together.api.email.EmailService;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.jwt.JwtService;
-import com.kakao.together.redis.RedisService;
+import com.kakao.together.api.redis.RedisService;
 import com.kakao.together.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.kakao.together.controller.dto.AuthDto.SignupByEmailRequest;
+import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -43,12 +43,12 @@ public class AuthFacade {
                 .sender(EMAIL_SENDER)
                 .recipient(request.getEmail())
                 .subject("인증하시고 서비스를 이용해주세요!")
-                .text(EmailTemplateDto.SignUpVerification.getTemplate())
+                .text(EmailTemplate.SignUpVerification.getTemplate())
                 .build();
 
         emailService.sendMail(emailInfo);
 
-        String code = EmailTemplateDto.SignUpVerification.getCode();
+        String code = EmailTemplate.SignUpVerification.getCode();
         redisService.setSingleData(EMAIL_PREFIX + code, request);
     }
 
@@ -84,12 +84,12 @@ public class AuthFacade {
             throw new CustomException(ErrorCode.NOT_FOUND_USER, "존재하지 않는 이메일입니다.");
         }
 
-        String code = EmailTemplateDto.PasswordResetTemplate.getCode();
+        String code = EmailTemplate.PasswordResetTemplate.getCode();
         emailService.sendMail(EmailBuilder.builder()
                 .sender(EMAIL_SENDER)
                 .recipient(email)
                 .subject("링크를 눌러 비밀번호를 변경해주세요!")
-                .text(EmailTemplateDto.PasswordResetTemplate.getTemplate())
+                .text(EmailTemplate.PasswordResetTemplate.getTemplate())
                 .build());
 
         redisService.setSingleData(EMAIL_PREFIX + code, email);

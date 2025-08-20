@@ -1,6 +1,6 @@
 package com.kakao.together.controller.file;
 
-import com.kakao.together.controller.dto.FileDto;
+import com.kakao.together.controller.file.dto.FileDto;
 import com.kakao.together.controller.dto.ImageDto;
 import com.kakao.together.service.file.FileService;
 import lombok.RequiredArgsConstructor;

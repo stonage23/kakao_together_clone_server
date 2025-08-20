@@ -1,9 +1,9 @@
 package com.kakao.together.domain.entity.fundraising;
 
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
-import com.kakao.together.controller.fundraising.dto.Status;
+import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.BaseTimeEntity;
-import com.kakao.together.domain.entity.Image;
+import com.kakao.together.domain.entity.image.Image;
 import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.post.Post;
 import jakarta.persistence.*;
@@ -42,7 +42,7 @@ public class Fundraising extends BaseTimeEntity {
     private Integer targetAmount;
 
     @Column(length = 12)
-    private Status status;
+    private FundraisingStatus fundraisingStatus;
 
     @OneToOne(fetch = FetchType.LAZY)
     private Agency agency;
@@ -59,16 +59,25 @@ public class Fundraising extends BaseTimeEntity {
     private List<Comment> comments = new ArrayList<>();
 
     @Embedded
-    private FundraisingStatus fundraisingStatus;
+    private FundraisingCurrent fundraisingCurrent;
 
     public void updateFundraising(EditFundraisingDto dto, Agency agency, Image thumbnail, Post post) {
         this.title = dto.getTitle();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();
         this.targetAmount = dto.getTargetAmount();
-        this.status = dto.getStatus();
+        this.fundraisingStatus = dto.getFundraisingStatus();
         this.agency = agency;
         this.thumbnail = thumbnail;
+        this.post = post;
+    }
+
+    /**
+     * 파라미터로 전달 받는 post는 영속상태이어야 한다.
+     * 반드시 JPA으로 DB에서 조회한 프록시객체 상태
+     * @param post
+     */
+    public void setPost(Post post) {
         this.post = post;
     }
 }
