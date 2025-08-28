@@ -2,8 +2,10 @@ package com.kakao.together.service.post.imple;
 
 import com.kakao.together.api.htmlparser.JsoupHtmlParser;
 import com.kakao.together.api.htmlparser.RawTag;
-import com.kakao.together.controller.dto.ContentDto;
 import com.kakao.together.controller.dto.ContentDto.ContentCommand;
+import com.kakao.together.controller.dto.ContentDto.ImageContentCommand;
+import com.kakao.together.controller.dto.ContentDto.SubtitleContentCommand;
+import com.kakao.together.controller.dto.ContentDto.TextContentCommand;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.PostCommand;
@@ -21,7 +23,6 @@ import com.kakao.together.mapper.TagMapper;
 import com.kakao.together.service.file.FileStorageService;
 import com.kakao.together.service.file.impl.FilePathResolver;
 import com.kakao.together.service.post.PostService;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,33 +51,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post findPostById(Long postId) {
-        return postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "해당 id에 해당하는 POST 엔티티가 존재하지 않습니다."));
-    }
-
-    @Override
-    public String postToHtml(@NonNull Post post) {
-        StringBuilder html = new StringBuilder();
-//        for (Content content : post.getContents()) {
-//            if (content instanceof SubTitleContent subTitleContent) {
-//                html.append("<").append(ContentType.SUBTITLE.getTag()).append(">");
-//                html.append(subTitleContent.getSubtitle());
-//                html.append("</").append(ContentType.SUBTITLE.getTag()).append(">");
-//            } else if (content instanceof TextContent textContent) {
-//                html.append("<").append(ContentType.TEXT.getTag()).append(">");
-//                html.append(textContent.getText());
-//                html.append("</").append(ContentType.TEXT.getTag()).append(">");
-//            } else if (content instanceof ImageContent imageContent) {
-//                FileInfo image = imageContent.getImage();
-//                String url = filePathResolver.resolveUploadPath(image.generateFilename().toString(), image.getContentType()).toString();
-//                html.append("<").append(ContentType.IMAGE.getTag()).append(" src=\"");
-//                html.append(url);
-//                html.append("\" ");
-//                html.append()
-//                html.append("/>");
-//            } else throw new CustomException(ErrorCode.NOT_VALID_TAG, "허용 외 타입의 콘텐츠가 DB에 저장되어 있어 HTML 구성 실패");
-//            html.append("\n");
-//        }
-        return html.toString();
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "해당 id에 해당하는 POST 엔티티가 존재하지 않습니다."));
     }
 
     @Override
@@ -116,8 +92,17 @@ public class PostServiceImpl implements PostService {
 
         final Post finalCreatedPost = post;
 
-        postCommand.getContents().forEach(contentCommand ->
-                contentRepository.save(contentCommand.toEntity(finalCreatedPost)));
+        postCommand.getContents().forEach(contentCommand -> {
+            if (contentCommand instanceof ImageContentCommand imageContentCommand) {
+                FileInfo image = fileInfoRepository.findById(imageContentCommand.getImageId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
+                contentRepository.save(imageContentCommand.toEntity(imageContentCommand.getPost(), image));
+            } else if (contentCommand instanceof TextContentCommand textContentCommand) {
+                contentRepository.save(textContentCommand.toEntity(finalCreatedPost));
+            } else if (contentCommand instanceof SubtitleContentCommand subtitleContentCommand) {
+                contentRepository.save(subtitleContentCommand.toEntity(finalCreatedPost));
+            } else throw new CustomException(ErrorCode.NOT_PERMITTED_CONDITION);
+        });
 
         return finalCreatedPost.getId();
     }
@@ -188,17 +173,17 @@ public class PostServiceImpl implements PostService {
                     ContentType type = ContentType.fromTag(tag.getTagName());
                     switch (type) {
                         case SUBTITLE -> {
-                            ContentDto.SubtitleContentCommand subtitleContentCommand = TagMapper.toSubtitleContentCommand(tag);
+                            SubtitleContentCommand subtitleContentCommand = TagMapper.toSubtitleContentCommand(tag);
                             subtitleContentCommand.setOrder(currentOrder);
                             contentCommands.add(subtitleContentCommand);
                         }
                         case TEXT -> {
-                            ContentDto.TextContentCommand textContentCommand = TagMapper.toTextContentCommand(tag);
+                            TextContentCommand textContentCommand = TagMapper.toTextContentCommand(tag);
                             textContentCommand.setOrder(currentOrder);
                             contentCommands.add(textContentCommand);
                         }
                         case IMAGE -> {
-                            ContentDto.ImageContentCommand imageContentCommand = TagMapper.toImageContentCommand(tag);
+                            ImageContentCommand imageContentCommand = TagMapper.toImageContentCommand(tag);
                             imageContentCommand.setOrder(currentOrder);
                             contentCommands.add(imageContentCommand);
                         }

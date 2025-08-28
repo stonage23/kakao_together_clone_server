@@ -25,6 +25,7 @@ public enum ErrorCode {
     INVALID_ARGUMENT("적절하지 않은 입력값입니다.", "INVALID_ARGUMENT", HttpStatus.BAD_REQUEST),
     NOT_NULL_VIOLATION("null이면 안되는 엔티티 제약조건을 위반하였습니다.", "NOT_NULL_VIOLATION", HttpStatus.INTERNAL_SERVER_ERROR),
     NOT_PERMITTED_CONDITION("허용한 조건 분기 외 로직 호출예외가 발생하였습니다.", "NOT_PERMITTED_CONDITION", HttpStatus.INTERNAL_SERVER_ERROR),
+    BUISINESS_VIOLATION("비즈니스룰 위반입니다.", "BUISINESS_VIOLATION", HttpStatus.BAD_REQUEST),
 
     // 유저
     NOT_FOUND_USER("유저가 존재하지 않습니다.", "NOT_FOUND_USER", HttpStatus.NOT_FOUND),

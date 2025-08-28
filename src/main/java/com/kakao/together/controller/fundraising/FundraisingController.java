@@ -1,6 +1,5 @@
 package com.kakao.together.controller.fundraising;
 
-import com.kakao.together.controller.comment.dto.CommentDto;
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
@@ -42,6 +41,6 @@ public class FundraisingController {
 
     @GetMapping("/api/fundraisings/{id}/comments")
     public ResponseEntity<List<CommentResponse>> getAllComments(@PathVariable Long id) {
-        return ResponseEntity.of(fundraisingService.findAllComments(id));
+        return ResponseEntity.ok(fundraisingService.findAllComments(id));
     }
 }

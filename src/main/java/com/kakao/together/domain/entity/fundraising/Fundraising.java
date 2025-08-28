@@ -81,7 +81,7 @@ public class Fundraising extends BaseTimeEntity {
 
     public void updateDraftToCreated() {
         validateConstraints();
-        this.draftStatus = DraftStatus.CREATED;
+        this.draftStatus = DraftStatus.PUBLISHED;
     }
 
     public void updateFundraisingStatus(String status) {

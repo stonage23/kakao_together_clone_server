@@ -3,9 +3,9 @@ package com.kakao.together.service.fundraising;
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
-import com.kakao.together.domain.entity.fundraising.Fundraising;
 
 import java.util.List;
 
@@ -25,9 +25,9 @@ public interface FundraisingService {
 
     void deleteIfExists(Long fundraisingId);
 
-    Fundraising findTempFundraisingById(Long id);
+    EditFundraisingResponse findTempFundraisingById(Long id);
 
-    List<FundraisingDto.SimpleEditFundraisingResponse> findAllTempFundraisings();
+    List<FundraisingDto.SimpleTempFundraisingResponse> findAllTempFundraisings();
 
     void updateDraftToCreated(EditFundraisingRequest request);
 

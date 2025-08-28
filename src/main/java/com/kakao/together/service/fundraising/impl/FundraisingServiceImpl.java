@@ -1,11 +1,9 @@
 package com.kakao.together.service.fundraising.impl;
 
+import com.kakao.together.controller.agency.dto.AgencyDto;
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.dto.ContentDto.ContentResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleEditFundraisingResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.*;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.content.Content;
@@ -55,21 +53,29 @@ public class FundraisingServiceImpl implements FundraisingService {
         Agency agency = null;
         FileInfo thumbnail = null;
 
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; postId: " + postId)
+        );
+
         if (request.getAgencyId() != null) {
             agency = agencyRepository.findById(request.getAgencyId()).orElseThrow(
                     () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; agencyId: " + request.getAgencyId())
             );
         }
 
-        if (request.getThumbnail() != null && request.getThumbnail().getId() != null) {
-            thumbnail = fileInfoRepository.findById(request.getThumbnail().getId()).orElseThrow(
-                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnail().getId())
+        if (request.getThumbnailId() != null) {
+            thumbnail = fileInfoRepository.findById(request.getThumbnailId()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnailId())
+            );
+        } else {
+            post.getContents().stream()
+                    .filter(content -> content.getType().equals(ContentType.IMAGE))
+                    .findFirst()
+                    .orElseThrow(() -> new CustomException(ErrorCode.BUISINESS_VIOLATION, "이미지를 최소 1개 이상 첨부해주세요."));
+            thumbnail = fileInfoRepository.findById(request.getThumbnailId()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnailId())
             );
         }
-
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; postId: " + postId)
-        );
 
         Fundraising createdFundraising = fundraisingRepository.save(request.toEntity(agency, thumbnail, post));
 
@@ -93,9 +99,17 @@ public class FundraisingServiceImpl implements FundraisingService {
             );
         }
 
-        if (request.getThumbnail() != null && request.getThumbnail().getId() != null) {
-            thumbnail = fileInfoRepository.findById(request.getThumbnail().getId()).orElseThrow(
-                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnail().getId())
+        if (request.getThumbnailId() != null) {
+            thumbnail = fileInfoRepository.findById(request.getThumbnailId()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnailId())
+            );
+        } else {
+            fundraising.getPost().getContents().stream()
+                    .filter(content -> content.getType().equals(ContentType.IMAGE))
+                    .findFirst()
+                    .orElseThrow(() -> new CustomException(ErrorCode.BUISINESS_VIOLATION, "이미지를 최소 1개 이상 첨부해주세요."));
+            thumbnail = fileInfoRepository.findById(request.getThumbnailId()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; imageId: " + request.getThumbnailId())
             );
         }
 
@@ -118,15 +132,35 @@ public class FundraisingServiceImpl implements FundraisingService {
     @Override
     public List<FundraisingResponse> findFundraisingsExpiringInThreeDaysLimit(int limit) {
         return fundraisingRepository.findFundraisingsWithExpiringInThreeDaysLimit(limit).stream()
-                .map(fundraising -> FundraisingResponse.fromEntity(fundraising))
+                .map(this::resolveFundraisingResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<FundraisingResponse> findFundraisingsTopLimit(int limit) {
         return fundraisingRepository.findFundraisingsWithTopLimit(limit).stream()
-                .map(fundraising -> FundraisingResponse.fromEntity(fundraising))
+                .map(this::resolveFundraisingResponse)
                 .collect(Collectors.toList());
+    }
+
+    private FundraisingResponse resolveFundraisingResponse(Fundraising fundraising) {
+        FileInfo image = fundraising.getThumbnail();
+        String thumbnailUrl = filePathResolver.resolveUploadPath(image.generateFilename(), image.getContentType()).toString();
+        return FundraisingResponse.builder()
+                .id(fundraising.getId())
+                .title(fundraising.getTitle())
+                .thumbnailUrl(thumbnailUrl)
+                .targetAmount(fundraising.getTargetAmount())
+                .startDate(fundraising.getStartDate())
+                .endDate(fundraising.getEndDate())
+                .fundraisingStatus(fundraising.getFundraisingCurrent())
+                .agency(AgencyDto.fromEntity(fundraising.getAgency()))
+                .currentAmount(fundraising.getFundraisingCurrent().getCurrentAmount())
+                .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
+                .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
+                .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
+                .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
+                .build();
     }
 
     @Override
@@ -141,21 +175,22 @@ public class FundraisingServiceImpl implements FundraisingService {
     @Override
     public FundraisingResponse getOngoingFundraisingResponse(Long fundraisingId) {
         return fundraisingRepository.findByIdAndFundraisingStatus(fundraisingId, FundraisingStatus.ONGOING)
-                .map(FundraisingResponse::fromEntity)
+                .map(this::resolveFundraisingResponse)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "해당 fundraisingId을 가진 모금이 없습니다."));
     }
 
     @Override
-    public Fundraising findTempFundraisingById(Long fundraisingId) {
-        return fundraisingRepository.findByIdAndDraftStatus(fundraisingId, DraftStatus.TEMPORARY).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "임시 저장 모금이 존재하지 않습니다.")
-        );
+    public EditFundraisingResponse findTempFundraisingById(Long fundraisingId) {
+        Fundraising fundraising = fundraisingRepository.findByIdAndDraftStatus(fundraisingId, DraftStatus.TEMPORARY)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "임시 저장 모금이 존재하지 않습니다."));
+        List<ContentResponse> contents = contentResponseListMapper(fundraising.getPost().getContents());
+        return EditFundraisingResponse.fromEntity(fundraising, contents);
     }
 
     @Override
-    public List<SimpleEditFundraisingResponse> findAllTempFundraisings() {
+    public List<SimpleTempFundraisingResponse> findAllTempFundraisings() {
         return fundraisingRepository.findByFundraisingStatus(DraftStatus.TEMPORARY).stream()
-                .map(SimpleEditFundraisingResponse::fromEntity).collect(Collectors.toList());
+                .map(SimpleTempFundraisingResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Override

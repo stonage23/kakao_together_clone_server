@@ -4,7 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum PostType {
-    STORY("STORY");
+    STORY("STORY"),
+    NEWS("NEWS");
+
 
     private String value;
     PostType(String value) {this.value = value;}

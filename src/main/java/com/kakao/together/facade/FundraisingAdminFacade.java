@@ -2,9 +2,8 @@ package com.kakao.together.facade;
 
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleEditFundraisingResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleTempFundraisingResponse;
 import com.kakao.together.domain.entity.fundraising.DraftStatus;
-import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.fundraising.FundraisingDraftHandler;
@@ -53,13 +52,11 @@ public class FundraisingAdminFacade {
         fundraisingService.updateFundraisingStatus(fundraisingId, status);
     }
 
-    public List<SimpleEditFundraisingResponse> getAllTempFundraisings() {
+    public List<SimpleTempFundraisingResponse> getAllTempFundraisings() {
         return fundraisingService.findAllTempFundraisings();
     }
 
     public EditFundraisingResponse getTempFundraising(Long fundraisingId) {
-        Fundraising fundraising = fundraisingService.findTempFundraisingById(fundraisingId);
-        String buildedHtml = postService.postToHtml(fundraising.getPost());
-        return EditFundraisingResponse.fromEntity(fundraising, buildedHtml);
+        return fundraisingService.findTempFundraisingById(fundraisingId);
     }
 }
