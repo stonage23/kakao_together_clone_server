@@ -1,6 +1,6 @@
 package com.kakao.together.controller.dto;
 
-import com.kakao.together.domain.entity.image.Image;
+import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
@@ -14,16 +14,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ContentDto {
 
-    private Long documentId;
-    private String contentType;
-    private String subtitle;
-    private String text;
-    private String caption;
-    private Image image;
-    private Integer order;
-
     public interface ContentCommand {
         Content toEntity(Post post);
+        void setOrder(Integer order);
     }
 
     @Builder
@@ -31,7 +24,7 @@ public class ContentDto {
     @Getter
     public static class ImageContentCommand implements ContentCommand{
         private String caption;
-        private Image image;
+        private ImageCommand image;
         private Integer order;
         private Post post;
 
@@ -39,10 +32,15 @@ public class ContentDto {
         public ImageContent toEntity(Post post) {
             return ImageContent.builder()
                     .caption(this.caption)
-                    .image(this.image)
+                    .image(this.image.toEntity())
                     .order(this.order)
                     .post(post)
                     .build();
+        }
+
+        @Override
+        public void setOrder(Integer order) {
+            this.order = order;
         }
     }
 
@@ -62,6 +60,11 @@ public class ContentDto {
                     .post(post)
                     .build();
         }
+
+        @Override
+        public void setOrder(Integer order) {
+            this.order = order;
+        }
     }
 
     @Builder
@@ -78,6 +81,46 @@ public class ContentDto {
                     .text(this.text)
                     .post(post)
                     .order(this.order)
+                    .build();
+        }
+
+        @Override
+        public void setOrder(Integer order) {
+            this.order = order;
+        }
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class ContentResponse {
+        private String type;
+        private Object value;
+
+        @AllArgsConstructor
+        private static class ImageValue {
+            private String url;
+            private String caption;
+        }
+
+        public static ContentResponse fromText(String type, String value) {
+            return ContentResponse.builder()
+                    .type(type)
+                    .value(value)
+                    .build();
+        }
+
+        public static ContentResponse fromImage(String type, String url, String caption) {
+            return ContentResponse.builder()
+                    .type(type)
+                    .value(new ImageValue(url, caption))
+                    .build();
+        }
+
+        public static ContentResponse fromSubtitle(String type, String value) {
+            return ContentResponse.builder()
+                    .type(type)
+                    .value(value)
                     .build();
         }
     }

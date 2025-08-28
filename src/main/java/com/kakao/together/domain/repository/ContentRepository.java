@@ -13,8 +13,8 @@ import java.util.List;
 public interface ContentRepository extends JpaRepository<Content, Long> {
 
     @Query("select c from ImageContent c where c.post.id = :postId")
-    List<ImageContent> findAllByTypeAndPostId(@Param("postId") Long postId);
+    List<ImageContent> findAllImageContentByPostId(@Param("postId") Long postId);
 
-    @Query("select c from ImageContent c where c.image.id = :imageId")
-    ImageContent findByImageId(@Param("imageId") Long imageId);
+    @Query("select c from ImageContent c where c.image.id = :fileInfoId")
+    ImageContent findByImageId(@Param("fileInfoId") Long fileInfoId);
 }

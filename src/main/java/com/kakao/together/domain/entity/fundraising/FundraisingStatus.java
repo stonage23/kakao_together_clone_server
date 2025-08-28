@@ -1,15 +1,17 @@
 package com.kakao.together.domain.entity.fundraising;
 
-import lombok.Getter;
-
-@Getter
 public enum FundraisingStatus {
-    PAUSE("PAUSE"),
     ONGOING("ONGOING"),
-    TEMPORARY("TEMPORARY"),
-    CREATED("CREATED"),
+    PAUSE("PAUSE"),
     ENDED("ENDED");
 
-    private final String status;
-    FundraisingStatus(final String status) {this.status = status;}
+    private final String value;
+
+    FundraisingStatus(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return this.value;
+    }
 }

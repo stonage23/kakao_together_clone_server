@@ -1,6 +1,6 @@
 package com.kakao.together.domain.entity.agency;
 
-import com.kakao.together.domain.entity.image.Image;
+import com.kakao.together.domain.entity.image.FileInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +28,6 @@ public class Agency {
     @Column(nullable = false)
     private String organizationType;
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "image_id")
-    private Image logo;
+    @JoinColumn(name = "file_info_id")
+    private FileInfo logo;
 }

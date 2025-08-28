@@ -1,6 +1,5 @@
 package com.kakao.together.controller.comment.dto;
 
-import com.kakao.together.controller.member.dto.MemberDto.Writer;
 import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
@@ -37,13 +36,22 @@ public class CommentDto {
         private Long fundraisingId;
         private String comment;
 
-        public CommentResponse fromEntity(Comment comment) {
+        public static CommentResponse fromEntity(Comment comment, String profileUrl) {
+            Member writer = comment.getWriter();
             return CommentResponse.builder()
                     .commentId(comment.getId())
-                    .writer(Writer.fromEntity(comment.getWriter(), comment.getWriter().getProfile()))
+                    .writer(new Writer(writer.getId(), writer.getProfile().getNickname(), profileUrl))
                     .fundraisingId(comment.getFundraising().getId())
                     .comment(comment.getComment())
                     .build();
+        }
+
+        @AllArgsConstructor
+        @Getter
+        private static class Writer {
+            private Long id;
+            private String nickname;
+            private String profileUrl;
         }
     }
 

@@ -23,6 +23,8 @@ public enum ErrorCode {
      * [format] 적절하지 않은 OOO: {}
       */
     INVALID_ARGUMENT("적절하지 않은 입력값입니다.", "INVALID_ARGUMENT", HttpStatus.BAD_REQUEST),
+    NOT_NULL_VIOLATION("null이면 안되는 엔티티 제약조건을 위반하였습니다.", "NOT_NULL_VIOLATION", HttpStatus.INTERNAL_SERVER_ERROR),
+    NOT_PERMITTED_CONDITION("허용한 조건 분기 외 로직 호출예외가 발생하였습니다.", "NOT_PERMITTED_CONDITION", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // 유저
     NOT_FOUND_USER("유저가 존재하지 않습니다.", "NOT_FOUND_USER", HttpStatus.NOT_FOUND),
@@ -46,6 +48,10 @@ public enum ErrorCode {
     // 파일
     NOT_FOUND_VALUE("필요한 값이 존재하지 않습니다.", "NOT_FOUND_VALUE", HttpStatus.BAD_REQUEST),
     NOT_VALID_FORMAT("사용가능한 파일 확장자가 아닙니다.", "NOT_VALID_FORMAT", HttpStatus.BAD_REQUEST),
+    // TODO 구체적인 예외처리
+    FAILED_UPLOAD_FILE("파일 업로드에 실패했습니다", "FAILED_UPLOAD_FILE", HttpStatus.INTERNAL_SERVER_ERROR),
+    // TODO 구체적인 예외처리
+    FAILED_DELETE_FILE("파일 삭제에 실패했습니다.", "FAILED_DELETE_FILE", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // 토큰
     NOT_MATCH_BEARER("Bearer prefix가 없는 토큰", "NOT_MATCH_BEARER", HttpStatus.INTERNAL_SERVER_ERROR),

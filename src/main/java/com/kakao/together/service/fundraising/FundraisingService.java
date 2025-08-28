@@ -1,23 +1,23 @@
 package com.kakao.together.service.fundraising;
 
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingDto;
+import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FundraisingService {
 
-    void createTempFundraising(EditFundraisingDto request, Long postId);
-
-    Fundraising createFundraising(Fundraising fundraising);
+    Long createFundraising(EditFundraisingRequest request, Long postId);
 
     FundraisingResponse getOngoingFundraisingResponse(Long fundraisingId);
 
-    Optional<Fundraising> findFundraisingNullable(Long fundraisingId);
+    Long updateFundraising(EditFundraisingRequest request);
 
-    Fundraising findFundraisingNullCheck(Long fundraisingId);
+    void updateFundraisingStatus(Long fundraisingId, String status);
 
     List<FundraisingResponse> findFundraisingsExpiringInThreeDaysLimit(int limit);
 
@@ -27,5 +27,11 @@ public interface FundraisingService {
 
     Fundraising findTempFundraisingById(Long id);
 
-    List<Fundraising> findAllTempFundraisings();
+    List<FundraisingDto.SimpleEditFundraisingResponse> findAllTempFundraisings();
+
+    void updateDraftToCreated(EditFundraisingRequest request);
+
+    FundraisingPostResponse getFundraisingStory(Long fundraisingId);
+
+    List<CommentResponse> findAllComments(Long fundraisingId);
 }

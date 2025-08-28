@@ -1,14 +1,8 @@
 package com.kakao.together.service.file;
 
+import com.kakao.together.controller.file.dto.FileDto.FileResponse;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
-public interface FileService<T> {
-
-    T saveFile(MultipartFile file);
-
-    void moveFile(List<T> fileList);
-
-    void deleteFile(String url);
+public interface FileService {
+    FileResponse processTempUpload(MultipartFile file);
 }

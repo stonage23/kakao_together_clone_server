@@ -1,10 +1,10 @@
 package com.kakao.together.service.image;
 
-import com.kakao.together.controller.dto.ImageDto;
-import com.kakao.together.domain.entity.image.Image;
+import com.kakao.together.controller.image.dto.ImageCommand;
+import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.domain.repository.ImageRepository;
+import com.kakao.together.domain.repository.FileInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,25 +14,25 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ImageService {
 
-    private final ImageRepository imageRepository;
+    private final FileInfoRepository fileInfoRepository;
 
-    public Image createIfSrcNotExist(ImageDto dto) {
-        return imageRepository.findByUrl(dto.getUrl()).orElseGet(
-                () -> imageRepository.save(dto.toEntity())
+    public FileInfo createIfSrcNotExist(ImageCommand dto) {
+        return fileInfoRepository.findByUrl(dto.getUrl()).orElseGet(
+                () -> fileInfoRepository.save(dto.toEntity())
         );
     }
 
-    public Image getImageEntityById(Long imageId) {
-        return imageRepository.findById(imageId).orElseThrow(
+    public FileInfo getImageEntityById(Long imageId) {
+        return fileInfoRepository.findById(imageId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청하신 이미지를 찾을 수 없습니다. ")
         );
     }
 
-    public Optional<Image> findImageById(Long imageId) {
-        return imageRepository.findById(imageId);
+    public Optional<FileInfo> findImageById(Long imageId) {
+        return fileInfoRepository.findById(imageId);
     }
 
-    public void delete(Image image) {
-        imageRepository.delete(image);
+    public void delete(FileInfo fileInfo) {
+        fileInfoRepository.delete(fileInfo);
     }
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Builder
 @NoArgsConstructor
@@ -13,14 +14,19 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class FundraisingCurrent {
 
-//    @Column(nullable = false)
-    private Integer currentAmount;
-//    @Column(nullable = false)
-    private Integer directDonatorCount;
-//    @Column(nullable = false)
-    private Integer indirectDonatorCount;
-//    @Column(nullable = false)
-    private Integer directDonationAmount;
-//    @Column(nullable = false)
-    private Integer indirectDonationAmount;
+    @Builder.Default
+    @ColumnDefault("0")
+    private Integer currentAmount = 0;
+    @Builder.Default
+    @ColumnDefault("0")
+    private Integer directDonorCount = 0;
+    @Builder.Default
+    @ColumnDefault("0")
+    private Integer indirectDonorCount = 0;
+    @Builder.Default
+    @ColumnDefault("0")
+    private Integer directDonationAmount = 0;
+    @Builder.Default
+    @ColumnDefault("0")
+    private Integer indirectDonationAmount = 0;
 }

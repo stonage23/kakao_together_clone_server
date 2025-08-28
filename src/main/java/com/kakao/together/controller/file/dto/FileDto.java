@@ -4,11 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
-@AllArgsConstructor
-@Getter
 public class FileDto {
-    private String originalName;
-    private String realName;
-    private String url;
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class FileResponse {
+        private Long id;
+        private String originalName;
+        private String url;
+        private Long size;
+        private String contentType;
+    }
 }

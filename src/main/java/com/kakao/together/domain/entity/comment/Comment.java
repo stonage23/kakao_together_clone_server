@@ -23,11 +23,11 @@ public class Comment extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fundraising_id")
+    @JoinColumn(name = "fundraising_id", nullable = false)
     private Fundraising fundraising;
 
     private String comment;

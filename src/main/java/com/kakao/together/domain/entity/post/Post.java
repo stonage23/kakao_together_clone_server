@@ -25,5 +25,10 @@ public class Post {
     private PostType type;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex asc")
     private List<Content> contents;
+
+    public void updatePost(Post post) {
+        this.type = post.getType();
+    }
 }

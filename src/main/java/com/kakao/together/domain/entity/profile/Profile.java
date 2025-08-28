@@ -1,6 +1,6 @@
 package com.kakao.together.domain.entity.profile;
 
-import com.kakao.together.domain.entity.image.Image;
+import com.kakao.together.domain.entity.image.FileInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,8 +21,8 @@ public class Profile {
     @Column(nullable = false)
     private String nickname;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id", nullable = false)
-    private Image profileImage;
+    @JoinColumn(name = "file_info_id", nullable = false)
+    private FileInfo profileImage;
 
     public void updateProfile(Profile profile) {
         this.nickname = profile.getNickname();

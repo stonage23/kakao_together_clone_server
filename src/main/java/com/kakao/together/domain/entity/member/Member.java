@@ -41,6 +41,7 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
+    @Builder.Default
     @OneToMany(mappedBy = "writer", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 

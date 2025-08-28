@@ -1,19 +1,20 @@
 package com.kakao.together.controller.fundraising.dto;
 
 import com.kakao.together.controller.agency.dto.AgencyDto;
-import com.kakao.together.controller.dto.ImageDto;
-import com.kakao.together.domain.entity.fundraising.FundraisingCurrent;
-import com.kakao.together.domain.entity.image.Image;
-import com.kakao.together.domain.entity.content.Content;
-import com.kakao.together.domain.entity.content.extend.SubTitleContent;
-import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.fundraising.FundraisingStatus;
+import com.kakao.together.controller.dto.ContentDto;
+import com.kakao.together.controller.dto.ContentDto.ContentResponse;
+import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
+import com.kakao.together.domain.entity.fundraising.FundraisingCurrent;
+import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ public class FundraisingDto {
     public static class FundraisingResponse {
         private Long id;
         private String title;
-        private ImageDto thumbnailUrl;
+        private ImageCommand thumbnailUrl;
         private Integer targetAmount;
         private LocalDate startDate;
         private LocalDate endDate;
@@ -46,7 +47,7 @@ public class FundraisingDto {
             return FundraisingResponse.builder()
                     .id(fundraising.getId())
                     .title(fundraising.getTitle())
-                    .thumbnailUrl(ImageDto.fromEntity(fundraising.getThumbnail()))
+                    .thumbnailUrl(ImageCommand.fromEntity(fundraising.getThumbnail()))
                     .targetAmount(fundraising.getTargetAmount())
                     .startDate(fundraising.getStartDate())
                     .endDate(fundraising.getEndDate())
@@ -64,58 +65,63 @@ public class FundraisingDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    @ToString
-    public static class EditFundraisingDto {
+    public static class EditFundraisingRequest {
 
-        public interface UpdateDraft {}
         public interface Save {}
         public interface Update {}
 
-        @NotBlank(groups = {UpdateDraft.class, Update.class})
+        @NotBlank(groups = {Update.class})
         private Long fundraisingId;
         @NotBlank(groups = {Save.class, Update.class})
         private String title;
-        @NotBlank(groups = {Save.class, Update.class})
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
-        @NotBlank(groups = {Save.class, Update.class})
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate endDate;
-        @NotBlank(groups = {Save.class, Update.class})
         private Integer TargetAmount;
-        @NotBlank(groups = {Save.class, Update.class})
-        private FundraisingStatus fundraisingStatus;
-        @NotBlank(groups = {Save.class, Update.class})
-        private ImageDto thumbnail;
+        private String status;
+        private ImageCommand thumbnail;
         @NotBlank(groups = {Save.class, Update.class})
         private String html;
-        @NotBlank(groups = {Save.class, Update.class})
         private Long agencyId;
-        @NotBlank(groups = {Save.class, Update.class})
         private Long postId;
 
-        public Fundraising toEntity(Agency agency, @Nullable Image thumbnail, @Nullable Post post) {
-            Fundraising.FundraisingBuilder builder = Fundraising.builder()
+        public Fundraising toEntity(Agency agency, @Nullable FileInfo thumbnail, @Nullable Post post) {
+            return Fundraising.builder()
                     .title(this.title)
                     .startDate(this.startDate)
                     .endDate(this.endDate)
-                    .fundraisingStatus(FundraisingStatus.TEMPORARY)
                     .agency(agency)
                     .post(post)
-                    .thumbnail(thumbnail);
-            if (fundraisingId != null)
-                        builder.id(this.fundraisingId);
-
-            return builder.build();
+                    .thumbnail(thumbnail)
+                    .id(this.fundraisingId)
+                    .build();
         }
+    }
 
-        public static EditFundraisingDto fromEntity(final Fundraising fundraising, final String buildedHtml) {
-            return EditFundraisingDto.builder()
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class EditFundraisingResponse {
+
+        private Long fundraisingId;
+        private String title;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private Integer TargetAmount;
+        private String status;
+        private ImageCommand thumbnail;
+        private String html;
+        private Long agencyId;
+        private Long postId;
+
+        public static EditFundraisingResponse fromEntity(final Fundraising fundraising, final String buildedHtml) {
+            return EditFundraisingResponse.builder()
                     .fundraisingId(fundraising.getId())
                     .title(fundraising.getTitle())
                     .startDate(fundraising.getStartDate())
                     .endDate(fundraising.getEndDate())
-                    .thumbnail(fundraising.getThumbnail() != null ? ImageDto.fromEntity(fundraising.getThumbnail()) : null)
+                    .thumbnail(fundraising.getThumbnail() != null ? ImageCommand.fromEntity(fundraising.getThumbnail()) : null)
                     .html(buildedHtml)
                     .postId(fundraising.getPost() != null ? fundraising.getPost().getId() : null)
                     .agencyId(fundraising.getAgency() != null ? fundraising.getAgency().getId() : null)
@@ -163,64 +169,12 @@ public class FundraisingDto {
         }
     }
 
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    public static class FundraisingSingleResponse {
-        private Long id;
-        private String thumbnailUrl;
-        private String title;
-        private Integer targetAmount;
-        private Integer currentAmount;
-        private String summary;
-
-        @Builder
-        public FundraisingSingleResponse (Fundraising fundraising) {
-            this.id = fundraising.getId();
-            this.thumbnailUrl = fundraising.getThumbnail().getUrl();
-            this.title = fundraising.getTitle();
-        }
-
-        public String generateSummary (Post post, int length) {
-            StringBuilder summary = new StringBuilder();
-            List<Content> contents = post.getContents();
-            int currentLength = 0;
-
-            for (Content content : contents) {
-                if (content instanceof SubTitleContent) {
-                    String subtitle = ((SubTitleContent) content).getSubtitle();
-                    currentLength += subtitle.length();
-                    if (currentLength <= length) {
-                        summary.append(subtitle).append(" ");
-                    } else {
-                        int remainingLength = length - (currentLength - subtitle.length());
-                        summary.append(subtitle, 0, remainingLength).append(" ");
-                        break;
-                    }
-                } else if (content instanceof TextContent) {
-                    String text = ((TextContent) content).getText();
-                    currentLength += text.length();
-                    if (currentLength <= length) {
-                        summary.append(text).append(" ");
-                    } else {
-                        int remainingLength = length - (currentLength - text.length());
-                        summary.append(text, 0, remainingLength).append(" ");
-                        break;
-                    }
-                }
-                if (currentLength >= length) {
-                    break;
-                }
-            }
-            return summary.toString();
-        }
-    }
-
     @Builder
     @AllArgsConstructor
+    @Getter
     public static class SimpleEditFundraisingResponse {
-        String title;
-        LocalDateTime updatedAt;
+        private String title;
+        private LocalDateTime updatedAt;
 
         public static SimpleEditFundraisingResponse fromEntity(Fundraising fundraising) {
             return SimpleEditFundraisingResponse.builder()
@@ -228,5 +182,20 @@ public class FundraisingDto {
                     .updatedAt(fundraising.getUpdatedAt())
                     .build();
         }
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public class FundraisingStatusUpdateRequest {
+        private String status;
+    }
+
+    @Builder
+    @AllArgsConstructor
+    @Getter
+    public static class FundraisingPostResponse {
+        private Long postId;
+        private String postType;
+        private List<ContentResponse> contents;
     }
 }

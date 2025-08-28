@@ -1,8 +1,13 @@
 package com.kakao.together.controller.fundraising;
 
 import com.kakao.together.annotation.Admin;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto;
-import com.kakao.together.exception.CustomException;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest.Save;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest.Update;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingStatusUpdateRequest;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleEditFundraisingResponse;
+import com.kakao.together.domain.entity.fundraising.DraftStatus;
 import com.kakao.together.facade.FundraisingAdminFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,40 +24,39 @@ public class FundraisingAdminController {
 
     @Admin
     @PostMapping("/admin/fundraisings/temp")
-    public ResponseEntity<Void> createTempFundraising(@RequestBody FundraisingDto.EditFundraisingDto fundraisingDto) {
-        fundraisingAdminFacade.createTempFundraising(fundraisingDto);
-        return ResponseEntity.ok().build();
-    }
-
-    @Admin
-    @PutMapping("/admin/fundraisings/temp")
-    public ResponseEntity<Void> updateTempFundraising(@RequestBody @Validated(FundraisingDto.EditFundraisingDto.UpdateDraft.class) FundraisingDto.EditFundraisingDto fundraisingDto) {
-        if (fundraisingDto.getFundraisingId() == null) throw new CustomException("모금 게시글 임시저장 수정 실패: fundraisingId 누락");
-        fundraisingAdminFacade.updateTempFundraising(fundraisingDto);
+    public ResponseEntity<Void> processTempFundraising(@RequestBody @Validated(Save.class) EditFundraisingRequest request) {
+        fundraisingAdminFacade.createFundraising(request, DraftStatus.TEMPORARY);
         return ResponseEntity.ok().build();
     }
 
     @Admin
     @PostMapping("/admin/fundraisings")
-    public ResponseEntity<Void> createFundraising(@RequestBody @Validated(FundraisingDto.EditFundraisingDto.Save.class) FundraisingDto.EditFundraisingDto requestDto) {
-        fundraisingAdminFacade.createFundraising(requestDto);
+    public ResponseEntity<Void> createFundraising(@RequestBody @Validated(Save.class) EditFundraisingRequest request) {
+        fundraisingAdminFacade.createFundraising(request, DraftStatus.CREATED);
         return ResponseEntity.ok().build();
     }
 
     @Admin
     @PutMapping("/admin/fundraisings/{id}")
-    public ResponseEntity<Void> updateFundraising(@PathVariable Long id, @RequestBody @Validated(FundraisingDto.EditFundraisingDto.Update.class) FundraisingDto.EditFundraisingDto requestDto) {
-        fundraisingAdminFacade.updateFundraising(requestDto);
+    public ResponseEntity<Void> updateFundraising(@PathVariable Long id, @RequestBody @Validated(Update.class) EditFundraisingRequest request) {
+        fundraisingAdminFacade.updateFundraising(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Admin
+    @PatchMapping("/admin/fundraisings/{id}/status")
+    public ResponseEntity<Void> changeFundraisingStatus(@PathVariable Long id, @RequestBody FundraisingStatusUpdateRequest request) {
+        fundraisingAdminFacade.changeFundraisingStatus(id, request.getStatus());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/admin/temp/fundraisings")
-    public ResponseEntity<List<FundraisingDto.SimpleEditFundraisingResponse>> getTempFundraisings() {
-        return ResponseEntity.ok(fundraisingAdminFacade.getTempFundraisings());
+    public ResponseEntity<List<SimpleEditFundraisingResponse>> getTempFundraisings() {
+        return ResponseEntity.ok(fundraisingAdminFacade.getAllTempFundraisings());
     }
 
     @GetMapping("/admin/temp/fundraisings/{id}")
-    public ResponseEntity<FundraisingDto.EditFundraisingDto> getTempFundraising(@PathVariable Long id) {
-        return ResponseEntity.ok(fundraisingAdminFacade.findTemporaryFundraisingById(id));
+    public ResponseEntity<EditFundraisingResponse> getTempFundraising(@PathVariable Long id) {
+        return ResponseEntity.ok(fundraisingAdminFacade.getTempFundraising(id));
     }
 }
