@@ -20,13 +20,6 @@ public class ErrorResponse {
 	private String code;
 	private Map<String, String> errors;
 
-	private ErrorResponse(final ErrorCode code, final String message) {
-		this.message = message;
-		this.status = code.getHttpStatus().value();
-		this.code = code.getCode();
-		this.errors = new HashMap<>();
-	}
-
 	private ErrorResponse(final ErrorCode code) {
 		this.message = code.getMessage();
 		this.status = code.getHttpStatus().value();
@@ -45,8 +38,6 @@ public class ErrorResponse {
 		return new ErrorResponse(code);
 	}
 
-	public static ErrorResponse of(final ErrorCode code, final String message) { return new ErrorResponse(code, message); }
-
 	public static ErrorResponse of(ErrorCode code, BindingResult bindingResult) {
 		return new ErrorResponse(code, buildErrors(bindingResult));
 	}
@@ -56,8 +47,7 @@ public class ErrorResponse {
 	}
 
 	public static ErrorResponse of(final CustomException e) {
-		if(e.getMessage() == null) return new ErrorResponse(e.getErrorCode());
-		return new ErrorResponse(e.getErrorCode(), e.getMessage());
+		return new ErrorResponse(e.getErrorCode());
 	}
 
 	/**

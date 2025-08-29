@@ -1,13 +1,21 @@
 package com.kakao.together.exception;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class CustomException extends RuntimeException {
 
+	/**
+	 * 응답 메시지
+	 */
 	private String message;
+	/**
+	 * 기본 응답 메시지, 응답 상태 코드
+	 */
 	private ErrorCode errorCode;
+	/**
+	 * 디버깅 로깅용 Throwable
+	 */
 	private Throwable cause;
 
 	/**
@@ -27,7 +35,6 @@ public class CustomException extends RuntimeException {
 	public CustomException(ErrorCode errorCode) {
 		super(errorCode.getMessage());
 		this.errorCode = errorCode;
-		this.message = errorCode.getMessage();
 	}
 
 	/**
@@ -42,14 +49,23 @@ public class CustomException extends RuntimeException {
 	}
 
 	/**
-	 * 발생한 예외 추적이 필요한 경우
-	 * @param message
-	 * @param cause
+	 * 발생한 예외 추적이 필요한 경우. 500 상태 코드로 응답
+	 * @param cause CustomException으로 래핑한 예외
 	 */
-	public CustomException(String message, Throwable cause) {
-		super(message, cause);
+	public CustomException(Throwable cause) {
+		super(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
 		this.cause = cause;
-		this.message = message;
+		this.errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+	}
+
+	/**
+	 * 발생한 예외 추적 + 메시지 로깅. 500 상태 코드로 응답
+	 * @param cause
+	 * @param message
+	 */
+	public CustomException(Throwable cause, String message) {
+		super(message);
+		this.cause = cause;
 		this.errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 	}
 }

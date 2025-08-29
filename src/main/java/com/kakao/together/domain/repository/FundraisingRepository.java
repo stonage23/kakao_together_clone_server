@@ -16,16 +16,13 @@ public interface FundraisingRepository extends JpaRepository<Fundraising, Long> 
 
     Optional<Fundraising> findByIdAndDraftStatus(Long id, DraftStatus draftStatus);
 
-    @Query(value = "SELECT * FROM fundraising WHERE end_date BETWEEN :dateFrom AND :dateTo  ORDER BY RAND() LIMIT :limit", nativeQuery = true)
-    Optional<Fundraising> findFundraisingExpiringBetweenGivenDaysRandom(@Param("limit") int limit, @Param("dateFrom") String dateFrom, @Param("dateTo") String dateTo);
-
     @Query(value = """
     SELECT * FROM fundraising
-    WHERE end_date <= CURRENT_DATE + INTERVAL 3 DAY
+    WHERE end_date <= CURRENT_DATE + INTERVAL :daysLeft DAY
     ORDER BY RAND()
     LIMIT :limit
 """, nativeQuery = true)
-    List<Fundraising> findFundraisingsWithExpiringInThreeDaysLimit(@Param("limit") int limit);
+    List<Fundraising> findFundraisingsWithExpiringInDaysLimit(@Param("limit") int limit, @Param("daysLeft") int daysLeft);
 
     @Query(value = """
     SELECT * FROM (

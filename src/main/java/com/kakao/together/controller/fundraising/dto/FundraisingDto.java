@@ -46,11 +46,11 @@ public class FundraisingDto {
     @Getter
     public static class EditFundraisingRequest {
 
-        public interface Temporary {}
+        public interface DRAFT {}
         public interface PUBLISHED {}
 
         private Long fundraisingId;
-        @NotBlank(groups = {Temporary.class, PUBLISHED.class}, message = "제목을 입력해주세요.")
+        @NotBlank(groups = {DRAFT.class, PUBLISHED.class}, message = "제목을 입력해주세요.")
         private String title;
         @NotBlank(groups = {PUBLISHED.class}, message = "시작일을 지정해주세요.")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -113,12 +113,12 @@ public class FundraisingDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class SimpleTempFundraisingResponse {
+    public static class SimpleDraftFundraisingResponse {
         private String title;
         private LocalDateTime updatedAt;
 
-        public static SimpleTempFundraisingResponse fromEntity(Fundraising fundraising) {
-            return SimpleTempFundraisingResponse.builder()
+        public static SimpleDraftFundraisingResponse fromEntity(Fundraising fundraising) {
+            return SimpleDraftFundraisingResponse.builder()
                     .title(fundraising.getTitle())
                     .updatedAt(fundraising.getUpdatedAt())
                     .build();

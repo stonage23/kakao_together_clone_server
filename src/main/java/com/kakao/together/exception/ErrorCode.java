@@ -15,7 +15,7 @@ public enum ErrorCode {
     UNAUTHENTICATED_REQUEST("인증된 계정만 접근이 가능한 요청입니다.", "UNAUTHENTICATED_REQUEST", HttpStatus.FORBIDDEN),
     /**
      * [case] 조회한 엔티티가 존재하지 않는 경우 <br>
-     * [format] 요청한 엔티티가 존재하지 않습니다; 000
+     * [format] 요청한 엔티티가 존재하지 않습니다; userId: 1234
      */
     NOT_FOUND_ENTITY("요청한 Entity가 존재하지 않습니다.", "NOT_FOUND_ENTITY", HttpStatus.NOT_FOUND),
     /**

@@ -197,7 +197,7 @@ public class PostServiceImpl implements PostService {
 
     private void createImageIfSrcNotExist(RawTag imgTag) {
 
-        Optional<FileInfo> image = fileInfoRepository.findByUrl(imgTag.getAttributes().get("src"));
+        Optional<FileInfo> image = fileInfoRepository.findBySavedName(imgTag.getAttributes().get("savedName"));
 
         if (image.isEmpty()) {
             ImageCommand imageCommand = TagMapper.toImageCommand(imgTag);

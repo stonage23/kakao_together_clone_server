@@ -1,11 +1,7 @@
 package com.kakao.together.service.fundraising;
 
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.*;
 
 import java.util.List;
 
@@ -13,25 +9,27 @@ public interface FundraisingService {
 
     Long createFundraising(EditFundraisingRequest request, Long postId);
 
-    FundraisingResponse getOngoingFundraisingResponse(Long fundraisingId);
+    FundraisingResponse findOngoingFundraising(Long fundraisingId);
 
-    Long updateFundraising(EditFundraisingRequest request);
+    Long updateFundraising(Long fundraisingId, EditFundraisingRequest request);
 
     void updateFundraisingStatus(Long fundraisingId, String status);
 
-    List<FundraisingResponse> findFundraisingsExpiringInThreeDaysLimit(int limit);
+    List<FundraisingResponse> findFundraisingsExpiringInDays(int limit);
 
     List<FundraisingResponse> findFundraisingsTopLimit(int limit);
 
     void deleteIfExists(Long fundraisingId);
 
-    EditFundraisingResponse findTempFundraisingById(Long id);
+    EditFundraisingResponse findDraftFundraising(Long fundraisingId);
 
-    List<FundraisingDto.SimpleTempFundraisingResponse> findAllTempFundraisings();
+    List<SimpleDraftFundraisingResponse> findAllDraftFundraisings();
 
-    void updateDraftToCreated(EditFundraisingRequest request);
+    void updateDraftToPublished(Long fundraisingId, EditFundraisingRequest request);
 
-    FundraisingPostResponse getFundraisingStory(Long fundraisingId);
+    FundraisingPostResponse findFundraisingStory(Long fundraisingId);
 
     List<CommentResponse> findAllComments(Long fundraisingId);
+
+    EditFundraisingResponse findFundraising(Long fundraisingId);
 }

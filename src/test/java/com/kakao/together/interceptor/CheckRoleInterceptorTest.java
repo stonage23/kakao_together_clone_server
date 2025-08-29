@@ -39,8 +39,8 @@ class CheckRoleInterceptorTest {
         log.info("#####" + result.getResponse().getContentAsString());
 
         assertThat(result.getResponse().getStatus()).isEqualTo(ErrorCode.ONLY_ADMIN_EXCEPTION.getHttpStatus().value());
-        assertThat((String) TestUtil.fromJson(result, "message")).isEqualTo(ErrorCode.ONLY_ADMIN_EXCEPTION.getMessage());
-        assertThat((Double) TestUtil.fromJson(result, "status")).isEqualTo(403);
+        assertThat((String) TestUtil.getValueFromJson(result, "message")).isEqualTo(ErrorCode.ONLY_ADMIN_EXCEPTION.getMessage());
+        assertThat((Double) TestUtil.getValueFromJson(result, "status")).isEqualTo(403);
     }
 
     @Test

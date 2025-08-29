@@ -1,29 +1,30 @@
 package com.kakao.together.controller.auth;
 
-import com.kakao.together.controller.dto.TokenContainer;
 import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.LoginRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
+import com.kakao.together.controller.dto.TokenContainer;
 import com.kakao.together.facade.AuthFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping(produces="application/json;charset=UTF-8")
 public class AuthController {
 
     private final AuthFacade authFacade;
 
     @PostMapping("/auth/signup")
     public ResponseEntity signupRequest(@RequestBody @Valid SignupByEmailRequest requestDto) {
+        System.out.println("##### 들어와");
         authFacade.saveTempTokenAndSendValidationMail(requestDto);
         return ResponseEntity.ok().build();
     }

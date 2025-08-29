@@ -28,7 +28,7 @@ public class AuthDto {
         private String password;
 
         @NotBlank(message = "사용하실 닉네임을 입력해주세요.")
-        @Size(min = 1, max = 10, message = "닉네임은 1자 이상 10자 이하로 입력해주세요.")
+        @Size(min = 1, max = 20, message = "닉네임은 1자 이상 10자 이하로 입력해주세요.")
         private String nickname;
 
         private String age;

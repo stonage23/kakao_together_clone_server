@@ -6,40 +6,38 @@ import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingR
 import com.kakao.together.service.fundraising.FundraisingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/fundraisings")
 public class FundraisingController {
 
     private final FundraisingService fundraisingService;
 
-    @GetMapping("/api/fundraisings/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<FundraisingResponse> getOngoingFundraising(@PathVariable Long id) {
-        return ResponseEntity.ok(fundraisingService.getOngoingFundraisingResponse(id));
+        return ResponseEntity.ok(fundraisingService.findOngoingFundraising(id));
     }
 
-    @GetMapping("/api/fundraisings/expiring-soon")
+    @GetMapping("/expiring-soon")
     public ResponseEntity<List<FundraisingResponse>> getExpiringSoonFundraising(@RequestParam(defaultValue = "3") int limit) {
-        return ResponseEntity.ok(fundraisingService.findFundraisingsExpiringInThreeDaysLimit(limit));
+        return ResponseEntity.ok(fundraisingService.findFundraisingsExpiringInDays(limit));
     }
 
-    @GetMapping("/api/fundraisings/total-donations")
-    public ResponseEntity<List<FundraisingResponse>> getTopFundraisings(@RequestParam(defaultValue = "3") int limit) {
+    @GetMapping("/total-donations")
+    public ResponseEntity<List<FundraisingResponse>> getTopFundraising(@RequestParam(defaultValue = "3") int limit) {
         return ResponseEntity.ok(fundraisingService.findFundraisingsTopLimit(limit));
     }
 
-    @GetMapping("/api/fundraisings/{id}/post/story")
+    @GetMapping("/{id}/story")
     public ResponseEntity<FundraisingPostResponse> getFundraisingStory(@PathVariable Long id) {
-        return ResponseEntity.ok(fundraisingService.getFundraisingStory(id));
+        return ResponseEntity.ok(fundraisingService.findFundraisingStory(id));
     }
 
-    @GetMapping("/api/fundraisings/{id}/comments")
+    @GetMapping("/{id}/comments")
     public ResponseEntity<List<CommentResponse>> getAllComments(@PathVariable Long id) {
         return ResponseEntity.ok(fundraisingService.findAllComments(id));
     }

@@ -2,7 +2,7 @@ package com.kakao.together.facade;
 
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleTempFundraisingResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.SimpleDraftFundraisingResponse;
 import com.kakao.together.domain.entity.fundraising.DraftStatus;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
@@ -30,33 +30,38 @@ public class FundraisingAdminFacade {
      * @param request
      * @param draftStatus
      */
+    // TODO [Refactor] 핸들러 쓰지말고 로직 나누기
     @Transactional
-    public void createFundraising(EditFundraisingRequest request, DraftStatus draftStatus) {
+    public void createFundraising(Long fundraisingId, EditFundraisingRequest request, DraftStatus draftStatus) {
 
         FundraisingDraftHandler draftHandler = draftHandlers.stream()
                 .filter(handler -> handler.supports(draftStatus, request.getFundraisingId()))
                 .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_PERMITTED_CONDITION));
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-        draftHandler.handle(request);
+        draftHandler.handle(fundraisingId, request);
     }
 
     @Transactional
-    public void updateFundraising(EditFundraisingRequest request) {
+    public void updateFundraising(Long fundraisingId, EditFundraisingRequest request) {
 
         postService.buildPost(request);
-        fundraisingService.updateFundraising(request);
+        fundraisingService.updateFundraising(fundraisingId, request);
     }
 
     public void changeFundraisingStatus(Long fundraisingId, String status) {
         fundraisingService.updateFundraisingStatus(fundraisingId, status);
     }
 
-    public List<SimpleTempFundraisingResponse> getAllTempFundraisings() {
-        return fundraisingService.findAllTempFundraisings();
+    public List<SimpleDraftFundraisingResponse> getAllDraftFundraising() {
+        return fundraisingService.findAllDraftFundraisings();
     }
 
-    public EditFundraisingResponse getTempFundraising(Long fundraisingId) {
-        return fundraisingService.findTempFundraisingById(fundraisingId);
+    public EditFundraisingResponse getDraftFundraising(Long fundraisingId) {
+        return fundraisingService.findDraftFundraising(fundraisingId);
+    }
+
+    public EditFundraisingResponse getFundraising(Long id) {
+        return fundraisingService.findFundraising(id);
     }
 }

@@ -1,6 +1,5 @@
 package com.kakao.together.service.fundraising.impl;
 
-import com.kakao.together.controller.agency.dto.AgencyDto;
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.dto.ContentDto.ContentResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.*;
@@ -19,6 +18,7 @@ import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.domain.repository.*;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.mapper.FundraisingMapper;
 import com.kakao.together.service.file.impl.FilePathResolver;
 import com.kakao.together.service.fundraising.FundraisingService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.kakao.together.common.constants.BusinessConstants.FundraisingConstants.FUNDRAISING_EXPIRING_DAYS;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class FundraisingServiceImpl implements FundraisingService {
     private final CommentRepository commentRepository;
 
     /**
-     * Post는 생성 책임이 있는 로직에서 생성 후 id만 전달
+     * Post 생성 및 관리는 Post 도메인 책임. 생성 후 id만 전달
      * @param request
      * @param postId
      */
@@ -84,9 +86,9 @@ public class FundraisingServiceImpl implements FundraisingService {
 
     @Override
     @Transactional
-    public Long updateFundraising(EditFundraisingRequest request) {
+    public Long updateFundraising(Long fundraisingId, EditFundraisingRequest request) {
 
-        Fundraising fundraising = fundraisingRepository.findById(request.getFundraisingId()).orElseThrow(
+        Fundraising fundraising = fundraisingRepository.findById(fundraisingId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + request.getFundraisingId())
         );
 
@@ -130,8 +132,8 @@ public class FundraisingServiceImpl implements FundraisingService {
     }
 
     @Override
-    public List<FundraisingResponse> findFundraisingsExpiringInThreeDaysLimit(int limit) {
-        return fundraisingRepository.findFundraisingsWithExpiringInThreeDaysLimit(limit).stream()
+    public List<FundraisingResponse> findFundraisingsExpiringInDays(int limit) {
+        return fundraisingRepository.findFundraisingsWithExpiringInDaysLimit(limit, FUNDRAISING_EXPIRING_DAYS).stream()
                 .map(this::resolveFundraisingResponse)
                 .collect(Collectors.toList());
     }
@@ -146,68 +148,54 @@ public class FundraisingServiceImpl implements FundraisingService {
     private FundraisingResponse resolveFundraisingResponse(Fundraising fundraising) {
         FileInfo image = fundraising.getThumbnail();
         String thumbnailUrl = filePathResolver.resolveUploadPath(image.generateFilename(), image.getContentType()).toString();
-        return FundraisingResponse.builder()
-                .id(fundraising.getId())
-                .title(fundraising.getTitle())
-                .thumbnailUrl(thumbnailUrl)
-                .targetAmount(fundraising.getTargetAmount())
-                .startDate(fundraising.getStartDate())
-                .endDate(fundraising.getEndDate())
-                .fundraisingStatus(fundraising.getFundraisingCurrent())
-                .agency(AgencyDto.fromEntity(fundraising.getAgency()))
-                .currentAmount(fundraising.getFundraisingCurrent().getCurrentAmount())
-                .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
-                .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
-                .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
-                .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
-                .build();
+        return FundraisingMapper.toFundraisingResponse(fundraising, thumbnailUrl);
     }
 
     @Override
     public void deleteIfExists(Long fundraisingId) {
         if (!fundraisingRepository.existsById(fundraisingId)) {
-            log.warn("존재하지 않는 모금Id로 데이터 삭제 시도; fundraisingId: {}, method: {}", fundraisingId, "FundraisingServiceImpl.existsById");
+            log.error("존재하지 않는 모금Id로 데이터 삭제 시도; fundraisingId: {}, method: {}", fundraisingId, "FundraisingServiceImpl.existsById");
             return;
         }
         fundraisingRepository.deleteById(fundraisingId);
     }
 
     @Override
-    public FundraisingResponse getOngoingFundraisingResponse(Long fundraisingId) {
+    public FundraisingResponse findOngoingFundraising(Long fundraisingId) {
         return fundraisingRepository.findByIdAndFundraisingStatus(fundraisingId, FundraisingStatus.ONGOING)
                 .map(this::resolveFundraisingResponse)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "해당 fundraisingId을 가진 모금이 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId));
     }
 
     @Override
-    public EditFundraisingResponse findTempFundraisingById(Long fundraisingId) {
-        Fundraising fundraising = fundraisingRepository.findByIdAndDraftStatus(fundraisingId, DraftStatus.TEMPORARY)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "임시 저장 모금이 존재하지 않습니다."));
+    public EditFundraisingResponse findDraftFundraising(Long fundraisingId) {
+        Fundraising fundraising = fundraisingRepository.findByIdAndDraftStatus(fundraisingId, DraftStatus.DRAFT)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId));
         List<ContentResponse> contents = contentResponseListMapper(fundraising.getPost().getContents());
         return EditFundraisingResponse.fromEntity(fundraising, contents);
     }
 
     @Override
-    public List<SimpleTempFundraisingResponse> findAllTempFundraisings() {
-        return fundraisingRepository.findByFundraisingStatus(DraftStatus.TEMPORARY).stream()
-                .map(SimpleTempFundraisingResponse::fromEntity).collect(Collectors.toList());
+    public List<SimpleDraftFundraisingResponse> findAllDraftFundraisings() {
+        return fundraisingRepository.findByFundraisingStatus(DraftStatus.DRAFT).stream()
+                .map(SimpleDraftFundraisingResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void updateDraftToCreated(EditFundraisingRequest request) {
-        Long updatedFundraising = updateFundraising(request);
+    public void updateDraftToPublished(Long fundraisingId, EditFundraisingRequest request) {
+        Long updatedFundraising = updateFundraising(fundraisingId, request);
         Fundraising fundraising = fundraisingRepository.findById(updatedFundraising).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "임시 저장 모금이 존재하지 않습니다.")
+                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: "+ fundraisingId)
         );
         fundraising.updateDraftToCreated();
     }
 
     @Override
-    public FundraisingPostResponse getFundraisingStory(Long fundraisingId) {
+    public FundraisingPostResponse findFundraisingStory(Long fundraisingId) {
 
         Fundraising fundraising = fundraisingRepository.findById(fundraisingId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "해당 fundraisingId을 가진 모금이 없습니다.")
+                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId)
         );
 
         Post post = fundraising.getPost();
@@ -234,6 +222,14 @@ public class FundraisingServiceImpl implements FundraisingService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public EditFundraisingResponse findFundraising(Long fundraisingId) {
+        Fundraising fundraising = fundraisingRepository.findById(fundraisingId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId));
+        List<ContentResponse> contents = contentResponseListMapper(fundraising.getPost().getContents());
+        return EditFundraisingResponse.fromEntity(fundraising, contents);
+    }
+
     private List<ContentResponse> contentResponseListMapper(List<Content> contents) {
         return contents.stream()
                 .map(content -> {
@@ -245,7 +241,7 @@ public class FundraisingServiceImpl implements FundraisingService {
                         FileInfo image = imageContent.getImage();
                         String url = filePathResolver.resolveUploadPath(image.generateFilename(), image.getContentType()).toString();
                         return ContentResponse.fromImage(ContentType.IMAGE.getValue(), url, imageContent.getCaption());
-                    } else throw new CustomException(ErrorCode.NOT_PERMITTED_CONDITION);
+                    } else throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "contentId: " + content.getId());
                 }).collect(Collectors.toList());
     }
 }

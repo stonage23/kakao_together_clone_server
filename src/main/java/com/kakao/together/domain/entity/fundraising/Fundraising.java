@@ -22,7 +22,6 @@ import java.util.List;
  * FundraisingCurrent 데이터 조작은 Fundraising과 독립적으로 이뤄진다.
  */
 @Entity
-@Table (name = "Fundraising")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,8 +45,9 @@ public class Fundraising extends BaseTimeEntity {
     private Integer targetAmount;
 
     @Builder.Default
-    @ColumnDefault("TEMPORARY")
-    private DraftStatus draftStatus = DraftStatus.TEMPORARY;
+    @ColumnDefault("'DRAFT'")
+    @Enumerated(EnumType.STRING)
+    private DraftStatus draftStatus = DraftStatus.DRAFT;
 
     private FundraisingStatus fundraisingStatus;
 
