@@ -7,4 +7,8 @@ public enum MemberStatus {
 
     private final String value;
     MemberStatus(final String value) {this.value = value;}
+
+    public String getValue() {
+        return this.value;
+    }
 }

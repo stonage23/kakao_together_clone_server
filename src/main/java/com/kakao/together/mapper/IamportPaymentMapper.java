@@ -1,7 +1,6 @@
 package com.kakao.together.mapper;
 
-import com.kakao.together.api.paymentgate.PaymentResponse;
-import com.kakao.together.payment.PaymentResponseMapper;
+import com.kakao.together.controller.paymentgate.dto.PaymentResponse;
 import com.siot.IamportRestClient.response.Payment;
 import org.springframework.stereotype.Component;
 

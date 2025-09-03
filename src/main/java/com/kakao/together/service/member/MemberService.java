@@ -2,31 +2,31 @@ package com.kakao.together.service.member;
 
 import com.kakao.together.controller.auth.dto.AuthDto;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.member.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.member.dto.MemberDto.DonationStateResponse;
+import com.kakao.together.controller.member.dto.MemberDto.MeDetailResponse;
 import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import org.springframework.stereotype.Service;
 
 import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
-import static com.kakao.together.controller.member.dto.MemberDto.MemberData;
 
 @Service
 public interface MemberService {
 
     void createMember(SignupByEmailRequest request);
 
-    MemberData findMemberByEmail(String email);
+    boolean checkEmailDuplicate(String email);
 
-    boolean isPresentEmail(String email);
-
-    boolean isEqualPassword(String username, String password);
+    boolean checkCredentials(String username, String password);
 
     void updatePassword(ResetPasswordRequest reqeustDto);
 
     void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto);
 
-    boolean isPresentNickname(String nickname);
+    boolean checkNicknameDuplicate(String nickname);
 
-    MyProfileResponse getProfile(String username);
+    MeDetailResponse getMyDetail(String username);
 
     void updateProfile(String username, ProfileUpdateRequest profileReq);
+
+    DonationStateResponse getDonationState(Long memberId);
 }

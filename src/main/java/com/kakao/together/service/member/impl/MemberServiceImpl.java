@@ -1,26 +1,36 @@
 package com.kakao.together.service.member.impl;
 
-import com.kakao.together.controller.auth.dto.AuthDto;
+import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.member.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.member.dto.MemberDto.DonationStateResponse;
+import com.kakao.together.controller.member.dto.MemberDto.MeDetailResponse;
 import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
+import com.kakao.together.domain.entity.donation.Donation;
+import com.kakao.together.domain.entity.donation.DonationStatus;
+import com.kakao.together.domain.entity.donation.DonationType;
+import com.kakao.together.domain.entity.file.FileStatus;
+import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.domain.entity.profile.Profile;
+import com.kakao.together.domain.entity.member.MemberStatus;
+import com.kakao.together.domain.entity.member.Profile;
+import com.kakao.together.domain.repository.DonationRepository;
+import com.kakao.together.domain.repository.FileInfoRepository;
+import com.kakao.together.domain.repository.MemberRepository;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.domain.repository.MemberRepository;
+import com.kakao.together.service.file.FileStorageService;
+import com.kakao.together.service.file.impl.FilePathResolver;
 import com.kakao.together.service.member.MemberService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
+import java.io.IOException;
+import java.util.List;
 
 import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
-import static com.kakao.together.controller.member.dto.MemberDto.MemberData;
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +39,16 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileInfoRepository fileInfoRepository;
+    private final FilePathResolver filePathResolver;
+    private final FileStorageService fileStorageService;
+    private DonationRepository donationRepository;
 
     @Override
     @Transactional
     public void createMember(SignupByEmailRequest request) {
         memberRepository.findByEmail(request.getEmail())
                 .ifPresent((member) -> {
-                    log.error("이미 존재하는 이메일로 계정생성 시도: " + member.getEmail());
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
                 });
         Member member = request.toEntity();
@@ -43,21 +56,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberData findMemberByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 이메일에 해당하는 유저 정보를 DB에서 조회하지 못함");
-        });
-
-        return MemberData.fromEntity(member);
-    }
-
-    @Override
-    public boolean isPresentEmail(String email) {
+    public boolean checkEmailDuplicate(String email) {
         return memberRepository.existsByEmail(email);
     }
 
     @Override
-    public boolean isEqualPassword(String username, String password) {
+    public boolean checkCredentials(String username, String password) {
         Member member = memberRepository.findByEmail(username).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
@@ -66,48 +70,102 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void updatePassword(ResetPasswordRequest reqeustDto) {
-        Member member = memberRepository.findByEmail(reqeustDto.getEmail()).orElseThrow(
+    public void updatePassword(ResetPasswordRequest request) {
+        Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
-        member.updatePassword(passwordEncoder.encode(reqeustDto.getPassword()));
+        member.updatePassword(passwordEncoder.encode(request.getPassword()));
     }
 
     @Override
     @Transactional
-    public void deleteMember(String username, AuthDto.DeleteMemberRequest requestDto) {
-        Member member = memberRepository.findByEmail(username).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
-        );
-        if (passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
-        memberRepository.delete(member);
+    public void deleteMember(String username, DeleteMemberRequest requestDto) {
+
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+            throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+        }
+
+        member.updateMemberStatus(MemberStatus.DELETED);
     }
 
     @Override
-    public boolean isPresentNickname(String nickname) {
+    public boolean checkNicknameDuplicate(String nickname) {
         return memberRepository.existsByProfile_Nickname(nickname);
     }
 
     @Override
-    public MyProfileResponse getProfile(String username) {
+    public MeDetailResponse getMyDetail(String username) {
         Member member = memberRepository.findByEmail(username).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
-        try {
-            Profile profile = member.getProfile();
-            return MyProfileResponse.fromEntity(profile);
-        } catch (NoSuchElementException e) {
-            log.error("##### 존재해야하는 Profile이 존재하지 않음");
-            throw new CustomException(ErrorCode.NOT_FOUND_PROFILE);
+        Profile profile = member.getProfile();
+        if (profile.getProfileImage() == null) {
+            String defaultUrl = "기본 프로필 이미지 경로";
+            return MeDetailResponse.fromEntity(member, defaultUrl);
+        } else {
+            FileInfo profileImage = profile.getProfileImage();
+            String url = filePathResolver.resolveUploadPath(profileImage.generateFilename(), profileImage.getContentType()).toString();
+            return MeDetailResponse.fromEntity(member, url);
         }
     }
 
     @Override
     @Transactional
-    public void updateProfile(String username, ProfileUpdateRequest profileReq) {
+    public void updateProfile(String username, ProfileUpdateRequest request) {
         Member member = memberRepository.findByEmail(username).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
-        member.updateProfile(profileReq.toEntity());
+        FileInfo image = null;
+        if (request.getImageId() != null) {
+            image = fileInfoRepository.findById(request.getImageId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "업로드되어 있어야할 이미지가 존재하지 않음; imageId: " + request.getImageId()));
+            image.updateFileStatus(FileStatus.USED);
+        }
+        FileInfo preImage = member.getProfile().getProfileImage();
+        if (preImage != null) {
+            fileInfoRepository.delete(preImage);
+            try {
+                fileStorageService.deleteFile(preImage.getSavedName(), preImage.getContentType());
+            } catch (IOException e) {
+                throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
+            }
+        }
+
+        member.updateProfile(request.getNickname(), image, request.getBirth(), request.getAddress());
+    }
+
+    @Override
+    public DonationStateResponse getDonationState(Long memberId) {
+        if (!memberRepository.existsById(memberId))
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+
+        List<Donation> donations = donationRepository.findAllByMemberIdAndStatus(memberId, DonationStatus.COMPLETE.getValue());
+
+        Long directDonationAmount = donations.stream()
+                .filter(donation -> donation.getType() == DonationType.DIRECT)
+                .mapToLong(donation -> donation.getAmount()).sum();
+        Long directDonationCount = donations.stream()
+                .filter(donation -> donation.getType() == DonationType.DIRECT)
+                .count();
+        Long indirectDonationAmount = donations.stream()
+                .filter(donation -> donation.getType() == DonationType.COMMENT)
+                .mapToLong(donation -> donation.getAmount()).sum();
+        Long commentDonationCount = donations.stream()
+                .filter(donation -> donation.getType() == DonationType.COMMENT)
+                .count();
+        Long donationAmount = directDonationAmount + indirectDonationAmount;
+        Long donationCount = directDonationCount + commentDonationCount;
+
+        return DonationStateResponse.builder()
+                .donationAmount(donationAmount)
+                .donationCount(donationCount)
+                .directDonationCount(directDonationCount)
+                .directDonationAmount(directDonationAmount)
+                .indirectDonationAmount(indirectDonationAmount)
+                .commentDonationCount(commentDonationCount)
+                .build();
     }
 }

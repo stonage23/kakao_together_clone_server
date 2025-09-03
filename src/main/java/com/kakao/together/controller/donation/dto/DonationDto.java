@@ -9,12 +9,10 @@ import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.payment.PaymentTransaction;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.math.BigDecimal;
 
 public class DonationDto {
 
@@ -26,7 +24,7 @@ public class DonationDto {
     public static class DonationRequest {
         private String impUid;
         private String merchantUid;
-        private BigDecimal amount;
+        private Long amount;
         private Long fundraisingId;
         private String type;
 
@@ -42,6 +40,7 @@ public class DonationDto {
                     .status(DonationStatus.COMPLETE)
                     .paymentTransaction(paymentTransaction)
                     .type(donationType)
+                    .amount(amount)
                     .build();
         }
     }
@@ -66,7 +65,7 @@ public class DonationDto {
         private Long id;
         private String status;
         private String type;
-        private BigDecimal amount;
+        private Long amount;
         private FundraisingSummaryResponse fundraising;
 
         public static DonationsResponse fromEntity(Donation donation) {

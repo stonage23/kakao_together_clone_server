@@ -5,7 +5,7 @@ import com.kakao.together.controller.auth.dto.AuthDto.LoginRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
 import com.kakao.together.controller.dto.TokenContainer;
-import com.kakao.together.facade.AuthFacade;
+import com.kakao.together.service.auth.impl.EmailAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,31 +13,28 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(produces="application/json;charset=UTF-8")
 public class AuthController {
 
-    private final AuthFacade authFacade;
+    private final EmailAccountService emailAccountService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity signupRequest(@RequestBody @Valid SignupByEmailRequest requestDto) {
-        System.out.println("##### 들어와");
-        authFacade.saveTempTokenAndSendValidationMail(requestDto);
+    public ResponseEntity registerMemberAndSendEmail(@RequestBody @Valid SignupByEmailRequest requestDto) {
+        emailAccountService.processEmailSignupRequest(requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/validation/{code}")
     public ResponseEntity signupValidate(@PathVariable("code") String code) {
-        authFacade.validateSignup(code);
+        emailAccountService.validateSignup(code);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest requestDto) {
-        TokenContainer tokenContainer = authFacade.login(requestDto);
+        TokenContainer tokenContainer = emailAccountService.login(requestDto);
         return ResponseEntity.ok()
                 .headers(tokenContainer.getHttpHeaders())
                 .build();
@@ -45,33 +42,32 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails principal) {
-        authFacade.logout(principal.getUsername());
+        emailAccountService.logout(principal.getUsername());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/password-reset/request/{email}")
     public ResponseEntity<Void> sendPasswordResetRequestMail(@PathVariable String email) {
-        authFacade.sendPasswordResetEmail(email);
+        emailAccountService.sendPasswordResetEmail(email);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/auth/password-reset/{code}")
-    public ResponseEntity<Object> checkPasswordResetCode(@PathVariable String code) {
-        String email = authFacade.checkPasswordResetCode(code);
-        Map<String, String> data = Map.of("email", email, "code", code);
-        return ResponseEntity.ok().body(data);
+    public ResponseEntity<Boolean> checkPasswordResetCode(@PathVariable String code, @RequestParam String email) {
+        boolean isValidated = emailAccountService.checkPasswordResetCode(code, email);
+        return ResponseEntity.ok().body(isValidated);
     }
 
     @PostMapping("/auth/password-reset")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest reqeustDto) {
         reqeustDto.checkPasswordMatch();
-        authFacade.resetPassword(reqeustDto);
+        emailAccountService.resetPassword(reqeustDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/auth/delete")
     public ResponseEntity<Void> deleteMember(@AuthenticationPrincipal UserDetails principal, @RequestBody DeleteMemberRequest requestDto) {
-        authFacade.deleteMember(principal.getUsername(), requestDto);
+        emailAccountService.deleteMember(principal.getUsername(), requestDto);
         return ResponseEntity.ok().build();
     }
 }

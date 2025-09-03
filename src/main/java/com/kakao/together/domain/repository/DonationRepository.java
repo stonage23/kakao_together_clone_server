@@ -4,6 +4,7 @@ import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -11,4 +12,7 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     boolean existsByMemberIdAndFundraisingIdAndStatusAndType(Long memberId, Long fundraisingId, DonationStatus status, DonationType type);
 
     List<Donation> findAllByMemberId(Long memberId);
+
+    @Query("select d from Donation d where d.member.id = :memberId and d.status = :status")
+    List<Donation> findAllByMemberIdAndStatus(Long memberId, String status);
 }

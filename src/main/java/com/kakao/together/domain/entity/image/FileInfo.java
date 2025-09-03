@@ -35,4 +35,8 @@ public class FileInfo extends BaseTimeEntity {
     public String generateFilename() {
         return this.savedName + "." + this.extension;
     }
+
+    public void updateFileStatus(FileStatus status) {
+        this.status = status;
+    }
 }

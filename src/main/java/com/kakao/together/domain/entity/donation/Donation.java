@@ -3,7 +3,7 @@ package com.kakao.together.domain.entity.donation;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.payment.PaymentTransaction;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +24,8 @@ public class Donation extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DonationStatus status;
+    @Column(nullable = false)
+    private Long amount;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;

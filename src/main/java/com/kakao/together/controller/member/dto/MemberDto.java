@@ -1,10 +1,9 @@
 package com.kakao.together.controller.member.dto;
 
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.domain.entity.profile.Profile;
-import lombok.AllArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,50 +12,40 @@ public class MemberDto {
 
     @Builder
     @AllArgsConstructor
+    @Getter
     public static class ProfileUpdateRequest {
 
         @NotBlank(message = "사용하실 닉네임을 입력해주세요.")
-        @Size(min = 1, max = 10, message = "닉네임은 1자 이상 10자 이하로 입력해주세요.")
+        @Size(min = 1, max = 20, message = "닉네임은 1자 이상 20자 이하로 입력해주세요.")
         private String nickname;
-
-        public Profile toEntity() {
-            return Profile.builder()
-                    .nickname(this.nickname)
-                    .build();
-        }
+        private Long imageId;
+        private String birth;
+        private String address;
     }
 
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     @Builder
-    public static class MyProfileResponse {
+    public static class MeDetailResponse {
 
-        private String nickname;
-
-        public static MyProfileResponse fromEntity(Profile member) {
-            return MyProfileResponse.builder()
-                    .nickname(member.getNickname())
-                    .build();
-        }
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    @Builder
-    public static class MemberData {
         private Long id;
         private String email;
-        private String password;
         private String nickname;
-        private String age;
+        private String accountStatus;
+        private String profileImageUrl;
+        private String birth;
         private String address;
-        private Boolean isEmailVerified;
 
-        public static MemberData fromEntity(Member member) {
-            return MemberData.builder()
+        public static MeDetailResponse fromEntity(Member member, String profileImageUrl) {
+            return MeDetailResponse.builder()
+                    .id(member.getId())
                     .email(member.getEmail())
+                    .nickname(member.getProfile().getNickname())
+                    .accountStatus(member.getMemberStatus().getValue())
+                    .profileImageUrl(profileImageUrl)
+                    .birth(member.getProfile().getBirth())
+                    .address(member.getProfile().getAddress())
                     .build();
         }
     }
@@ -81,5 +70,18 @@ public class MemberDto {
                     .password(this.password)
                     .build();
         }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class DonationStateResponse {
+        private Long directDonationAmount;
+        private Long directDonationCount;
+        private Long donationAmount;
+        private Long donationCount;
+        private Long indirectDonationAmount;
+        private Long commentDonationCount;
     }
 }

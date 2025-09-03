@@ -1,6 +1,7 @@
 package com.kakao.together.controller.member;
 
-import com.kakao.together.controller.member.dto.MemberDto.MyProfileResponse;
+import com.kakao.together.controller.member.dto.MemberDto.DonationStateResponse;
+import com.kakao.together.controller.member.dto.MemberDto.MeDetailResponse;
 import com.kakao.together.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,17 +21,17 @@ public class MemberController {
 
     @GetMapping("/check-duplicate/{email}")
     public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable String email) {
-        return ResponseEntity.ok(memberService.isPresentEmail(email));
+        return ResponseEntity.ok(memberService.checkEmailDuplicate(email));
     }
 
     @GetMapping("/check-duplicate/{nickname}")
     public ResponseEntity<Boolean> checkDuplicateNickname(@PathVariable String nickname) {
-        return ResponseEntity.ok(memberService.isPresentNickname(nickname));
+        return ResponseEntity.ok(memberService.checkNicknameDuplicate(nickname));
     }
 
-    @GetMapping("/me/profile")
-    public ResponseEntity<MyProfileResponse> getProfile(@AuthenticationPrincipal UserDetails principle) {
-        MyProfileResponse response = memberService.getProfile(principle.getUsername());
+    @GetMapping("/me/detail")
+    public ResponseEntity<MeDetailResponse> getMyDetails(@AuthenticationPrincipal UserDetails principle) {
+        MeDetailResponse response = memberService.getMyDetail(principle.getUsername());
         return ResponseEntity.ok(response);
     }
 
@@ -39,5 +40,11 @@ public class MemberController {
                                                     @AuthenticationPrincipal UserDetails principle) {
         memberService.updateProfile(principle.getUsername(), profileReq);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/state")
+    public ResponseEntity<DonationStateResponse> getDonationState(@PathVariable Long id) {
+        DonationStateResponse state = memberService.getDonationState(id);
+        return ResponseEntity.ok(state);
     }
 }

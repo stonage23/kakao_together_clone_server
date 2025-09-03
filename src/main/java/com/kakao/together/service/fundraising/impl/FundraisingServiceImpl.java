@@ -1,7 +1,7 @@
 package com.kakao.together.service.fundraising.impl;
 
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
-import com.kakao.together.controller.dto.ContentDto.ContentResponse;
+import com.kakao.together.controller.post.dto.ContentDto.ContentResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.*;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.comment.Comment;

@@ -8,16 +8,17 @@ import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.exception.CustomException;
-import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.payment.PaymentTransaction;
 import com.kakao.together.domain.repository.DonationRepository;
 import com.kakao.together.domain.repository.FundraisingRepository;
 import com.kakao.together.domain.repository.MemberRepository;
-import com.kakao.together.domain.repository.PaymentRepository;
+import com.kakao.together.domain.repository.PaymentTransactionRepository;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import com.kakao.together.service.donation.DonationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +32,11 @@ public class DonationServiceImpl implements DonationService {
 
     private final MemberRepository memberRepository;
     private final FundraisingRepository fundraisingRepository;
-    private final PaymentRepository paymentRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
     private final DonationRepository donationRepository;
+
+    @Value("${together.donation.comment.amount}")
+    private Long commentDonationAmount;
 
     @Override
     @Transactional
@@ -50,7 +54,7 @@ public class DonationServiceImpl implements DonationService {
                     return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "모금 정보 DB에서 조회 실패");
                 }
         );
-        PaymentTransaction paymentTransaction = paymentRepository.findByMerchantUid(request.getMerchantUid()).orElseThrow(
+        PaymentTransaction paymentTransaction = paymentTransactionRepository.findByMerchantUid(request.getMerchantUid()).orElseThrow(
                 () -> {
                     log.error("전달 받은 merchantUid와 일치하는 결제 내역 없음; merchantUid: {}", request.getMerchantUid());
                     return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "결제 내역 DB에서 조회 실패");
@@ -104,6 +108,7 @@ public class DonationServiceImpl implements DonationService {
                 .status(DonationStatus.COMPLETE)
                 .type(DonationType.COMMENT)
                 .member(doner)
+                .amount(commentDonationAmount)
                 .build();
         donationRepository.save(donation);
     }

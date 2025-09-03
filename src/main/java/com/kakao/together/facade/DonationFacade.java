@@ -9,8 +9,8 @@ import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.payment.PaymentTransaction;
-import com.kakao.together.api.paymentgate.service.PortOnePaymentValidationService;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
+import com.kakao.together.service.paymentgate.impl.PortOnePaymentGateService;
 import com.kakao.together.security.CustomUserDetails;
 import com.kakao.together.service.comment.CommentService;
 import com.kakao.together.service.donation.DonationService;
@@ -27,7 +27,7 @@ import java.util.List;
 public class DonationFacade {
 
     private final DonationService donationService;
-    private final PortOnePaymentValidationService portOnePaymentValidationService;
+    private final PortOnePaymentGateService portOnePaymentValidationService;
     private final CommentService commentService;
 
     @Transactional
@@ -37,7 +37,7 @@ public class DonationFacade {
     }
 
     @Transactional
-    public void cancelDonation(CustomUserDetails userDetails, Long donationId) {
+    public void cancelDonation(Long donationId) {
         Donation donation = donationService.getDonationEntity(donationId);
         PaymentTransaction paymentTransaction = donation.getPaymentTransaction();
         if (paymentTransaction == null) {

@@ -26,6 +26,7 @@ public enum ErrorCode {
     NOT_NULL_VIOLATION("null이면 안되는 엔티티 제약조건을 위반하였습니다.", "NOT_NULL_VIOLATION", HttpStatus.INTERNAL_SERVER_ERROR),
     NOT_PERMITTED_CONDITION("허용한 조건 분기 외 로직 호출예외가 발생하였습니다.", "NOT_PERMITTED_CONDITION", HttpStatus.INTERNAL_SERVER_ERROR),
     BUISINESS_VIOLATION("비즈니스룰 위반입니다.", "BUISINESS_VIOLATION", HttpStatus.BAD_REQUEST),
+    CODE_EXPIRED("인증 코드가 만료되었습니다. 다시 시도해주세요.", "CODE_EXPIRED", HttpStatus.NOT_FOUND),
 
     // 유저
     NOT_FOUND_USER("유저가 존재하지 않습니다.", "NOT_FOUND_USER", HttpStatus.NOT_FOUND),
@@ -64,6 +65,8 @@ public enum ErrorCode {
 
     // 결제
     DUPLICATE_PAYMENT("해당 merchantUid을 가진 결제 내역이 이미 DB에 존재합니다.", "DUPLICATE_PAYMENT", HttpStatus.CONFLICT),
+    FAILED_VERIFY_PAYMENT("PG사 결제 검증에 실패하였습니다. 서버 관리자에게 문의해주세요", "FAILED_VERIFY_PAYMENT", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAILED_PAYMENT_CANCEL("결제 취소에 실패했습니다. 관리자에게 문의해주세요", "FAILED_PAYMENT_CANCEL", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // html 파싱
     NOT_VALID_TAG("적절하지 않은 tag가 포함되어 있습니다.", "NOT_VALID_TAG", HttpStatus.BAD_REQUEST),

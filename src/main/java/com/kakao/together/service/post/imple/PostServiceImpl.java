@@ -2,15 +2,16 @@ package com.kakao.together.service.post.imple;
 
 import com.kakao.together.api.htmlparser.JsoupHtmlParser;
 import com.kakao.together.api.htmlparser.RawTag;
-import com.kakao.together.controller.dto.ContentDto.ContentCommand;
-import com.kakao.together.controller.dto.ContentDto.ImageContentCommand;
-import com.kakao.together.controller.dto.ContentDto.SubtitleContentCommand;
-import com.kakao.together.controller.dto.ContentDto.TextContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.ContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.ImageContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.SubtitleContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.TextContentCommand;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.PostCommand;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
+import com.kakao.together.domain.entity.file.FileStatus;
 import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.domain.entity.post.PostType;
@@ -110,6 +111,13 @@ public class PostServiceImpl implements PostService {
     private void checkImageContentsChange(String html, Long postId) {
         Set<Long> removedIds = extractRemovedImageIds(html, postId);
         deleteImagesByIds(removedIds);
+
+        JsoupHtmlParser.extractTagsFromBody(html, "img")
+                .forEach(imageTag -> {
+                    Long imageId = Long.valueOf(imageTag.getAttributes().get("imageId"));
+                    FileInfo image = fileInfoRepository.findById(imageId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
+                    image.updateFileStatus(FileStatus.USED);
+                });
     }
 
     @Override

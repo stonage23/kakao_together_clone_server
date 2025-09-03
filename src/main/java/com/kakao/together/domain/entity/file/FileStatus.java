@@ -2,7 +2,8 @@ package com.kakao.together.domain.entity.file;
 
 public enum FileStatus {
     PENDING("PENDING"),
-    USED("USED");
+    USED("USED"),
+    DELETED("DELETED");
 
     private String value;
 

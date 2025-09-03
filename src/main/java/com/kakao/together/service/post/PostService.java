@@ -1,6 +1,6 @@
 package com.kakao.together.service.post;
 
-import com.kakao.together.controller.dto.ContentDto.ContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.ContentCommand;
 import com.kakao.together.domain.entity.post.Post;
 
 import java.util.List;

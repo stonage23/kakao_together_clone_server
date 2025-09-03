@@ -1,9 +1,9 @@
 package com.kakao.together.mapper;
 
 import com.kakao.together.api.htmlparser.RawTag;
-import com.kakao.together.controller.dto.ContentDto.ImageContentCommand;
-import com.kakao.together.controller.dto.ContentDto.SubtitleContentCommand;
-import com.kakao.together.controller.dto.ContentDto.TextContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.ImageContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.SubtitleContentCommand;
+import com.kakao.together.controller.post.dto.ContentDto.TextContentCommand;
 import com.kakao.together.controller.image.dto.ImageCommand;
 
 public class TagMapper {

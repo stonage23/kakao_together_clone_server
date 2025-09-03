@@ -1,13 +1,14 @@
 package com.kakao.together.domain.entity.member;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
-import com.kakao.together.domain.entity.profile.Profile;
 import com.kakao.together.domain.entity.comment.Comment;
+import com.kakao.together.domain.entity.image.FileInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,17 +29,18 @@ public class Member extends BaseTimeEntity {
     private String email;
     @Column(nullable = false)
     private String password;
-    private String age;
-    private String address;
     @Column(nullable = false)
+    @Builder.Default
+    @ColumnDefault("'ROLE_MEMBER'")
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.MEMBER;
+    @Builder.Default
+    @ColumnDefault("'ACTIVE'")
     @Enumerated(EnumType.STRING)
-    private MemberStatus memberStatus;
+    private MemberStatus memberStatus = MemberStatus.ACTIVE;
     private LocalDateTime deletedAt;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
+    @Embedded
     private Profile profile;
 
     @Builder.Default
@@ -49,8 +51,11 @@ public class Member extends BaseTimeEntity {
         this.password = encodedPassword;
     }
 
-    public void updateProfile(Profile updatedProfile) {
-        Profile profile = getProfile();
-        updateProfile(updatedProfile);
+    public void updateProfile(String nickname, FileInfo updatedProfile, String birth, String address) {
+        profile.update(nickname, updatedProfile, birth, address);
+    }
+
+    public void updateMemberStatus(MemberStatus memberStatus) {
+        this.memberStatus = memberStatus;
     }
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 public class CustomException extends RuntimeException {
 
 	/**
-	 * 응답 메시지
+	 * 로깅용 메시지
 	 */
 	private String message;
 	/**
