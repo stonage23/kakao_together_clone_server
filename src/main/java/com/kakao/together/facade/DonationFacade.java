@@ -1,19 +1,16 @@
 package com.kakao.together.facade;
 
 import com.kakao.together.controller.comment.dto.CommentDto.CommentRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationCreateWithCommentWrapper;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.donation.dto.DonationDto.*;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.domain.entity.payment.PaymentTransaction;
-import com.kakao.together.service.paymentgate.impl.PortOnePaymentGateService;
 import com.kakao.together.security.CustomUserDetails;
 import com.kakao.together.service.comment.CommentService;
 import com.kakao.together.service.donation.DonationService;
+import com.kakao.together.service.paymentgate.impl.PortOnePaymentGateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,14 +28,18 @@ public class DonationFacade {
     private final CommentService commentService;
 
     @Transactional
-    public void createDonation(CustomUserDetails userDetails, DonationRequest request) {
+    public void completeDonation(Long donationId, DonationCompleteRequest request) {
         portOnePaymentValidationService.verifyPayment(request.getImpUid());
-        donationService.createDonation(request, userDetails.getId());
+        donationService.updateDonationToComplete(request.getMerchantUid(), donationId);
     }
 
     @Transactional
-    public void cancelDonation(Long donationId) {
+    public void cancelDonation(CustomUserDetails userDetails, Long donationId) {
         Donation donation = donationService.getDonationEntity(donationId);
+        if (donation.getMember().getId() != userDetails.getId()) {
+            log.warn("로그인 유저가 다른사람의 기부 내역을 취소하려는 시도가 있었습니다; memberId: {}, donationId: {}", donation.getMember().getId(), donationId);
+            throw new CustomException(ErrorCode.FAILED_CANCEL_DONATION);
+        }
         PaymentTransaction paymentTransaction = donation.getPaymentTransaction();
         if (paymentTransaction == null) {
             log.error("존재해야하는 결제 내역(PaymentTransaction)이 존재하지 않음; donationId: {}", donationId);
@@ -63,5 +64,9 @@ public class DonationFacade {
 
     public List<DonationsResponse> getAllMyDonations(CustomUserDetails userDetails) {
         return donationService.getAllDonationsForDonor(userDetails.getId());
+    }
+
+    public DonationPendingResponse createPendingDonation(CustomUserDetails  userDetails, DonationPendingRequest request) {
+        return donationService.createPendingDonation(userDetails.getId(), request);
     }
 }

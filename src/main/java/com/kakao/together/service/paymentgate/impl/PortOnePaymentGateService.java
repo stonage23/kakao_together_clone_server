@@ -1,7 +1,9 @@
 package com.kakao.together.service.paymentgate.impl;
 
-import com.kakao.together.api.paymentgate.exception.PaymentGateException;
-import com.kakao.together.api.paymentgate.paymentDetails.PaymentDetails;
+import com.kakao.together.api.paymentgate.exception.PaymentGateResponseException;
+import com.kakao.together.api.paymentgate.exception.PaymentGateTokenException;
+import com.kakao.together.api.paymentgate.exception.PaymentNotFoundException;
+import com.kakao.together.controller.paymentgate.dto.PaymentDetails;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.mapper.PaymentResponseMapper;
@@ -19,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -45,11 +46,18 @@ public class PortOnePaymentGateService implements PaymentGateService {
         this.paymentDetailsService = paymentDetailsService;
     }
 
-    private String getToken() throws IamportResponseException, IOException {
+    private String getToken() throws PaymentGateTokenException {
         String token = portOneTokenProvider.getToken();
         if (token != null) return token;
 
-        IamportResponse<AccessToken> iamportResponse = iamportClient.getAuth();
+        IamportResponse<AccessToken> iamportResponse = null;
+
+        try{
+        iamportResponse = iamportClient.getAuth();
+        }
+        catch (IamportResponseException | IOException e) {
+            throw new PaymentGateTokenException("PG사 접근 토큰 발급 실패");
+        }
         portOneTokenProvider.setToken(iamportResponse.getResponse().getToken());
         return iamportResponse.getResponse().getToken();
     }
@@ -60,9 +68,9 @@ public class PortOnePaymentGateService implements PaymentGateService {
         Payment pgPayment = null;
         try {
             pgPayment = getPaymentDetails(impUid);
-        } catch (IamportResponseException | IOException e) {
-            refundPayment(impUid);
-            throw new CustomException(e, "PortOne API 요청에 필요한 토큰 생성 실패");
+        } catch (PaymentGateTokenException e) {
+            log.error("결제 검증 도중 PortOne API 요청에 필요");
+            throw new CustomException(e, "결제 검증 도중 PortOne API 요청에 필요한 토큰 생성 실패");
         }
 
         if (pgPayment == null || pgPayment.getMerchantUid() == null) {
@@ -74,9 +82,9 @@ public class PortOnePaymentGateService implements PaymentGateService {
         try {
             String merchantUid = pgPayment.getMerchantUid();
             paymentDetails = paymentDetailsService.loadPaymentByMerchantUid(merchantUid);
-        } catch (CustomException e) {
+        } catch (PaymentNotFoundException e) {
             refundPayment(impUid);
-            throw e;
+            throw new CustomException(ErrorCode.FAILED_VERIFY_PAYMENT);
         }
 
         if (!Objects.equals(pgPayment.getAmount(), paymentDetails.getAmount())) {
@@ -87,7 +95,7 @@ public class PortOnePaymentGateService implements PaymentGateService {
         paymentDetailsService.completePayment(iamportPaymentMapper.toPaymentResponse(pgPayment));
     }
 
-    private Payment getPaymentDetails(String impUid) throws IamportResponseException, IOException {
+    private Payment getPaymentDetails(String impUid) throws PaymentGateTokenException {
 
         WebClient webClient = WebClient.builder()
                 .baseUrl(BASE_URL)
@@ -113,7 +121,7 @@ public class PortOnePaymentGateService implements PaymentGateService {
         String merchantUid = null;
         try {
             merchantUid = this.cancelPayment(impUid).getMerchantUid();
-        } catch (IamportResponseException | IOException e) {
+        } catch (PaymentGateTokenException e) {
             throw new CustomException(ErrorCode.FAILED_PAYMENT_CANCEL);
         }
         if (merchantUid == null) {
@@ -129,7 +137,7 @@ public class PortOnePaymentGateService implements PaymentGateService {
      * @param impUid
      * @return
      */
-    private PaymentDetails cancelPayment(String impUid) throws IamportResponseException, IOException {
+    private PaymentDetails cancelPayment(String impUid) throws PaymentGateTokenException {
 
         CancelData cancelData = new CancelData(impUid, true);
 
@@ -144,7 +152,7 @@ public class PortOnePaymentGateService implements PaymentGateService {
                 .retrieve()
                 .onStatus(status -> status.isError(), clientResponse ->
                         clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new PaymentGateException("결제 취소 실패", HttpStatus.BAD_REQUEST)))
+                                .flatMap(errorBody -> Mono.error(new PaymentGateResponseException(errorBody)))
                 )
                 .bodyToMono(new ParameterizedTypeReference<IamportResponse<PaymentDetails>>() {
                 })

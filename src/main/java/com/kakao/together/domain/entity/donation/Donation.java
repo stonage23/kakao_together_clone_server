@@ -41,4 +41,9 @@ public class Donation extends BaseTimeEntity {
     public void updateStatus(DonationStatus status) {
         this.status = status;
     }
+
+    public void completeDonation(PaymentTransaction paymentTransaction) {
+        this.paymentTransaction = paymentTransaction;
+        this.status = DonationStatus.COMPLETE;
+    }
 }

@@ -44,6 +44,10 @@ public enum ErrorCode {
     // 모금 포스트
     NOT_FOUND_FUNDRAISING("요청하신 모금을 찾을 수 없습니다.", "NOT_FOUND_FUNDRAISING", HttpStatus.NOT_FOUND),
 
+    // 기부
+    FAILED_CANCEL_DONATION("기부 내역 취소에 실패했습니다.", "FAILED_CANCEL_DONATION", HttpStatus.INTERNAL_SERVER_ERROR),
+    NOT_FOUND_DONATION("기부내역을 찾을 수 없습니다.", "NOT_FOUND_DONATION", HttpStatus.NOT_FOUND),
+
     // 관리자
     ONLY_ADMIN_EXCEPTION("Admin 계정만 접근할 수 있는 요청입니다.", "ONLY_ADMIN_EXCEPTION", HttpStatus.FORBIDDEN),
 

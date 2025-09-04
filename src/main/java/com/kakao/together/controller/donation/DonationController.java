@@ -1,8 +1,6 @@
 package com.kakao.together.controller.donation;
 
-import com.kakao.together.controller.donation.dto.DonationDto.DonationCreateWithCommentWrapper;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.donation.dto.DonationDto.*;
 import com.kakao.together.facade.DonationFacade;
 import com.kakao.together.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +17,16 @@ public class DonationController {
 
     private final DonationFacade donationFacade;
 
-    @PostMapping("/direct")
-    public ResponseEntity<Void> createDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DonationRequest request) {
-        donationFacade.createDonation(userDetails, request);
+    @PostMapping("/direct/pending")
+    public ResponseEntity<DonationPendingResponse> createPendingDonations(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DonationPendingRequest request) {
+        DonationPendingResponse response = donationFacade.createPendingDonation(userDetails, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // TODO 기부 요청 하는 사람이랑 로그인 유저랑 일치하는지 로직 필요?
+    @PostMapping("/{donationId}/complete")
+    public ResponseEntity<Void> completeDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long donationId, @RequestBody DonationCompleteRequest request) {
+        donationFacade.completeDonation(donationId, request);
         return ResponseEntity.ok().build();
     }
 

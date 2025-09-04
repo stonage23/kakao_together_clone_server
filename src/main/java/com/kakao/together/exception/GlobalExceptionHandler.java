@@ -33,8 +33,7 @@ public class GlobalExceptionHandler {
     // NOTE 커스텀 예외는 다중으로 wrap하지 않기
     @ExceptionHandler({ CustomException.class })
     protected ResponseEntity<ErrorResponse> customException(CustomException e) {
-        if (e.getCause() != null) log.error(e.getMessage(), e.getCause());
-        else log.error(e.getMessage(), e);
+        log.error(e.getMessage(), e);
         ErrorResponse response = ErrorResponse.of(e);
         return ResponseEntity
                 .status(response.getStatus())

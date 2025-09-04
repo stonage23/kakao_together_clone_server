@@ -1,6 +1,7 @@
 package com.kakao.together.controller.auth.dto;
 
 import com.kakao.together.domain.entity.member.Member;
+import com.kakao.together.domain.entity.member.Profile;
 import com.kakao.together.domain.entity.member.Role;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
@@ -12,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 public class AuthDto {
+
+    private AuthDto() {}
 
     @Builder
     @AllArgsConstructor
@@ -26,15 +29,19 @@ public class AuthDto {
         @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
         private String password;
 
-        private String age;
+        private String birth;
         private String address;
 
         public Member toEntity() {
+            Profile profile = Profile
+                    .builder()
+                    .birth(this.birth)
+                    .address(this.address)
+                    .build();
             return Member.builder()
                     .email(this.email)
                     .password(this.password)
-                    .age(this.age)
-                    .address(this.address)
+                    .profile(profile)
                     .role(Role.MEMBER)
                     .build();
         }

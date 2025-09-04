@@ -1,4 +1,4 @@
-package com.kakao.together.api.paymentgate.paymentDetails;
+package com.kakao.together.controller.paymentgate.dto;
 
 import java.math.BigDecimal;
 

@@ -13,6 +13,7 @@ import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class DonationDto {
 
@@ -21,7 +22,7 @@ public class DonationDto {
     @Builder
     @AllArgsConstructor
     @Getter
-    public static class DonationRequest {
+    public static class DonationCompleteRequest {
         private String impUid;
         private String merchantUid;
         private Long amount;
@@ -77,5 +78,31 @@ public class DonationDto {
                     .fundraising(FundraisingSummaryResponse.fromEntity(donation.getFundraising()))
                     .build();
         }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class DonationPendingResponse {
+
+        private Long donationId;
+        private String paymentUrl;
+
+        public static DonationPendingResponse fromEntity(Donation donation, String paymentUrl) {
+            return DonationPendingResponse.builder()
+                    .donationId(donation.getId())
+                    .paymentUrl(paymentUrl)
+                    .build();
+        }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class DonationPendingRequest {
+        private Long fundraisingId;
+        private Long amount;
     }
 }

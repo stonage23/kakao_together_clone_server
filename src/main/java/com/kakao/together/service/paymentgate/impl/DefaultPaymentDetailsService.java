@@ -1,15 +1,13 @@
 package com.kakao.together.service.paymentgate.impl;
 
 import com.kakao.together.api.paymentgate.exception.PaymentNotFoundException;
-import com.kakao.together.api.paymentgate.paymentDetails.DefaultPaymentDetails;
-import com.kakao.together.api.paymentgate.paymentDetails.PaymentDetails;
+import com.kakao.together.controller.paymentgate.dto.DefaultPaymentDetails;
+import com.kakao.together.controller.paymentgate.dto.PaymentDetails;
 import com.kakao.together.controller.paymentgate.dto.PaymentResponse;
 import com.kakao.together.domain.entity.payment.CardPaymentTransactionDetail;
 import com.kakao.together.domain.entity.payment.PaymentStatus;
 import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import com.kakao.together.domain.repository.PaymentTransactionRepository;
-import com.kakao.together.exception.CustomException;
-import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.paymentgate.PaymentDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +27,7 @@ public class DefaultPaymentDetailsService implements PaymentDetailsService {
     @Override
     public PaymentDetails loadPaymentByMerchantUid(String merchantUid) throws PaymentNotFoundException {
         PaymentTransaction paymentTransaction = paymentTransactionRepository.findByMerchantUid(merchantUid).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청하신 merchantUid에 해당하는 결제 내역이 존재하지 않습니다.")
+                () -> new PaymentNotFoundException("요청하신 merchantUid에 해당하는 결제 내역이 존재하지 않습니다.")
         );
 
         return DefaultPaymentDetails.builder()

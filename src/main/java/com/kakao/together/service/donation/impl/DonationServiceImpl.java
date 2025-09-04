@@ -1,20 +1,18 @@
 package com.kakao.together.service.donation.impl;
 
-import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationRequest;
-import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
+import com.kakao.together.controller.donation.dto.DonationDto.*;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
+import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import com.kakao.together.domain.repository.DonationRepository;
 import com.kakao.together.domain.repository.FundraisingRepository;
 import com.kakao.together.domain.repository.MemberRepository;
 import com.kakao.together.domain.repository.PaymentTransactionRepository;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import com.kakao.together.service.donation.DonationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,30 +38,19 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     @Transactional
-    public void createDonation(DonationRequest request, Long donorId) {
+    public void updateDonationToComplete(String merchantUid, Long donationId) {
 
-        Member doner = memberRepository.findById(donorId).orElseThrow(
+        PaymentTransaction paymentTransaction = paymentTransactionRepository.findByMerchantUid(merchantUid).orElseThrow(
                 () -> {
-                    log.error("전달 받은 donorId와 일치하는 유저 정보 없음; donorId: {}", donorId);
-                    return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "기부자 정보 DB에서 조회 실패");
-                }
-        );
-        Fundraising fundraising = fundraisingRepository.findById(request.getFundraisingId()).orElseThrow(
-                () -> {
-                    log.error("전달 받은 fundraisingId와 일치하는 모금 정보 없음; fundraisingId: {}", request.getFundraisingId());
-                    return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "모금 정보 DB에서 조회 실패");
-                }
-        );
-        PaymentTransaction paymentTransaction = paymentTransactionRepository.findByMerchantUid(request.getMerchantUid()).orElseThrow(
-                () -> {
-                    log.error("전달 받은 merchantUid와 일치하는 결제 내역 없음; merchantUid: {}", request.getMerchantUid());
+                    log.error("전달 받은 merchantUid와 일치하는 결제 내역 없음; merchantUid: {}", merchantUid);
                     return new CustomException(ErrorCode.NOT_FOUND_ENTITY, "결제 내역 DB에서 조회 실패");
                 }
         );
 
-        Donation donation = request.toEntity(doner, fundraising, paymentTransaction);
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DONATION));
 
-        donationRepository.save(donation);
+        donation.completeDonation(paymentTransaction);
     }
 
     @Override
@@ -117,5 +104,25 @@ public class DonationServiceImpl implements DonationService {
     public List<DonationsResponse> getAllDonationsForDonor(Long donorId) {
         List<Donation> donations = donationRepository.findAllByMemberId(donorId);
         return donations.stream().map(DonationsResponse::fromEntity).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public DonationPendingResponse createPendingDonation(Long memberId, DonationPendingRequest request) {
+        Member donor = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "로그인한 유저의 memberId 조회 실패; memberId: " + memberId));
+        Fundraising fundraising = fundraisingRepository.findById(request.getFundraisingId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FUNDRAISING));
+
+        Donation donation = Donation.builder()
+                .member(donor)
+                .status(DonationStatus.PENDING)
+                .fundraising(fundraising)
+                .type(DonationType.DIRECT)
+                .amount(request.getAmount())
+                .build();
+        Donation savedDonation = donationRepository.save(donation);
+
+        return DonationPendingResponse.fromEntity(savedDonation, "결제url");
     }
 }
