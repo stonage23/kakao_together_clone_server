@@ -1,20 +1,29 @@
 package com.kakao.together.domain.entity.payment;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
-import com.kakao.together.exception.CustomException;
-import com.kakao.together.exception.ErrorCode;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
+/**
+ * PaymentTransaction은 불변
+ * merchantUid으로 결제 카테고리 분류
+ */
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class PaymentTransaction extends BaseTimeEntity {
+
+    @Builder
+    public PaymentTransaction(String merchantUid, Long amount) {
+        this.merchantUid = merchantUid;
+        this.amount = amount;
+        this.status = PaymentStatus.PENDING;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,23 +35,31 @@ public class PaymentTransaction extends BaseTimeEntity {
     private Long amount;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+    private String pgProvider;
+    private Instant paidAt;
+    private Instant cancelledAt;
+    private Instant failedAt;
+    private String failReason;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "payment_transaction_detail_id")
-    private PaymentTransactionDetail paymentTransactionDetail;
-
-    public void updateStatus(PaymentStatus status) {
-        this.status = status;
-    }
-
-    public void setPaymentTransactionDetail (PaymentTransactionDetail paymentTransactionDetail) {
-        this.paymentTransactionDetail = paymentTransactionDetail;
-    }
-
-    public void setImpUid(String impUid) {
-        if (this.impUid != null) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "impUid 상태 충돌; impUid는 최초 1회만 값을 넣을 수 있습니다.");
-        }
+    public void completePayment(String impUid, Long paidAt, String pgProvider) {
+        this.status = PaymentStatus.APPROVAL;
+        this.pgProvider = pgProvider;
         this.impUid = impUid;
+        this.paidAt = Instant.ofEpochSecond(paidAt);
+    }
+
+    public void cancelPayment(Long cancelledAt) {
+        this.status = PaymentStatus.CANCEL;
+        this.cancelledAt = Instant.ofEpochSecond(cancelledAt);
+    }
+
+    public void failPayment(String failReason, Long failedAt) {
+        this.status = PaymentStatus.FAILED;
+        this.failReason = failReason;
+        this.failedAt = Instant.ofEpochSecond(failedAt);
+    }
+
+    public void failCancel() {
+        this.status = PaymentStatus.FAILED_CANCEL;
     }
 }

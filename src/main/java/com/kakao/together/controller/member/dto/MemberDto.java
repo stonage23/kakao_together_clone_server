@@ -1,6 +1,7 @@
 package com.kakao.together.controller.member.dto;
 
 import com.kakao.together.domain.entity.member.Member;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class MemberDto {
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class EmailDuplicateCheckRequest {
+        @Email
+        private String email;
+    }
 
     @Builder
     @AllArgsConstructor

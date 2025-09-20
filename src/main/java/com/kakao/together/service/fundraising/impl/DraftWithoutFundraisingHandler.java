@@ -7,6 +7,7 @@ import com.kakao.together.service.fundraising.FundraisingService;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,8 +22,9 @@ public class DraftWithoutFundraisingHandler implements FundraisingDraftHandler {
     }
 
     @Override
-    public void handle(Long fundraisingId, EditFundraisingRequest request) {
-        Long createdPostId = postService.buildPost(request);
+    @Transactional
+    public void handle(EditFundraisingRequest request) {
+        Long createdPostId = postService.createPost(request);
         fundraisingService.createFundraising(request, createdPostId);
     }
 }

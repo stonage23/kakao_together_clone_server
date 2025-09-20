@@ -1,6 +1,6 @@
 package com.kakao.together.token.jwt;
 
-import com.kakao.together.controller.dto.TokenContainer;
+import com.kakao.together.controller.token.TokenContainer;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.token.TokenService;
@@ -24,20 +24,13 @@ public class JwtService implements TokenService {
     private final SecretKey secretKey;
     private final JwtParser jwtParser;
 
-
     @Value("${jwt.access.expiration}")
     private Long accessTokenExpirationPeriod;
     @Value("${jwt.refresh.expiration}")
     private Long refreshTokenExpirationPeriod;
-    @Value("${jwt.access.header}")
-    private String accessHeader;
-    @Value("${jwt.refresh.header}")
-    private String refreshHeader;
 
 
     private static final String BEARER = "Bearer ";
-    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
-    private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
 
     /**
      * Secret key는 보안 및 일관성을 위해 외부에서 주입받아 Key 객체로 변환 후 사용
@@ -68,25 +61,19 @@ public class JwtService implements TokenService {
                 .compact();
     }
 
-    private String createAccessToken(Map<String, Object> claims) {
-        return buildToken(claims, ACCESS_TOKEN_SUBJECT, accessTokenExpirationPeriod);
+    private String createAccessToken(String subject, Map<String, Object> claims) {
+        return buildToken(claims, subject, accessTokenExpirationPeriod);
     }
 
-    private String createRefreshToken(Map<String, Object> claims) {
-        return buildToken(claims, REFRESH_TOKEN_SUBJECT, refreshTokenExpirationPeriod);
+    private String createRefreshToken(String subject, Map<String, Object> claims) {
+        return buildToken(claims, subject, refreshTokenExpirationPeriod);
     }
 
     @Override
-    public String createBearerAccessToken(Map<String, Object> claims) { return withBearerPrefix(createAccessToken(claims)); }
-
-    @Override
-    public String createBearerRefreshToken(Map<String, Object> claims) { return withBearerPrefix(createRefreshToken(claims)); }
-
-    @Override
-    public TokenContainer generateTokenContainerWithCommonClaims(Map<String, Object> claims) {
-        String accessToken = createAccessToken(claims);
-        String refreshToken = createRefreshToken(claims);
-        return new TokenContainer(accessHeader, refreshHeader, accessToken, refreshToken);
+    public TokenContainer generateTokenContainer(String subject, Map<String, Object> claims) {
+        String accessToken = createAccessToken(subject, claims);
+        String refreshToken = createRefreshToken(subject, claims);
+        return new TokenContainer(accessToken, refreshToken);
     }
 
     private Jws<Claims> parseToken(String token) {
@@ -94,25 +81,18 @@ public class JwtService implements TokenService {
             return jwtParser
                     .parseSignedClaims(token);
         } catch (UnsupportedJwtException e) {
-            throw new UnsupportedJwtException("서명되지 않은 jwt토큰: token = {}"+ token, e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "서명되지 않은 jwt토큰: token = {}"+ token);
         } catch (JwtException e) {
-            throw new JwtException("jwt토큰 파싱 실패: token = {}"+ token, e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "jwt토큰 파싱 실패: token = " + token + " : " + e);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("jwt토큰이 null 또는 적절하지 못한 상태: token = {}"+ token, e);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("토큰 유효성 확인 도중 알 수 없는 에러 발생", e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "jwt토큰이 null 또는 적절하지 못한 상태: token = " + token);
         }
-    }
-
-    @Override
-    public String withBearerPrefix(String token) {
-        return BEARER + token;
     }
 
     @Override
     public String removeBearerPrefix(@NotNull String token) {
         if (!token.startsWith(BEARER)) {
-            log.error("Bearer prefix가 없는 토큰");
+            log.warn("Bearer prefix가 없는 토큰");
             throw new CustomException(ErrorCode.NOT_MATCH_BEARER);
         }
         return token.replace(BEARER, "");

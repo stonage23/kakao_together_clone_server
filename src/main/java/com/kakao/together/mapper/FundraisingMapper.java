@@ -16,13 +16,14 @@ public class FundraisingMapper {
                 .targetAmount(fundraising.getTargetAmount())
                 .startDate(fundraising.getStartDate())
                 .endDate(fundraising.getEndDate())
-                .fundraisingStatus(fundraising.getFundraisingCurrent())
                 .agency(AgencyDto.fromEntity(fundraising.getAgency()))
                 .currentAmount(fundraising.getFundraisingCurrent().getCurrentAmount())
                 .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
                 .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
                 .directDonationAmount(fundraising.getFundraisingCurrent().getDirectDonationAmount())
                 .indirectDonationAmount(fundraising.getFundraisingCurrent().getIndirectDonationAmount())
+                .directDonorCount(fundraising.getFundraisingCurrent().getDirectDonorCount())
+                .indirectDonorCount(fundraising.getFundraisingCurrent().getIndirectDonorCount())
                 .build();
     }
 }

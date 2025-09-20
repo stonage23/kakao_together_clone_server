@@ -1,38 +1,42 @@
 package com.kakao.together.controller.paymentgate.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentResponse {
+    @JsonProperty("merchant_uid")
     private String merchantUid;
+    @JsonProperty("imp_uid")
     private String impUid;
     private BigDecimal amount;
-    private String payMethod;
-    private String pgProvider;
-    private String bankCode;
-    private String bankName;
-    private String cardCode;
-    private String cardName;
-    private String cardNumber;
-    private int cardType;
-    private String vbankCode;
-    private String vbankName;
-    private String vbankNum;
-    private String vbankHolder;
-    private Instant vbankDate;
-    private Instant vbankIssuedAt;
     private String currency;
-    private String buyerName;
-    private String buyerEmail;
-    private String buyerTel;
-    private Instant paidAt;
-    private Instant failAt;
-    private Instant cancelledAt;
+    private String status;
+    @JsonProperty("pg_provider")
+    private String pgProvider;
+    @JsonProperty("started_at")
+    private Long startedAt;
+    @JsonProperty("paid_at")
+    private Long paidAt;
+    @JsonProperty("failed_at")
+    private Long failedAt;
+    @JsonProperty("cancelled_at")
+    private Long cancelledAt;
+    @JsonProperty("fail_reason")
+    private String failReason;
+    private String name;
+    @JsonProperty("pay_method")
+    private String payMethod;
+    @JsonProperty("emb_pg_provider")
+    private String embPgProvider;
 }

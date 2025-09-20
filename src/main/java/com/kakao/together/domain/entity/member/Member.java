@@ -31,7 +31,7 @@ public class Member extends BaseTimeEntity {
     private String password;
     @Column(nullable = false)
     @Builder.Default
-    @ColumnDefault("'ROLE_MEMBER'")
+    @ColumnDefault("'MEMBER'")
     @Enumerated(EnumType.STRING)
     private Role role = Role.MEMBER;
     @Builder.Default
@@ -57,5 +57,19 @@ public class Member extends BaseTimeEntity {
 
     public void updateMemberStatus(MemberStatus memberStatus) {
         this.memberStatus = memberStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Member)) {
+            return false;
+        }
+
+        Member member = (Member) o;
+
+        return this.id != null && this.id.equals(member.getId());
     }
 }

@@ -30,11 +30,8 @@ public class FileInfo extends BaseTimeEntity {
     @Column(nullable = false)
     private Long size;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private FileStatus status;
-
-    public String generateFilename() {
-        return this.savedName + "." + this.extension;
-    }
 
     public void updateFileStatus(FileStatus status) {
         this.status = status;

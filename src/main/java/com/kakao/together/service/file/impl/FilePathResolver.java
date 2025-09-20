@@ -33,9 +33,11 @@ public class FilePathResolver {
     private static final String FILE_TEMP_DIR = "src/main/resources/files/temporary";
     private static final String IMAGE_UPLOAD_DIR = "src/main/resources/imgs/content";
     private static final String IMAGE_TEMP_DIR = "src/main/resources/imgs/temporary";
+    private static final String IMAGE_SERVER_DIR = "http://localhost:9090/images/upload";
 
     private final Map<FileType, String> uploadDirMap = new EnumMap<>(FileType.class);
     private final Map<FileType, String> tempDirMap = new EnumMap<>(FileType.class);
+    private final Map<FileType, String> serverDirMap = new EnumMap<>(FileType.class);
 
     @PostConstruct
     void init() {
@@ -44,6 +46,8 @@ public class FilePathResolver {
 
         tempDirMap.put(FileType.IMAGE, IMAGE_TEMP_DIR);
         tempDirMap.put(FileType.DOCUMENT, FILE_TEMP_DIR);
+
+        serverDirMap.put(FileType.IMAGE, IMAGE_SERVER_DIR);
 
         // 디렉토리 보장
         uploadDirMap.values().forEach(FileManageUtil::createDirIfNotExists);
@@ -57,7 +61,7 @@ public class FilePathResolver {
      * @return
      */
     public Path resolveUploadPath(String fileName, String contentType) {
-        return resolvePath(fileName, contentType, uploadDirMap);
+        return resolveStoragePath(fileName, contentType, uploadDirMap);
     }
 
     /**
@@ -67,10 +71,25 @@ public class FilePathResolver {
      * @return
      */
     public Path resolveTempPath(String fileName, String contentType) {
-        return resolvePath(fileName, contentType, tempDirMap);
+        return resolveStoragePath(fileName, contentType, tempDirMap);
     }
 
-    private Path resolvePath(String fileName, String contentType, Map<FileType, String> dirMap) {
+    public String resolveServerPath(String fileName, String contentType) {
+        return resolveServerPath(fileName, contentType, serverDirMap);
+    }
+
+    private Path resolveStoragePath(String fileName, String contentType, Map<FileType, String> dirMap) {
+        return dirMap.entrySet().stream()
+                .filter(entry -> entry.getKey().matches(contentType))
+                .findFirst()
+                .map(entry -> buildAbsolutePath(fileName, entry.getValue()))
+                .orElseThrow(() -> new CustomException(
+                        ErrorCode.NOT_VALID_FORMAT,
+                        "업로드하려는 파일의 contentType을 확인해주세요; contentType=" + contentType + "; fileName:" + fileName
+                ));
+    }
+
+    private String resolveServerPath(String fileName, String contentType, Map<FileType, String> dirMap) {
         return dirMap.entrySet().stream()
                 .filter(entry -> entry.getKey().matches(contentType))
                 .findFirst()
@@ -81,8 +100,12 @@ public class FilePathResolver {
                 ));
     }
 
-    private Path buildPath(String fileName, String baseDir) {
+    private Path buildAbsolutePath(String fileName, String baseDir) {
         return Paths.get(baseDir).resolve(fileName).toAbsolutePath();
+    }
+
+    private String buildPath(String fileName, String baseDir) {
+        return baseDir + fileName;
     }
 }
 

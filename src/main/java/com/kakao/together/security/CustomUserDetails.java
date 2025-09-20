@@ -4,26 +4,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Set;
 
 public class CustomUserDetails implements UserDetails {
 
     private final String username;
     private final String password;
-    private final Long id;
+    private final Long userId;
     private final String email;
-    private final Set<GrantedAuthority> authorities;
+    private final Collection<? extends GrantedAuthority> authorities;
     private final boolean accountNonLocked;
     private final boolean enabled;
 
-    public CustomUserDetails(String username, String password, Long memberId, String email, Set<GrantedAuthority> authorities) {
-        this(username, password, memberId, email, authorities, true, true);
+    public CustomUserDetails(String username, Collection<? extends GrantedAuthority> authorities) {
+        this(username, "", Long.valueOf(username), "", authorities, true, true);
     }
 
-    public CustomUserDetails(String username, String password, Long id, String email, Set<GrantedAuthority> authorities, boolean accountNonLocked, boolean enabled) {
+    public CustomUserDetails(String username, String password, Long userId, String email, Collection<? extends GrantedAuthority> authorities, boolean accountNonLocked, boolean enabled) {
         this.username = username;
         this.password = password;
-        this.id = id;
+        this.userId = userId;
         this.email = email;
         this.authorities = authorities;
         this.accountNonLocked = accountNonLocked;
@@ -47,16 +46,16 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.isAccountNonLocked();
+        return accountNonLocked;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.isEnabled();
+        return enabled;
     }
 
-    public Long getId() {
-        return this.id;
+    public Long getUserId() {
+        return this.userId;
     }
 
     public String getEmail() {

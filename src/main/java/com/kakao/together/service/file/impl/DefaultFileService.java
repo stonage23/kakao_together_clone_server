@@ -51,7 +51,8 @@ public class DefaultFileService implements FileService {
         return FileResponse.builder()
                 .id(fileInfo.getId())
                 .originalName(fileInfo.getOriginalName())
-                .url(filePathResolver.resolveTempPath(createdFileInfo.generateFilename(), createdFileInfo.getContentType()).toString())
+//                .url(filePathResolver.resolveTempPath(createdFileInfo.getSavedName(), createdFileInfo.getContentType()).toString())
+                .url("http://localhost:9090/images/temporary/" + fileInfo.getSavedName())
                 .size(fileInfo.getSize())
                 .contentType(fileInfo.getContentType())
                 .build();

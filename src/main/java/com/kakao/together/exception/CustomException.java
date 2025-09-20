@@ -14,6 +14,7 @@ public class CustomException extends RuntimeException {
 	 * 기본 응답 메시지, 응답 상태 코드
 	 */
 	private ErrorCode errorCode;
+	private String detailMessage;
 
 	/**
 	 * 디버깅용 메시지와 500 status 응답
@@ -41,6 +42,7 @@ public class CustomException extends RuntimeException {
 	public CustomException(ErrorCode errorCode, String message) {
 		super(message);
 		this.errorCode = errorCode;
+		this.detailMessage = message;
 	}
 
 	/**
@@ -60,5 +62,12 @@ public class CustomException extends RuntimeException {
 	public CustomException(Throwable cause, String message) {
 		super(message, cause);
 		this.errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+		this.detailMessage = message;
+	}
+
+	public CustomException(Throwable cause, ErrorCode errorCode, String message) {
+		super(message, cause);
+		this.errorCode = errorCode;
+		this.detailMessage = message;
 	}
 }

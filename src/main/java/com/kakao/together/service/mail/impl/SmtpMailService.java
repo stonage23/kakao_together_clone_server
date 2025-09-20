@@ -24,7 +24,13 @@ public class SmtpMailService implements MailService {
     private final JavaMailSender javaMailSender;
 
     private String sender = "카카오투게더";
-    private static final String SIGNUP_URL = "kakao-together/sign-up-verification";
+    @Value("${amdin.config.signup.url}")
+    private String signupUrl;
+//    private static final String SIGNUP_URL = "kakao-together/sign-up-verification";
+    @Value("${spring.mail.charset}")
+    private String charset;
+    @Value("${spring.mail.subtype}")
+    private String subtype;
     @Value("${spring.mail.host}")
     private String host;
 
@@ -33,14 +39,14 @@ public class SmtpMailService implements MailService {
     public String sendSignupMail(String recipient) {
 
         String code = getSignupCode();
-        String url = SIGNUP_URL + "?code=" + code;
+        String url = signupUrl + "?code=" + code;
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
             message.setSubject("인증하시고 서비스를 이용해주세요!");
             message.addRecipients(MimeMessage.RecipientType.TO, recipient);
-            message.setText(EmailTemplate.getSignupTemplate(url));
+            message.setText(EmailTemplate.getSignupTemplate(url), charset, subtype);
             message.setFrom(new InternetAddress(host, sender));
 
             javaMailSender.send(message);
@@ -51,6 +57,8 @@ public class SmtpMailService implements MailService {
         } catch (MailException e) {
             log.error("Error sending email", e);
         }
+
+        log.debug("생성된 회원가입 인증 코드: " + code);
 
         return code;
     }

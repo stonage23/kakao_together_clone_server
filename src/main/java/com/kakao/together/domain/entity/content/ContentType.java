@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum ContentType {
     TEXT("TEXT", "p"),
     IMAGE("IMAGE", "img"),
-    SUBTITLE("SUBTITLE", "h2");
+    SUBTITLE("SUBTITLE", "h2"),
+    FIGURE("FIGURE", "figure")
+    ;
 
     private final String value;
     private final String tag;

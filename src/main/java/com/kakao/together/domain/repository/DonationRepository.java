@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DonationRepository extends JpaRepository<Donation, Long> {
     boolean existsByMemberIdAndFundraisingIdAndStatusAndType(Long memberId, Long fundraisingId, DonationStatus status, DonationType type);
@@ -15,4 +16,6 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
 
     @Query("select d from Donation d where d.member.id = :memberId and d.status = :status")
     List<Donation> findAllByMemberIdAndStatus(Long memberId, String status);
+
+    Optional<Donation> findByIdAndMemberId(Long donationId, Long memberId);
 }

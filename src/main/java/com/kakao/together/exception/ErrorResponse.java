@@ -34,6 +34,13 @@ public class ErrorResponse {
 		this.errors = errors;
 	}
 
+	private ErrorResponse(final ErrorCode code, String message) {
+		this.message = message;
+		this.status = code.getHttpStatus().value();
+		this.code = code.getCode();
+		this.errors = new HashMap<>();
+	}
+
 	public static ErrorResponse of(final ErrorCode code) {
 		return new ErrorResponse(code);
 	}
@@ -47,7 +54,8 @@ public class ErrorResponse {
 	}
 
 	public static ErrorResponse of(final CustomException e) {
-		return new ErrorResponse(e.getErrorCode());
+		if (e.getDetailMessage() != null) return new ErrorResponse(e.getErrorCode(), e.getDetailMessage());
+		else return new ErrorResponse(e.getErrorCode());
 	}
 
 	/**

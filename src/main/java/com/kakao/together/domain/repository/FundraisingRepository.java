@@ -19,6 +19,7 @@ public interface FundraisingRepository extends JpaRepository<Fundraising, Long> 
     @Query(value = """
     SELECT * FROM fundraising
     WHERE end_date <= CURRENT_DATE + INTERVAL :daysLeft DAY
+    AND fundraising_status = "ONGOING"
     ORDER BY RAND()
     LIMIT :limit
 """, nativeQuery = true)
@@ -27,13 +28,14 @@ public interface FundraisingRepository extends JpaRepository<Fundraising, Long> 
     @Query(value = """
     SELECT * FROM (
                 SELECT * FROM fundraising
-                ORDER BY current_amount / goal_amount DESC
+                WHERE fundraising_status = "ONGOING"
+                ORDER BY current_amount / target_amount DESC
                 LIMIT 30
         ) AS top30
         ORDER BY RAND()
         LIMIT :limit;
-""", nativeQuery = true)
+            """, nativeQuery = true)
     List<Fundraising> findFundraisingsWithTopLimit(@Param("limit") int limit);
 
-    List<Fundraising> findByFundraisingStatus(DraftStatus draftStatus);
+    List<Fundraising> findByDraftStatus(DraftStatus draftStatus);
 }

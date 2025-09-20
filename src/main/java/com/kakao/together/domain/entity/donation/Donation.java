@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Entity
 @Builder
 @NoArgsConstructor
@@ -34,16 +37,85 @@ public class Donation extends BaseTimeEntity {
     private Fundraising fundraising;
     @Enumerated(EnumType.STRING)
     private DonationType type;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_transaction_id", unique = true, nullable = true)
     private PaymentTransaction paymentTransaction;
 
-    public void updateStatus(DonationStatus status) {
-        this.status = status;
+    /**
+     * Donation에 대한 PaymentTransaction은 단 1개. PaymentTransaction은 수정제한
+     */
+    public void completeDonation() {
+        if (this.status != DonationStatus.PENDING) {
+            throw new IllegalStateException("must be PENDING state before complete donation");
+        }
+        if (this.paymentTransaction == null) {
+            throw new IllegalStateException("payment transaction is null");
+        }
+        this.status = DonationStatus.COMPLETE;
     }
 
-    public void completeDonation(PaymentTransaction paymentTransaction) {
+    public void linkPaymentTransaction(PaymentTransaction paymentTransaction) {
+        if (this.status != DonationStatus.PENDING) {
+            throw new IllegalStateException("must be PENDING state before link payment transaction");
+        }
+        if (this.paymentTransaction != null) {
+            throw new IllegalStateException("payment transaction is already linked");
+        }
         this.paymentTransaction = paymentTransaction;
+    }
+
+    public void requestDonationCancel() {
+        this.status = DonationStatus.REQUEST_CANCEL;
+    }
+
+    public void cancelDonation() {
+        executeCancel();
+    }
+
+    public void cancelByUser() {
+
+        if (this.status == DonationStatus.CANCELLED) {
+            throw new IllegalStateException("donation is already cancelled");
+        }
+
+        if (this.status != DonationStatus.COMPLETE && this.status != DonationStatus.FAILED_CANCEL) {
+            throw new IllegalStateException("'COMPLETE' or 'FAILED_CANCEL' state can be cancelled");
+        }
+
+        if (!this.fundraising.isOngoing()) {
+            throw new IllegalStateException("only ongoing fundraising is allowed");
+        }
+        if (ChronoUnit.DAYS.between(this.getCreatedAt(), LocalDateTime.now()) > 7) {
+            throw new IllegalStateException("cannot cancel donation because cancellation date is greater than 7 days");
+        }
+
+        executeCancel();
+    }
+
+    public void cancelByAdmin() {
+        executeCancel();
+    }
+
+    private void executeCancel() {
+        if (this.status == DonationStatus.CANCELLED) {
+            throw new IllegalStateException("donation is already cancel");
+        }
+        this.status = DonationStatus.CANCELLED;
+    }
+
+    public void failCancelDonation() {
+        this.status = DonationStatus.FAILED_CANCEL;
+        this.paymentTransaction.failCancel();
+    }
+
+    public void failDonation() {
+        this.status = DonationStatus.FAILED;
+    }
+
+    public void forceCompleteDonation() {
+        if (this.paymentTransaction == null) {
+            throw new IllegalStateException("payment transaction is null");
+        }
         this.status = DonationStatus.COMPLETE;
     }
 }

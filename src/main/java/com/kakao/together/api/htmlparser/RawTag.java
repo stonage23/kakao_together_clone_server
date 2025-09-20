@@ -11,4 +11,5 @@ public class RawTag {
     private final String tagName;
     private final Map<String, String> attributes;
     private final String text;
+    private final String innerHtml;
 }

@@ -1,13 +1,11 @@
 package com.kakao.together.controller.auth;
 
-import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
-import com.kakao.together.controller.auth.dto.AuthDto.LoginRequest;
-import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
-import com.kakao.together.controller.dto.TokenContainer;
+import com.kakao.together.controller.auth.dto.AuthDto.*;
+import com.kakao.together.controller.token.TokenContainer;
 import com.kakao.together.service.auth.impl.EmailAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(produces="application/json;charset=UTF-8")
+@Slf4j
 public class AuthController {
 
     private final EmailAccountService emailAccountService;
@@ -26,23 +25,22 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/auth/validation/{code}")
-    public ResponseEntity signupValidate(@PathVariable("code") String code) {
+    @GetMapping("/auth/validation")
+    public ResponseEntity signupValidate(@RequestParam String code) {
         emailAccountService.validateSignup(code);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest requestDto) {
-        TokenContainer tokenContainer = emailAccountService.login(requestDto);
-        return ResponseEntity.ok()
-                .headers(tokenContainer.getHttpHeaders())
-                .build();
+    public ResponseEntity<TokenContainer> login(@RequestBody @Valid LoginRequest requestDto) {
+        TokenContainer token = emailAccountService.login(requestDto);
+        log.info(requestDto.getLoginId());
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails principal) {
-        emailAccountService.logout(principal.getUsername());
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails principal, @RequestBody LogoutRequest request) {
+        emailAccountService.logout(principal, request);
         return ResponseEntity.ok().build();
     }
 

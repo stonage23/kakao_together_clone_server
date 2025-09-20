@@ -1,6 +1,6 @@
 package com.kakao.together.token;
 
-import com.kakao.together.controller.dto.TokenContainer;
+import com.kakao.together.controller.token.TokenContainer;
 import io.jsonwebtoken.Claims;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,13 +10,7 @@ import java.util.Map;
 public interface TokenService {
     SecretKey getSecretKey();
 
-    String createBearerAccessToken(Map<String, Object> claims);
-
-    String createBearerRefreshToken(Map<String, Object> claims);
-
-    TokenContainer generateTokenContainerWithCommonClaims(Map<String, Object> claims);
-
-    String withBearerPrefix(String token);
+    TokenContainer generateTokenContainer(String subject, Map<String, Object> claims);
 
     String removeBearerPrefix(@NotNull String token);
 

@@ -16,22 +16,25 @@ public class TagMapper {
                 .build();
     }
 
-    public static ImageContentCommand toImageContentCommand(RawTag element) {
+    public static ImageContentCommand toImageContentCommand(RawTag element, int order) {
         return ImageContentCommand.builder()
-                .imageId(Long.valueOf(element.getAttributes().get("imageId")))
+                .imageId(Long.valueOf(element.getAttributes().get("imageid")))
                 .caption(element.getAttributes().get("caption"))
+                .order(order)
                 .build();
     }
 
-    public static SubtitleContentCommand toSubtitleContentCommand(RawTag element) {
+    public static SubtitleContentCommand toSubtitleContentCommand(RawTag element, int order) {
         return SubtitleContentCommand.builder()
                 .subtitle(element.getText())
+                .order(order)
                 .build();
     }
 
-    public static TextContentCommand toTextContentCommand(RawTag element) {
+    public static TextContentCommand toTextContentCommand(String text, int order) {
         return TextContentCommand.builder()
-                .text(element.getText())
+                .text(text)
+                .order(order)
                 .build();
     }
 }

@@ -1,17 +1,17 @@
 package com.kakao.together.service.donation;
 
-import com.kakao.together.controller.donation.dto.DonationDto.*;
+import com.kakao.together.controller.donation.dto.DonationDto.CommentDonationRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationPendingRequest;
+import com.kakao.together.controller.donation.dto.DonationDto.DonationsResponse;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationType;
 
 import java.util.List;
 
 public interface DonationService {
-    void updateDonationToComplete(String merchantUid, Long donationId);
+    Donation completeDonation(Long donationId);
 
-    Donation getDonationEntity(Long donationId);
-
-    void cancelDonationById(Long donationId);
+    void cancelDonation(Long donationId);
 
     boolean isPresentValidDonation(Long fundraisingId, Long id, DonationType donationType);
 
@@ -19,5 +19,19 @@ public interface DonationService {
 
     List<DonationsResponse> getAllDonationsForDonor(Long donorId);
 
-    DonationPendingResponse createPendingDonation(Long memberId, DonationPendingRequest request);
+    Donation createPendingDonation(Long donorId, DonationPendingRequest request);
+
+    void cancelPendingDonation(Long donorId, Long donationId);
+
+    Donation getDonation(Long donationId, Long donorId);
+
+    void failCancelDonation(Long donationId);
+
+    Donation getDonation(Long donationId);
+
+    Donation failDonation(Long donationId);
+
+    void forceCompleteDonation(Long donationId);
+
+    void cancelByMember(Long donationId);
 }

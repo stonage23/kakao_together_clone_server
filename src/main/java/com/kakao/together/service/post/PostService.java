@@ -9,13 +9,15 @@ import static com.kakao.together.controller.fundraising.dto.FundraisingDto.EditF
 
 public interface PostService {
 
-    Post createPost(Post post);
-
     Post findPostById(Long postId);
 
-    Long buildPost(EditFundraisingRequest request);
+    Long createPost(EditFundraisingRequest request);
+
+    void updatePost(EditFundraisingRequest request, Long postId);
 
     void beforeUpdatePost(String html, Long postId);
 
     List<ContentCommand> extractContentsFromHtml(String html);
+
+    String resolveContent(Long postId);
 }

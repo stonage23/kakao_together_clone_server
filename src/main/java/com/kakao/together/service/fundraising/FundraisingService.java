@@ -25,7 +25,7 @@ public interface FundraisingService {
 
     List<SimpleDraftFundraisingResponse> findAllDraftFundraisings();
 
-    void updateDraftToPublished(Long fundraisingId, EditFundraisingRequest request);
+    void updateDraftToPublished(Long fundraisingId);
 
     FundraisingPostResponse findFundraisingStory(Long fundraisingId);
 

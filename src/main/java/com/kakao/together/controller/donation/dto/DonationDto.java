@@ -3,13 +3,6 @@ package com.kakao.together.controller.donation.dto;
 import com.kakao.together.controller.comment.dto.CommentDto.CommentRequest;
 import com.kakao.together.controller.fundraising.dto.FundraisingSummaryResponse;
 import com.kakao.together.domain.entity.donation.Donation;
-import com.kakao.together.domain.entity.donation.DonationStatus;
-import com.kakao.together.domain.entity.donation.DonationType;
-import com.kakao.together.domain.entity.fundraising.Fundraising;
-import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.exception.CustomException;
-import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.domain.entity.payment.PaymentTransaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,32 +13,19 @@ public class DonationDto {
     private DonationDto () {}
 
     @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class DonationCompleteRequest {
-        private String impUid;
-        private String merchantUid;
-        private Long amount;
-        private Long fundraisingId;
-        private String type;
+        private Long donorId;
+        private Long donationId;
 
-        public Donation toEntity(Member donor, Fundraising fundraising, PaymentTransaction paymentTransaction) {
-            DonationType donationType = switch (this.type) {
-                case "DIRECT" -> DonationType.DIRECT;
-                case "INDIRECT" -> DonationType.COMMENT;
-                default -> throw new CustomException(ErrorCode.INVALID_ARGUMENT, "적절하지 않은 DonationType: " + this.type);
-            };
-            return Donation.builder()
-                    .member(donor)
-                    .fundraising(fundraising)
-                    .status(DonationStatus.COMPLETE)
-                    .paymentTransaction(paymentTransaction)
-                    .type(donationType)
-                    .amount(amount)
-                    .build();
+        public boolean isValid(Long donationId) {
+            return this.donationId == donationId;
         }
     }
 
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class DonationCreateWithCommentWrapper {
@@ -53,6 +33,7 @@ public class DonationDto {
         private CommentDonationRequest donationRequest;
     }
 
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class CommentDonationRequest {
@@ -60,6 +41,7 @@ public class DonationDto {
     }
 
     @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class DonationsResponse {
@@ -87,14 +69,7 @@ public class DonationDto {
     public static class DonationPendingResponse {
 
         private Long donationId;
-        private String paymentUrl;
-
-        public static DonationPendingResponse fromEntity(Donation donation, String paymentUrl) {
-            return DonationPendingResponse.builder()
-                    .donationId(donation.getId())
-                    .paymentUrl(paymentUrl)
-                    .build();
-        }
+        private String merchantUid;
     }
 
     @Builder

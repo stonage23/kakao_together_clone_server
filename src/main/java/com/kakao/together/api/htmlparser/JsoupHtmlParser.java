@@ -14,7 +14,11 @@ import java.util.stream.Collectors;
 public class JsoupHtmlParser {
 
     public static List<RawTag> parseBodyFragment(String body) {
+
         List<RawTag> tags = new ArrayList<>();
+
+        if (body == null || body.isBlank()) return tags;
+
         Document doc = Jsoup.parseBodyFragment(body);
         Elements elements = doc.body().children();
 
@@ -22,7 +26,7 @@ public class JsoupHtmlParser {
             Map<String, String> attrMap = el.attributes().asList().stream()
                     .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
 
-            tags.add(new RawTag(el.tagName(), attrMap, el.text()));
+            tags.add(new RawTag(el.tagName(), attrMap, el.text(), el.html()));
         }
 
         return tags;
@@ -30,6 +34,9 @@ public class JsoupHtmlParser {
 
     public static List<RawTag> extractTagsFromBody(String body, String tagName) {
         List<RawTag> tags = new ArrayList<>();
+
+        if (body == null || body.isBlank()) return tags;
+
         Document doc = Jsoup.parseBodyFragment(body);
         Elements elements = doc.body().children();
 
@@ -40,7 +47,7 @@ public class JsoupHtmlParser {
             Map<String, String> attrMap = el.attributes().asList().stream()
                     .collect(Collectors.toMap(Attribute::getKey, Attribute::getValue));
 
-            tags.add(new RawTag(el.tagName(), attrMap, el.text()));
+            tags.add(new RawTag(el.tagName(), attrMap, el.text(), el.html()));
         }
 
         return tags;

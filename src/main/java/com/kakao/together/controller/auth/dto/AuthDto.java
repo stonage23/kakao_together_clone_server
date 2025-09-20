@@ -11,12 +11,14 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class AuthDto {
 
     private AuthDto() {}
 
     @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class SignupByEmailRequest {
@@ -33,8 +35,10 @@ public class AuthDto {
         private String address;
 
         public Member toEntity() {
+            String nickname = email.substring(0, email.indexOf("@"));
             Profile profile = Profile
                     .builder()
+                    .nickname(nickname)
                     .birth(this.birth)
                     .address(this.address)
                     .build();
@@ -48,13 +52,14 @@ public class AuthDto {
     }
 
     @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class LoginRequest {
 
         @NotBlank(message = "회원가입 당시 입력한 이메일로 로그인해주세요")
-        @Size(min = 1, max = 10, message = "닉네임은 1자 이상 10자 이하로 입력해주세요.")
-        private String username;
+        @Email
+        private String loginId;
 
         @NotBlank(message = "비밀번호를 입력해주세요.")
         @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
@@ -62,13 +67,22 @@ public class AuthDto {
 
         public Member toEntity() {
             return Member.builder()
-                    .email(this.username)
+                    .email(this.loginId)
                     .password(this.password)
                     .build();
         }
     }
 
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class LogoutRequest {
+        private String refreshToken;
+    }
+
+    @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class ResetPasswordRequest {
@@ -87,6 +101,8 @@ public class AuthDto {
         }
     }
 
+    @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class DeleteMemberRequest {

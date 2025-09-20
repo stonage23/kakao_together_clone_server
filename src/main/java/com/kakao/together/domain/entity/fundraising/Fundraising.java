@@ -9,6 +9,7 @@ import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,7 +27,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@ToString
 public class Fundraising extends BaseTimeEntity {
 
     @Id
@@ -34,6 +34,7 @@ public class Fundraising extends BaseTimeEntity {
     @Column(name = "fundraising_id")
     private Long id;
 
+    @NotBlank
     private String title;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -49,16 +50,20 @@ public class Fundraising extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private DraftStatus draftStatus = DraftStatus.DRAFT;
 
-    private FundraisingStatus fundraisingStatus;
+    @Builder.Default
+    @ColumnDefault("'PAUSE'")
+    @Enumerated(EnumType.STRING)
+    private FundraisingStatus fundraisingStatus = FundraisingStatus.PAUSE;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agency_id", unique = false)
     private Agency agency;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "file_info_id")
     private FileInfo thumbnail;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "post_id")
     private Post post;
 
@@ -68,7 +73,8 @@ public class Fundraising extends BaseTimeEntity {
 
     // TODO FundraisingCurrent 업데이트 하는 API 추가
     @Embedded
-    private FundraisingCurrent fundraisingCurrent;
+    @Builder.Default
+    private FundraisingCurrent fundraisingCurrent = new FundraisingCurrent();
 
     public void updateFundraising(EditFundraisingRequest dto, Agency agency, FileInfo thumbnail) {
         this.title = dto.getTitle();
@@ -100,8 +106,12 @@ public class Fundraising extends BaseTimeEntity {
     // TODO ErrorCode 디버깅용 메시지도 생성자에 넣어야할듯..
     private void validateConstraints() {
         if (this.title == null || this.startDate == null || this.endDate == null || this.targetAmount == null || agency == null || this.thumbnail == null || this.post == null) {
-            throw new CustomException(ErrorCode.NOT_NULL_VIOLATION, "서버 내부에 문제가 발생하였습니다. 서버 관리자에게 문의해주세요");
+            throw new CustomException(ErrorCode.NOT_NULL_VIOLATION, "모금을 발행하기 위해서는 모든 입력란을 채워야 합니다.");
         }
+    }
+
+    public boolean isOngoing() {
+        return this.fundraisingStatus == FundraisingStatus.ONGOING;
     }
 }
 

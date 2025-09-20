@@ -2,15 +2,18 @@ package com.kakao.together.service.post.imple;
 
 import com.kakao.together.api.htmlparser.JsoupHtmlParser;
 import com.kakao.together.api.htmlparser.RawTag;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
+import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.ContentDto.ContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.ImageContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.SubtitleContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.TextContentCommand;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
-import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.PostCommand;
+import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
+import com.kakao.together.domain.entity.content.extend.SubTitleContent;
+import com.kakao.together.domain.entity.content.extend.TextContent;
 import com.kakao.together.domain.entity.file.FileStatus;
 import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
@@ -21,7 +24,6 @@ import com.kakao.together.domain.repository.PostRepository;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.mapper.TagMapper;
-import com.kakao.together.service.file.FileStorageService;
 import com.kakao.together.service.file.impl.FilePathResolver;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,13 +42,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final ContentRepository contentRepository;
     private final FileInfoRepository fileInfoRepository;
-    private final FileStorageService fileStorageService;
     private final FilePathResolver filePathResolver;
-
-    @Override
-    public Post createPost(Post post) {
-        return postRepository.save(post);
-    }
 
     @Override
     public Post findPostById(Long postId) {
@@ -58,24 +52,30 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long buildPost(EditFundraisingRequest request) {
+    public Long createPost(EditFundraisingRequest request) {
 
         PostCommand postCommand;
         List<ContentCommand> contents = extractContentsFromHtml(request.getHtml());
 
-        if (request.getPostId() == null) {
-            postCommand = PostCommand.builder()
-                    .contents(contents)
-                    .build();
-        } else {
-            beforeUpdatePost(request.getHtml(), request.getPostId());
-            postCommand = PostCommand.builder()
-                    .postId(request.getPostId())
-                    .contents(contents)
-                    .build();
-        }
+        postCommand = PostCommand.builder()
+                .contents(contents)
+                .build();
 
         return buildPost(postCommand);
+    }
+
+    @Override
+    @Transactional
+    public void updatePost(EditFundraisingRequest request, Long postId) {
+        beforeUpdatePost(request.getHtml(), postId);
+        List<ContentCommand> contents = extractContentsFromHtml(request.getHtml());
+
+        PostCommand postCommand = PostCommand.builder()
+                .postId(postId)
+                .contents(contents)
+                .build();
+
+        buildPost(postCommand);
     }
 
     private Long buildPost(PostCommand postCommand) {
@@ -93,18 +93,20 @@ public class PostServiceImpl implements PostService {
 
         final Post finalCreatedPost = post;
 
-        postCommand.getContents().forEach(contentCommand -> {
+        List<Content> contents = postCommand.getContents().stream()
+                .map(contentCommand -> {
             if (contentCommand instanceof ImageContentCommand imageContentCommand) {
                 FileInfo image = fileInfoRepository.findById(imageContentCommand.getImageId())
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
-                contentRepository.save(imageContentCommand.toEntity(imageContentCommand.getPost(), image));
+                return imageContentCommand.toEntity(finalCreatedPost, image);
             } else if (contentCommand instanceof TextContentCommand textContentCommand) {
-                contentRepository.save(textContentCommand.toEntity(finalCreatedPost));
+                return textContentCommand.toEntity(finalCreatedPost);
             } else if (contentCommand instanceof SubtitleContentCommand subtitleContentCommand) {
-                contentRepository.save(subtitleContentCommand.toEntity(finalCreatedPost));
+                return subtitleContentCommand.toEntity(finalCreatedPost);
             } else throw new CustomException(ErrorCode.NOT_PERMITTED_CONDITION);
-        });
+        }).collect(Collectors.toList());
 
+        finalCreatedPost.updatePost(contents);
         return finalCreatedPost.getId();
     }
 
@@ -112,9 +114,11 @@ public class PostServiceImpl implements PostService {
         Set<Long> removedIds = extractRemovedImageIds(html, postId);
         deleteImagesByIds(removedIds);
 
-        JsoupHtmlParser.extractTagsFromBody(html, "img")
-                .forEach(imageTag -> {
-                    Long imageId = Long.valueOf(imageTag.getAttributes().get("imageId"));
+        JsoupHtmlParser.extractTagsFromBody(html, "figure")
+                .forEach(figureTag -> {
+                    List<RawTag> extractedTag = JsoupHtmlParser.extractTagsFromBody(figureTag.getInnerHtml(), "img");
+                    if (extractedTag.size() == 0) return;
+                    Long imageId = Long.valueOf(extractedTag.get(0).getAttributes().get("imageid"));
                     FileInfo image = fileInfoRepository.findById(imageId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
                     image.updateFileStatus(FileStatus.USED);
                 });
@@ -131,7 +135,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; postId: " + postId));
 
-        contentRepository.deleteAll(post.getContents());
+        contentRepository.deleteBulkByPostId(post.getId());
     }
 
     private Set<Long> extractRemovedImageIds(String html, Long postId) {
@@ -149,14 +153,18 @@ public class PostServiceImpl implements PostService {
         for (Long id : imageIds) {
             ImageContent imgContent = contentRepository.findByImageId(id);
             FileInfo image = imgContent.getImage();
-            try {
-                fileStorageService.deleteFile(image.generateFilename(), image.getContentType());
-            } catch (IOException e) {
-                throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
-            }
-            contentRepository.deleteById(imgContent.getId());
-            fileInfoRepository.deleteById(image.getId());
+
+            // NOTE 파일 삭제를 일단 바로하지 않고 실제 파일에 대한 메타데이터를 담은 테이블 file_info의 상태만 delete으로 바꾸기
+//            try {
+//                fileStorageService.deleteFile(image.getSavedName(), image.getContentType());
+//            } catch (IOException e) {
+//                throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
+//            }
+//            contentRepository.deleteById(imgContent.getId());
+//            fileInfoRepository.deleteById(image.getId());
+            image.updateFileStatus(FileStatus.DELETED);
         }
+
     }
 
     @Override
@@ -171,35 +179,63 @@ public class PostServiceImpl implements PostService {
         return tagsToContents(tags);
     }
 
+    @Override
+    public String resolveContent(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
+        List<Content> contents = post.getContents();
+
+        StringBuilder contentBuilder = new StringBuilder();
+        contents.forEach(content -> {
+                    if (content instanceof SubTitleContent subTitleContent)
+                        contentBuilder.append("<h2>").append(subTitleContent.getSubtitle()).append("</h2>");
+                    else if (content instanceof TextContent textContent)
+                        contentBuilder.append("<p>").append(textContent.getText()).append("</p>");
+                    else if (content instanceof ImageContent imageContent) {
+                        FileInfo image = imageContent.getImage();
+                        String url = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType());
+                        contentBuilder.append("<figure class='image-container'><img alt='image' src='").append(url).append("' imageid='").append(image.getId()).append("'></img></figure>");
+                    } else {
+                        log.warn("모금 Story내 content가 허용하는 타입 이외 다른 타입을 갖음; contentId: " + content.getId());
+                        throw new CustomException(ErrorCode.NOT_VALID_CONTENT, "contentId: " + content.getId());
+                    }
+                });
+        return contentBuilder.toString();
+    }
+
     private List<ContentCommand> tagsToContents(List<RawTag> tags) {
 
-        AtomicInteger order = new AtomicInteger(0);
+//        AtomicInteger order = new AtomicInteger(0);
         List<ContentCommand> contentCommands = new ArrayList<>();
 
-        tags.forEach(tag -> {
-                    int currentOrder = order.getAndIncrement();
-                    ContentType type = ContentType.fromTag(tag.getTagName());
-                    switch (type) {
-                        case SUBTITLE -> {
-                            SubtitleContentCommand subtitleContentCommand = TagMapper.toSubtitleContentCommand(tag);
-                            subtitleContentCommand.setOrder(currentOrder);
-                            contentCommands.add(subtitleContentCommand);
-                        }
-                        case TEXT -> {
-                            TextContentCommand textContentCommand = TagMapper.toTextContentCommand(tag);
-                            textContentCommand.setOrder(currentOrder);
-                            contentCommands.add(textContentCommand);
-                        }
-                        case IMAGE -> {
-                            ImageContentCommand imageContentCommand = TagMapper.toImageContentCommand(tag);
-                            imageContentCommand.setOrder(currentOrder);
-                            contentCommands.add(imageContentCommand);
-                        }
-                        default -> throw new CustomException(ErrorCode.NOT_VALID_TAG);
-                    }
-                }
-        );
+        int order = 0;
+        StringBuilder paragraphBuilder = new StringBuilder();
 
+        for (RawTag tag : tags) {
+            ContentType type = ContentType.fromTag(tag.getTagName());
+
+            if (type == ContentType.TEXT) {
+                if (!paragraphBuilder.isEmpty() &&
+                !tag.getText().isEmpty())
+                    paragraphBuilder.append("\n \n").append(tag.getText());
+                else if (!tag.getText().isEmpty())
+                    paragraphBuilder.append(tag.getText());
+            } else {
+                if (!paragraphBuilder.isEmpty()) {
+                    contentCommands.add(TagMapper.toTextContentCommand(paragraphBuilder.toString(), order++));
+                    paragraphBuilder.setLength(0);
+                }
+
+                if (type == ContentType.SUBTITLE) {
+                    contentCommands.add(TagMapper.toSubtitleContentCommand(tag, order++));
+                } else if (type == ContentType.
+                FIGURE) {
+                    List<RawTag> extractedTags = JsoupHtmlParser.parseBodyFragment(tag.getInnerHtml());
+                    contentCommands.add(TagMapper.toImageContentCommand(extractedTags.get(0), order++));
+                } else throw new CustomException(ErrorCode.NOT_VALID_TAG);
+            }
+        }
+        if (!paragraphBuilder.isEmpty()) contentCommands.add(TagMapper.toTextContentCommand(paragraphBuilder.toString(), order));
         return contentCommands;
     }
 

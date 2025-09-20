@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailRequest;
 
@@ -42,7 +43,7 @@ public class MemberServiceImpl implements MemberService {
     private final FileInfoRepository fileInfoRepository;
     private final FilePathResolver filePathResolver;
     private final FileStorageService fileStorageService;
-    private DonationRepository donationRepository;
+    private final DonationRepository donationRepository;
 
     @Override
     @Transactional
@@ -52,11 +53,12 @@ public class MemberServiceImpl implements MemberService {
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
                 });
         Member member = request.toEntity();
+        member.updatePassword(passwordEncoder.encode(request.getPassword()));
         memberRepository.save(member);
     }
 
     @Override
-    public boolean checkEmailDuplicate(String email) {
+    public boolean isExistsEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
 
@@ -79,12 +81,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void deleteMember(String username, DeleteMemberRequest requestDto) {
+    public void deleteMember(Long memberId, DeleteMemberRequest requestDto) {
 
-        Member member = memberRepository.findByEmail(username)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if (passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
             throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
         }
 
@@ -98,7 +100,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MeDetailResponse getMyDetail(String username) {
-        Member member = memberRepository.findByEmail(username).orElseThrow(
+        Member member = memberRepository.findById(Long.valueOf(username)).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
         Profile profile = member.getProfile();
@@ -107,7 +109,7 @@ public class MemberServiceImpl implements MemberService {
             return MeDetailResponse.fromEntity(member, defaultUrl);
         } else {
             FileInfo profileImage = profile.getProfileImage();
-            String url = filePathResolver.resolveUploadPath(profileImage.generateFilename(), profileImage.getContentType()).toString();
+            String url = filePathResolver.resolveUploadPath(profileImage.getSavedName(), profileImage.getContentType()).toString();
             return MeDetailResponse.fromEntity(member, url);
         }
     }
@@ -167,5 +169,11 @@ public class MemberServiceImpl implements MemberService {
                 .indirectDonationAmount(indirectDonationAmount)
                 .commentDonationCount(commentDonationCount)
                 .build();
+    }
+
+    @Override
+    public Member getMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("not present member"));
     }
 }

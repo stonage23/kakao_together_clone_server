@@ -41,7 +41,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private RawMultipartFile uploadFile(MultipartFile file) throws IOException {
         String extension = extractExtension(file.getOriginalFilename());
-        String createdFileName = createRealFilename();
+        String createdFileName = createRealFilename() + extension;
 
         Path storagePath = filePathResolver.resolveTempPath(createdFileName, file.getContentType());
 
