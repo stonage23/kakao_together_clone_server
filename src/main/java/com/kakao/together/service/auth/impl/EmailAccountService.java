@@ -5,7 +5,7 @@ import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.LoginRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.LogoutRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.token.TokenContainer;
+import com.kakao.together.controller.token.dto.TokenContainer;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.auth.AuthService;

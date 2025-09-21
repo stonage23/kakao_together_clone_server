@@ -1,5 +1,6 @@
 package com.kakao.together.controller.token;
 
+import com.kakao.together.controller.token.dto.TokenContainer;
 import com.kakao.together.service.token.RefreshTokenRepository;
 import com.kakao.together.token.jwt.AbstractRefreshTokenService;
 import com.kakao.together.token.jwt.JwtService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-import static com.kakao.together.controller.token.RefreshTokenDto.TokenRefreshRequest;
+import static com.kakao.together.controller.token.dto.RefreshTokenDto.TokenRefreshRequest;
 
 @RestController
 @RequestMapping("/api/token")

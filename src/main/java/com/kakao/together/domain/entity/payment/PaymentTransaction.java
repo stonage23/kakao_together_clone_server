@@ -53,10 +53,10 @@ public class PaymentTransaction extends BaseTimeEntity {
         this.cancelledAt = Instant.ofEpochSecond(cancelledAt);
     }
 
-    public void failPayment(String failReason, Long failedAt) {
+    public void failPayment(String failReason, Instant failedAt) {
         this.status = PaymentStatus.FAILED;
         this.failReason = failReason;
-        this.failedAt = Instant.ofEpochSecond(failedAt);
+        this.failedAt = failedAt;
     }
 
     public void failCancel() {

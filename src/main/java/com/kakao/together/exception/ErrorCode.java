@@ -51,6 +51,8 @@ public enum ErrorCode {
     // 기부
     FAILED_CANCEL_DONATION("기부 내역 취소에 실패했습니다.", "FAILED_CANCEL_DONATION", HttpStatus.INTERNAL_SERVER_ERROR),
     NOT_FOUND_DONATION("기부내역을 찾을 수 없습니다.", "NOT_FOUND_DONATION", HttpStatus.NOT_FOUND),
+    ALREADY_CANCELLED_DONATION("이미 취소된 기부입니다.", "ALREADY_CANCELLED_DONATION", HttpStatus.BAD_REQUEST),
+    ALREADY_COMPLETE_DONATION("이미 완료처리된 기부입니다.", "ALREADY_COMPLETE_DONATION", HttpStatus.BAD_REQUEST),
 
     // 관리자
     ONLY_ADMIN_EXCEPTION("Admin 계정만 접근할 수 있는 요청입니다.", "ONLY_ADMIN_EXCEPTION", HttpStatus.FORBIDDEN),

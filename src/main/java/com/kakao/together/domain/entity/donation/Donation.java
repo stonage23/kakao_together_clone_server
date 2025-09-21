@@ -4,6 +4,8 @@ import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.domain.entity.payment.PaymentTransaction;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +47,9 @@ public class Donation extends BaseTimeEntity {
      * Donation에 대한 PaymentTransaction은 단 1개. PaymentTransaction은 수정제한
      */
     public void completeDonation() {
+
+        if (this.status == DonationStatus.COMPLETE) throw new CustomException(ErrorCode.ALREADY_COMPLETE_DONATION);
+
         if (this.status != DonationStatus.PENDING) {
             throw new IllegalStateException("must be PENDING state before complete donation");
         }

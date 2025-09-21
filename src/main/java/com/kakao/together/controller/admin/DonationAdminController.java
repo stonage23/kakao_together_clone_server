@@ -19,8 +19,6 @@ public class DonationAdminController {
     private final DonationService donationService;
     private final DonationCancelService donationCancelService;
 
-    // TODO 기부 요청 하는 사람이랑 로그인 유저랑 일치하는지 로직 필요?
-    // NOTE 기부 완료는 pg사 웹훅 요청에 의해 자동처리. 얘는 관리자 전용 핸들러로 옮겨야 할까?
     @PostMapping("/{donationId}/complete")
     public ResponseEntity<Void> completeDonation(@PathVariable Long donationId, @RequestBody DonationCompleteRequest request) {
         if (request.isValid(donationId)) {

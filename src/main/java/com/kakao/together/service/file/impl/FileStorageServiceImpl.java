@@ -1,7 +1,6 @@
 package com.kakao.together.service.file.impl;
 
-import com.kakao.together.api.filestorage.FileValidator;
-import com.kakao.together.api.filestorage.RawMultipartFile;
+import com.kakao.together.controller.file.dto.RawMultipartFile;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.file.FileStorageService;
@@ -23,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 public class FileStorageServiceImpl implements FileStorageService {
 
+    private final FileValidator fileValidator;
     private final FilePathResolver filePathResolver;
 
     /**
@@ -33,7 +33,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public RawMultipartFile processUpload(MultipartFile file) throws IOException {
         String name = file.getOriginalFilename();
-        if (!FileValidator.isAllowedExtension(name)) {
+        if (!fileValidator.isAllowedExtension(name)) {
             throw new CustomException(ErrorCode.NOT_VALID_FORMAT);
         }
         return uploadFile(file);

@@ -1,6 +1,6 @@
 package com.kakao.together.domain;
 
-import com.kakao.together.config.JpaAuditingConfig;
+import com.kakao.together.config.JpaConfig;
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@Import(JpaAuditingConfig.class)
+@Import(JpaConfig.class)
 @Slf4j
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class BaseTimeEntityAuditingTest {

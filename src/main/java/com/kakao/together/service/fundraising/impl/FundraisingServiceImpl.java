@@ -20,13 +20,12 @@ import com.kakao.together.service.fundraising.FundraisingService;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.kakao.together.common.constants.BusinessConstants.FundraisingConstants.FUNDRAISING_EXPIRING_DAYS;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +39,10 @@ public class FundraisingServiceImpl implements FundraisingService {
     private final FilePathResolver filePathResolver;
     private final CommentRepository commentRepository;
     private final PostService postService;
+
+    @Value("${business.constants.fundraising.expiring-soon-days}")
+    private Integer FUNDRAISING_EXPIRING_DAYS;
+
     /**
      * Post 생성 및 관리는 Post 도메인 책임. 생성 후 id만 전달
      * @param request

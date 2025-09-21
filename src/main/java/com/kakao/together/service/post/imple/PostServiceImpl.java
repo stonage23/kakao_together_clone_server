@@ -1,7 +1,7 @@
 package com.kakao.together.service.post.imple;
 
-import com.kakao.together.api.htmlparser.JsoupHtmlParser;
-import com.kakao.together.api.htmlparser.RawTag;
+import com.kakao.together.helper.JsoupHtmlParser;
+import com.kakao.together.controller.post.dto.RawTag;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.ContentDto.ContentCommand;

@@ -1,6 +1,6 @@
 package com.kakao.together.mapper;
 
-import com.kakao.together.api.htmlparser.RawTag;
+import com.kakao.together.controller.post.dto.RawTag;
 import com.kakao.together.controller.post.dto.ContentDto.ImageContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.SubtitleContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.TextContentCommand;

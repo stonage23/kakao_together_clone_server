@@ -18,7 +18,7 @@ import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.service.donation.DonationService;
 import com.kakao.together.service.member.MemberService;
-import com.kakao.together.service.payment.helper.MerchantUidProviderImpl;
+import com.kakao.together.helper.MerchantUidProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +39,7 @@ public class DonationServiceImpl implements DonationService {
     private final FundraisingRepository fundraisingRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
     private final DonationRepository donationRepository;
-    private final MerchantUidProviderImpl merchantUidProviderImpl;
+    private final MerchantUidProvider merchantUidProvider;
     private final MemberService memberService;
 
     @Value("${together.donation.comment.amount}")
@@ -50,7 +50,7 @@ public class DonationServiceImpl implements DonationService {
     public Donation completeDonation(Long donationId) {
 
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DONATION));
+                .orElseThrow(() -> new NoSuchElementException("요청한 엔티티가 존재하지 않습니다; donationId: " + donationId));
 
         donation.completeDonation();
         return donation;
@@ -120,7 +120,7 @@ public class DonationServiceImpl implements DonationService {
 
         Donation createdDonation = donationRepository.save(donation);
 
-        String merchantUid = merchantUidProviderImpl.generateMerchantUid(PaymentType.DONATION, String.valueOf(createdDonation.getId()));
+        String merchantUid = merchantUidProvider.generateMerchantUid(PaymentType.DONATION, String.valueOf(createdDonation.getId()));
 
         PaymentTransaction paymentTransaction = PaymentTransaction.builder()
                 .amount(request.getAmount())
@@ -161,27 +161,27 @@ public class DonationServiceImpl implements DonationService {
     @Override
     public Donation getDonation(Long donationId, Long donorId) {
         return donationRepository.findByIdAndMemberId(donationId, donorId)
-                .orElseThrow(() -> new NoSuchElementException("not present donation; donationId=" + donationId + "; memberId=" + donorId));
+                .orElseThrow(() -> new NoSuchElementException("요청한 엔티티가 존재하지 않습니다; donationId: " + donationId + "; memberId=" + donorId));
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failCancelDonation(Long donationId) {
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new NoSuchElementException("not present donation; donationId=" + donationId));
+                .orElseThrow(() -> new NoSuchElementException("요청한 엔티티가 존재하지 않습니다; donationId: " + donationId));
         donation.failCancelDonation();
     }
 
     @Override
     public Donation getDonation(Long donationId) {
         return donationRepository.findById(donationId)
-                .orElseThrow(() -> new NoSuchElementException("not present donation; donationId=" + donationId));
+                .orElseThrow(() -> new NoSuchElementException("요청한 엔티티가 존재하지 않습니다; donationId: " + donationId));
     }
 
     @Override
     public Donation failDonation(Long donationId) {
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new NoSuchElementException("not present donation; donationId=" + donationId));
+                .orElseThrow(() -> new NoSuchElementException("요청한 엔티티가 존재하지 않습니다; donationId: " + donationId));
         donation.failDonation();
         return donation;
     }

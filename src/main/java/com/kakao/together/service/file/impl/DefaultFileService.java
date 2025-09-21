@@ -1,6 +1,6 @@
 package com.kakao.together.service.file.impl;
 
-import com.kakao.together.api.filestorage.RawMultipartFile;
+import com.kakao.together.controller.file.dto.RawMultipartFile;
 import com.kakao.together.controller.file.dto.FileDto.FileResponse;
 import com.kakao.together.domain.entity.file.FileStatus;
 import com.kakao.together.domain.entity.image.FileInfo;

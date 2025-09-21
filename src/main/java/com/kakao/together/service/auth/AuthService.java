@@ -2,7 +2,7 @@ package com.kakao.together.service.auth;
 
 import com.kakao.together.controller.auth.dto.AuthDto;
 import com.kakao.together.controller.auth.dto.AuthDto.LogoutRequest;
-import com.kakao.together.controller.token.TokenContainer;
+import com.kakao.together.controller.token.dto.TokenContainer;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface AuthService {

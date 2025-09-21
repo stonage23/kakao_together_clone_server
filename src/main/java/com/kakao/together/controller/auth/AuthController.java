@@ -1,7 +1,7 @@
 package com.kakao.together.controller.auth;
 
 import com.kakao.together.controller.auth.dto.AuthDto.*;
-import com.kakao.together.controller.token.TokenContainer;
+import com.kakao.together.controller.token.dto.TokenContainer;
 import com.kakao.together.service.auth.impl.EmailAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.kakao.together.token.jwt;
 
-import com.kakao.together.controller.token.TokenContainer;
+import com.kakao.together.controller.token.dto.TokenContainer;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.token.TokenService;
