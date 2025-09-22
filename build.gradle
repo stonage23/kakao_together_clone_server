@@ -16,7 +16,8 @@ java {
 repositories {
 	mavenCentral()
 	//lombok
-	maven { url "https://plugins.gradle.org/m2/" }
+	maven { url "https://plugins.gradle.org/m2/"}
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -48,8 +49,14 @@ dependencies {
 
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:testcontainers'
+
+	implementation 'org.jsoup:jsoup:1.21.1'
+
+	implementation 'com.github.iamport:iamport-rest-client-java:0.2.21'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 test {
 	useJUnitPlatform()
+	systemProperty("spring.profiles.active", "test")
 }

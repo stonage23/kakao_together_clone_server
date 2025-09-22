@@ -1,0 +1,113 @@
+package com.kakao.together.controller.auth.dto;
+
+import com.kakao.together.domain.entity.member.Member;
+import com.kakao.together.domain.entity.member.Profile;
+import com.kakao.together.domain.entity.member.Role;
+import com.kakao.together.exception.CustomException;
+import com.kakao.together.exception.ErrorCode;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+public class AuthDto {
+
+    private AuthDto() {}
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class SignupByEmailRequest {
+
+        @NotBlank(message = "이메일을 입력해주세요.")
+        @Email(message = "이메일 형식이 올바르지 않습니다.")
+        private String email;
+
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+
+        private String birth;
+        private String address;
+
+        public Member toEntity() {
+            String nickname = email.substring(0, email.indexOf("@"));
+            Profile profile = Profile
+                    .builder()
+                    .nickname(nickname)
+                    .birth(this.birth)
+                    .address(this.address)
+                    .build();
+            return Member.builder()
+                    .email(this.email)
+                    .password(this.password)
+                    .profile(profile)
+                    .role(Role.MEMBER)
+                    .build();
+        }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class LoginRequest {
+
+        @NotBlank(message = "회원가입 당시 입력한 이메일로 로그인해주세요")
+        @Email
+        private String loginId;
+
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+
+        public Member toEntity() {
+            return Member.builder()
+                    .email(this.loginId)
+                    .password(this.password)
+                    .build();
+        }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class LogoutRequest {
+        private String refreshToken;
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class ResetPasswordRequest {
+        @NotBlank
+        private String email;
+        @NotBlank
+        private String code;
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+        @NotBlank(message = "확인 비밀번호를 입력해주세요.")
+        private String checkPassword;
+
+        public void checkPasswordMatch() {
+            if (!this.password.equals(this.checkPassword)) throw new CustomException(ErrorCode.NOT_MATCH_CHECKPASSWORD);
+        }
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class DeleteMemberRequest {
+        @NotBlank(message = "비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+        private String password;
+    }
+}

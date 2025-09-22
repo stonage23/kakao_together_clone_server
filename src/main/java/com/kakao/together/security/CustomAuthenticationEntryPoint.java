@@ -1,0 +1,37 @@
+package com.kakao.together.security;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.exception.ErrorResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+@Component
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final Logger log = LoggerFactory.getLogger(Logger.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                         AuthenticationException authException) throws IOException, ServletException {
+
+        log.debug("계정인증이 필요한 요청. 로그인이 필요하다는 응답 반환");
+
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.REQUIRE_AUTHENTICATION);
+
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+}
