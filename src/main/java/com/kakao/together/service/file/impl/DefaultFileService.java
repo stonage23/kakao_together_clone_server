@@ -32,7 +32,7 @@ public class DefaultFileService implements FileService {
     public FileResponse processTempUpload(MultipartFile file) {
         RawMultipartFile rawMultipartFile;
         try {
-            rawMultipartFile = fileStorageService.processUpload(file);
+            rawMultipartFile = fileStorageService.processTempFileUpload(file);
         } catch (IOException e) {
             throw new CustomException(ErrorCode.FAILED_UPLOAD_FILE);
         }

@@ -33,7 +33,7 @@ public class FilePathResolver {
     private static final String FILE_TEMP_DIR = "src/main/resources/files/temporary";
     private static final String IMAGE_UPLOAD_DIR = "src/main/resources/imgs/content";
     private static final String IMAGE_TEMP_DIR = "src/main/resources/imgs/temporary";
-    private static final String IMAGE_SERVER_DIR = "http://localhost:9090/images/upload";
+    private static final String IMAGE_SERVER_DIR = "http://localhost:9090/images/content";
 
     private final Map<FileType, String> uploadDirMap = new EnumMap<>(FileType.class);
     private final Map<FileType, String> tempDirMap = new EnumMap<>(FileType.class);
@@ -84,7 +84,7 @@ public class FilePathResolver {
                 .findFirst()
                 .map(entry -> buildAbsolutePath(fileName, entry.getValue()))
                 .orElseThrow(() -> new CustomException(
-                        ErrorCode.NOT_VALID_FORMAT,
+                        ErrorCode.UNSUPPORTED_FILE_FORMAT,
                         "업로드하려는 파일의 contentType을 확인해주세요; contentType=" + contentType + "; fileName:" + fileName
                 ));
     }
@@ -95,7 +95,7 @@ public class FilePathResolver {
                 .findFirst()
                 .map(entry -> buildPath(fileName, entry.getValue()))
                 .orElseThrow(() -> new CustomException(
-                        ErrorCode.NOT_VALID_FORMAT,
+                        ErrorCode.UNSUPPORTED_FILE_FORMAT,
                         "업로드하려는 파일의 contentType을 확인해주세요; contentType=" + contentType + "; fileName:" + fileName
                 ));
     }
@@ -105,7 +105,7 @@ public class FilePathResolver {
     }
 
     private String buildPath(String fileName, String baseDir) {
-        return baseDir + fileName;
+        return baseDir + "/" + fileName;
     }
 }
 

@@ -1,7 +1,5 @@
 package com.kakao.together.service.post.imple;
 
-import com.kakao.together.helper.JsoupHtmlParser;
-import com.kakao.together.controller.post.dto.RawTag;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundraisingRequest;
 import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.ContentDto.ContentCommand;
@@ -9,12 +7,12 @@ import com.kakao.together.controller.post.dto.ContentDto.ImageContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.SubtitleContentCommand;
 import com.kakao.together.controller.post.dto.ContentDto.TextContentCommand;
 import com.kakao.together.controller.post.dto.PostCommand;
+import com.kakao.together.controller.post.dto.RawTag;
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.file.FileStatus;
 import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.domain.entity.post.PostType;
@@ -23,8 +21,11 @@ import com.kakao.together.domain.repository.FileInfoRepository;
 import com.kakao.together.domain.repository.PostRepository;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.exception.file.FileException;
+import com.kakao.together.helper.JsoupHtmlParser;
 import com.kakao.together.mapper.TagMapper;
 import com.kakao.together.service.file.impl.FilePathResolver;
+import com.kakao.together.service.file.impl.FileStorageServiceImpl;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final ContentRepository contentRepository;
     private final FileInfoRepository fileInfoRepository;
     private final FilePathResolver filePathResolver;
+    private final FileStorageServiceImpl fileStorageServiceImpl;
 
     @Override
     public Post findPostById(Long postId) {
@@ -98,6 +100,15 @@ public class PostServiceImpl implements PostService {
             if (contentCommand instanceof ImageContentCommand imageContentCommand) {
                 FileInfo image = fileInfoRepository.findById(imageContentCommand.getImageId())
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
+                image.updateStatusToUsed();
+                String fromUrl = filePathResolver.resolveTempPath(image.getSavedName(), image.getContentType()).toString();
+                try {
+                    fileStorageServiceImpl.moveToStorageUpload(fromUrl, image.getContentType());
+                } catch (FileException e) {
+                    log.error("파일 처리도중 발생한 예외로 게시글 작성 실패", e);
+                    throw new CustomException(ErrorCode.FILE_HANDLING_EXCEPTION);
+                }
+
                 return imageContentCommand.toEntity(finalCreatedPost, image);
             } else if (contentCommand instanceof TextContentCommand textContentCommand) {
                 return textContentCommand.toEntity(finalCreatedPost);
@@ -120,7 +131,7 @@ public class PostServiceImpl implements PostService {
                     if (extractedTag.size() == 0) return;
                     Long imageId = Long.valueOf(extractedTag.get(0).getAttributes().get("imageid"));
                     FileInfo image = fileInfoRepository.findById(imageId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
-                    image.updateFileStatus(FileStatus.USED);
+                    image.updateStatusToUsed();
                 });
     }
 
@@ -154,15 +165,7 @@ public class PostServiceImpl implements PostService {
             ImageContent imgContent = contentRepository.findByImageId(id);
             FileInfo image = imgContent.getImage();
 
-            // NOTE 파일 삭제를 일단 바로하지 않고 실제 파일에 대한 메타데이터를 담은 테이블 file_info의 상태만 delete으로 바꾸기
-//            try {
-//                fileStorageService.deleteFile(image.getSavedName(), image.getContentType());
-//            } catch (IOException e) {
-//                throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
-//            }
-//            contentRepository.deleteById(imgContent.getId());
-//            fileInfoRepository.deleteById(image.getId());
-            image.updateFileStatus(FileStatus.DELETED);
+            image.updateStatusToDeleted();
         }
 
     }
@@ -172,7 +175,6 @@ public class PostServiceImpl implements PostService {
     public List<ContentCommand> extractContentsFromHtml(String html) {
         List<RawTag> tags = JsoupHtmlParser.parseBodyFragment(html);
 
-        // TODO 이 로직 좀 이상함
         tags.stream().filter(tag -> Objects.equals(tag.getTagName(), "img"))
                 .forEach(this::createImageIfSrcNotExist);
 
@@ -205,7 +207,6 @@ public class PostServiceImpl implements PostService {
 
     private List<ContentCommand> tagsToContents(List<RawTag> tags) {
 
-//        AtomicInteger order = new AtomicInteger(0);
         List<ContentCommand> contentCommands = new ArrayList<>();
 
         int order = 0;

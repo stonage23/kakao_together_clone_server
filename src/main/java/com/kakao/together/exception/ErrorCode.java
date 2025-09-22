@@ -58,8 +58,9 @@ public enum ErrorCode {
     ONLY_ADMIN_EXCEPTION("Admin 계정만 접근할 수 있는 요청입니다.", "ONLY_ADMIN_EXCEPTION", HttpStatus.FORBIDDEN),
 
     // 파일
+    FILE_HANDLING_EXCEPTION("파일 처리 도중 문제가 발생했습니다.", "FILE_HANDLING_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
     NOT_FOUND_VALUE("필요한 값이 존재하지 않습니다.", "NOT_FOUND_VALUE", HttpStatus.BAD_REQUEST),
-    NOT_VALID_FORMAT("사용가능한 파일 확장자가 아닙니다.", "NOT_VALID_FORMAT", HttpStatus.BAD_REQUEST),
+    UNSUPPORTED_FILE_FORMAT("사용가능한 파일 확장자가 아닙니다.", "NOT_VALID_FORMAT", HttpStatus.BAD_REQUEST),
     // TODO 구체적인 예외처리
     FAILED_UPLOAD_FILE("파일 업로드에 실패했습니다", "FAILED_UPLOAD_FILE", HttpStatus.INTERNAL_SERVER_ERROR),
     // TODO 구체적인 예외처리

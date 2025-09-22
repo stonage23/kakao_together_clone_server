@@ -34,8 +34,6 @@ public class Post {
         this.contents.clear();
         if (contents != null) {
             for (Content content : contents) {
-                // 연관관계의 주인이 아닌 쪽(Post)에서 객체를 추가하면서,
-                // 주인 쪽(Content)에도 참조를 설정해준다 (연관관계 편의 메서드).
                 this.contents.add(content);
             }
         }

@@ -8,7 +8,6 @@ import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
-import com.kakao.together.domain.entity.file.FileStatus;
 import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.domain.entity.member.MemberStatus;
@@ -124,7 +123,7 @@ public class MemberServiceImpl implements MemberService {
         if (request.getImageId() != null) {
             image = fileInfoRepository.findById(request.getImageId())
                     .orElseThrow(() -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "업로드되어 있어야할 이미지가 존재하지 않음; imageId: " + request.getImageId()));
-            image.updateFileStatus(FileStatus.USED);
+            image.updateStatusToUsed();
         }
         FileInfo preImage = member.getProfile().getProfileImage();
         if (preImage != null) {
