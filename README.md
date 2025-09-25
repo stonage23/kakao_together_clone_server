@@ -13,7 +13,7 @@
 <br><br><br>
 
 ## 🔎 주요 기능
-### [인증](##-🏷️인증)
+### [인증](#-🏷️인증)
 - SpringSecurity 인증, 인가
 - JWT 토큰(accessToken, refreshToken) 기반 사용자 인증
 ### Redis 캐싱
@@ -208,6 +208,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
