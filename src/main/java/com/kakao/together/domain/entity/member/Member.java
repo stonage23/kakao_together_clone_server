@@ -35,13 +35,13 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role = Role.MEMBER;
     @Builder.Default
-    @ColumnDefault("'ACTIVE'")
+    @ColumnDefault("'PENDING'")
     @Enumerated(EnumType.STRING)
-    private MemberStatus memberStatus = MemberStatus.ACTIVE;
+    private MemberStatus memberStatus = MemberStatus.PENDING;
     private LocalDateTime deletedAt;
 
     @Embedded
-    private Profile profile;
+    private Profile profile = new Profile();
 
     @Builder.Default
     @OneToMany(mappedBy = "writer", orphanRemoval = true, fetch = FetchType.LAZY)
@@ -71,5 +71,19 @@ public class Member extends BaseTimeEntity {
         Member member = (Member) o;
 
         return this.id != null && this.id.equals(member.getId());
+    }
+
+    public void activateMember() {
+        if (this.memberStatus == MemberStatus.ACTIVE) {
+            throw new IllegalStateException("이미 활성화된 멤버");
+        }
+        this.memberStatus = MemberStatus.ACTIVE;
+    }
+
+    public void deleteMember() {
+        if (this.memberStatus == MemberStatus.DELETED) {
+            throw new IllegalStateException("이미 삭제된 멤버");
+        }
+        this.memberStatus = MemberStatus.DELETED;
     }
 }

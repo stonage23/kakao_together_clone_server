@@ -1,6 +1,7 @@
 package com.kakao.together.domain.entity.member;
 
 public enum MemberStatus {
+    PENDING("PENDING"),
     ACTIVE("ACTIVE"),
     DELETED("DELETED"),
     LOCKED("LOCKED");

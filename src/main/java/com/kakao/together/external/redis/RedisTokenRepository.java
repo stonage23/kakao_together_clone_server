@@ -1,34 +1,34 @@
 package com.kakao.together.external.redis;
 
+import com.kakao.together.external.redis.exception.RedisServiceException;
 import com.kakao.together.service.token.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisTokenRepository implements RefreshTokenRepository<String> {
+public class RedisTokenRepository implements RefreshTokenRepository {
 
-    private final RedisHandler redisHandler;
+    private final RedisService redisService;
 
-    private static final String BEARER = "Bearer ";
     private static final String REFRESH_TOKEN_FREFIX = "refresh_token ";
-    private static final Integer EXPIRES_IN_MINUTES = 60*30;
+    @Value("${business.constants.token.refresh-token.expiring}")
+    private Integer EXPIRES_IN_SECONDS;
 
     @Override
     public String findRefreshToken(String refreshToken) {
-        String value = (String) redisHandler.getValueOperations().get(resolveKey(refreshToken));
-        if (value == null) return "";
-        else return value;
+        return redisService.getData(resolveKey(refreshToken));
     }
 
     @Override
-    public void saveRefreshToken(String refreshToken, String username) {
-        redisHandler.getValueOperations().set(resolveKey(refreshToken), username, EXPIRES_IN_MINUTES);
+    public void saveRefreshToken(String refreshToken, String username) throws RedisServiceException {
+        redisService.setData(resolveKey(refreshToken), username, EXPIRES_IN_SECONDS);
     }
 
     @Override
     public void deleteRefreshToken(String refreshToken) {
-        redisHandler.getRedisTemplate().delete(resolveKey(refreshToken));
+        redisService.deleteData(resolveKey(refreshToken));
     }
 
     private String resolveKey(String refreshToken) {

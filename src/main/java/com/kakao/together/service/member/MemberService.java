@@ -1,8 +1,8 @@
 package com.kakao.together.service.member;
 
-import com.kakao.together.controller.auth.dto.AuthDto;
+import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.member.dto.MemberDto.DonationStateResponse;
+import com.kakao.together.controller.member.dto.MemberDto.DonationStatusResponse;
 import com.kakao.together.controller.member.dto.MemberDto.MeDetailResponse;
 import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.member.Member;
@@ -13,23 +13,23 @@ import static com.kakao.together.controller.auth.dto.AuthDto.SignupByEmailReques
 @Service
 public interface MemberService {
 
-    void createMember(SignupByEmailRequest request);
-
-    boolean isExistsEmail(String email);
-
-    boolean checkCredentials(String username, String password);
+    void checkEmailDuplication(String email);
 
     void updatePassword(ResetPasswordRequest reqeustDto);
 
-    void deleteMember(Long memberId, AuthDto.DeleteMemberRequest requestDto);
+    void deleteMember(Long memberId, DeleteMemberRequest requestDto);
 
-    boolean checkNicknameDuplicate(String nickname);
+    void checkNicknameDuplication(String nickname);
 
-    MeDetailResponse getMyDetail(String username);
+    MeDetailResponse getMyDetail(Long username);
 
     void updateProfile(String username, ProfileUpdateRequest profileReq);
 
-    DonationStateResponse getDonationState(Long memberId);
+    DonationStatusResponse getMyTotalDonationStatus(Long memberId);
 
     Member getMember(Long memberId);
+
+    void handleSignupRequest(SignupByEmailRequest request);
+
+    void activateMember(String code);
 }

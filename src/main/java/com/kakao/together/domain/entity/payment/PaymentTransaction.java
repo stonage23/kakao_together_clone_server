@@ -23,6 +23,7 @@ public class PaymentTransaction extends BaseTimeEntity {
         this.merchantUid = merchantUid;
         this.amount = amount;
         this.status = PaymentStatus.PENDING;
+        this.isRefunded = false;
     }
 
     @Id
@@ -30,16 +31,19 @@ public class PaymentTransaction extends BaseTimeEntity {
     @Column(name = "payment_transaction_id")
     private Long id;
     private String impUid;
+    @Column(nullable = false)
     private String merchantUid;
-    @Column(precision = 15, scale = 2)
+    @Column(precision = 15, scale = 2, nullable = false)
     private Long amount;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentStatus status;
     private String pgProvider;
     private Instant paidAt;
     private Instant cancelledAt;
     private Instant failedAt;
     private String failReason;
+    private boolean isRefunded;
 
     public void completePayment(String impUid, Long paidAt, String pgProvider) {
         this.status = PaymentStatus.APPROVAL;
@@ -62,4 +66,6 @@ public class PaymentTransaction extends BaseTimeEntity {
     public void failCancel() {
         this.status = PaymentStatus.FAILED_CANCEL;
     }
+
+    public void refundPayment() { this.isRefunded = true; }
 }

@@ -1,5 +1,5 @@
 package com.kakao.together.external.paymentgate.verification;
 
 public interface PaymentVerificationService {
-    boolean verifyPayment(String impUid, String merchantUid);
+    void verifyPayment(String impUid, String merchantUid);
 }

@@ -31,6 +31,7 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
         return DefaultPaymentDetails.builder()
                 .merchantUid(paymentTransaction.getMerchantUid())
                 .amount(BigDecimal.valueOf(paymentTransaction.getAmount()))
+                .status(paymentTransaction.getStatus())
                 .build();
     }
 }
