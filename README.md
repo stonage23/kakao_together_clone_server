@@ -67,7 +67,7 @@ sequenceDiagram
     AuthService-->>Client: 8. Access/Refresh 토큰 응답
     deactivate AuthService
 ```
-# 가나바
+## 가나바
 ### 📌 access token 기반 인증 흐름
 🔗 관련 파일
 - accessToken 인증 필터 [JwtAuthenticationFilter](src/main/java/com/kakao/together/filter/JwtAuthenticationFilter.java)
@@ -208,6 +208,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
