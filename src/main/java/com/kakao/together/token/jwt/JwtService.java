@@ -1,20 +1,17 @@
 package com.kakao.together.token.jwt;
 
-import com.kakao.together.controller.token.dto.TokenContainer;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.token.TokenService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -29,8 +26,8 @@ public class JwtService implements TokenService {
     @Value("${jwt.refresh.expiration}")
     private Long refreshTokenExpirationPeriod;
 
-
     private static final String BEARER = "Bearer ";
+    private static final String AUTHORITIES_CLAIM = "auth";
 
     /**
      * Secret key는 보안 및 일관성을 위해 외부에서 주입받아 Key 객체로 변환 후 사용
@@ -44,9 +41,7 @@ public class JwtService implements TokenService {
     }
 
     @Override
-    public SecretKey getSecretKey() {return this.secretKey;}
-
-    private String buildToken(Map<String, Object> claims, String subject, Long expirationPeriod) {
+    public String buildToken(Map<String, Object> claims, String subject, Long expirationPeriod) {
         Date now = new Date();
         return Jwts.builder()
                 .header()
@@ -56,24 +51,9 @@ public class JwtService implements TokenService {
                 .subject(subject)
                 .issuedAt(new Date())
                 .expiration(new Date(now.getTime() + expirationPeriod))
-                .claims(claims != null ? claims : new HashMap<>())
+                .claims(claims)
                 .signWith(secretKey)
                 .compact();
-    }
-
-    private String createAccessToken(String subject, Map<String, Object> claims) {
-        return buildToken(claims, subject, accessTokenExpirationPeriod);
-    }
-
-    private String createRefreshToken(String subject, Map<String, Object> claims) {
-        return buildToken(claims, subject, refreshTokenExpirationPeriod);
-    }
-
-    @Override
-    public TokenContainer generateTokenContainer(String subject, Map<String, Object> claims) {
-        String accessToken = createAccessToken(subject, claims);
-        String refreshToken = createRefreshToken(subject, claims);
-        return new TokenContainer(accessToken, refreshToken);
     }
 
     private Jws<Claims> parseToken(String token) {
@@ -87,15 +67,6 @@ public class JwtService implements TokenService {
         } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN, "jwt토큰이 null 또는 적절하지 못한 상태: token = " + token);
         }
-    }
-
-    @Override
-    public String removeBearerPrefix(@NotNull String token) {
-        if (!token.startsWith(BEARER)) {
-            log.warn("Bearer prefix가 없는 토큰");
-            throw new CustomException(ErrorCode.NOT_MATCH_BEARER);
-        }
-        return token.replace(BEARER, "");
     }
 
     @Override

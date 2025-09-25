@@ -2,7 +2,7 @@ package com.kakao.together.service.member.impl;
 
 import com.kakao.together.controller.auth.dto.AuthDto.DeleteMemberRequest;
 import com.kakao.together.controller.auth.dto.AuthDto.ResetPasswordRequest;
-import com.kakao.together.controller.member.dto.MemberDto.DonationStateResponse;
+import com.kakao.together.controller.member.dto.MemberDto.DonationStatusResponse;
 import com.kakao.together.controller.member.dto.MemberDto.MeDetailResponse;
 import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.donation.Donation;
@@ -10,18 +10,22 @@ import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
 import com.kakao.together.domain.entity.image.FileInfo;
 import com.kakao.together.domain.entity.member.Member;
-import com.kakao.together.domain.entity.member.MemberStatus;
 import com.kakao.together.domain.entity.member.Profile;
 import com.kakao.together.domain.repository.DonationRepository;
 import com.kakao.together.domain.repository.FileInfoRepository;
 import com.kakao.together.domain.repository.MemberRepository;
+import com.kakao.together.event.MemberSignupCompleteEvent;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.external.redis.exception.RedisServiceException;
+import com.kakao.together.service.cache.CacheService;
 import com.kakao.together.service.file.FileStorageService;
 import com.kakao.together.service.file.impl.FilePathResolver;
+import com.kakao.together.service.mail.MailService;
 import com.kakao.together.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,10 +47,13 @@ public class MemberServiceImpl implements MemberService {
     private final FilePathResolver filePathResolver;
     private final FileStorageService fileStorageService;
     private final DonationRepository donationRepository;
+    private final MailService mailService;
+    private final CacheService cacheService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Override
-    @Transactional
-    public void createMember(SignupByEmailRequest request) {
+    private static final String EMAIL_PREFIX = "email ";
+
+    private void createMember(SignupByEmailRequest request) {
         memberRepository.findByEmail(request.getEmail())
                 .ifPresent((member) -> {
                     throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -57,22 +64,19 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean isExistsEmail(String email) {
-        return memberRepository.existsByEmail(email);
-    }
+    public void checkEmailDuplication(String email) {
 
-    @Override
-    public boolean checkCredentials(String username, String password) {
-        Member member = memberRepository.findByEmail(username).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
-        );
-        return passwordEncoder.matches(password, member.getPassword());
+        boolean isPresent = memberRepository.existsByEmail(email);
+        if (isPresent) throw new CustomException(ErrorCode.CONFLICT_EXCEPTION, "이미 존재하는 이메일입니다.");
     }
 
     @Override
     @Transactional
     public void updatePassword(ResetPasswordRequest request) {
-        Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(
+
+        String email = cacheService.getData(EMAIL_PREFIX + request.getCode());
+
+        Member member = memberRepository.findByEmail(email).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
         member.updatePassword(passwordEncoder.encode(request.getPassword()));
@@ -89,17 +93,24 @@ public class MemberServiceImpl implements MemberService {
             throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
         }
 
-        member.updateMemberStatus(MemberStatus.DELETED);
+        try {
+            member.deleteMember();
+        } catch (IllegalStateException e) {
+            log.warn("유저 요청에 의한 삭제 처리중 문제 발생: 적절하지 않은 상태");
+            throw new CustomException(ErrorCode.CONFLICT_EXCEPTION, e.getMessage());
+        }
     }
 
     @Override
-    public boolean checkNicknameDuplicate(String nickname) {
-        return memberRepository.existsByProfile_Nickname(nickname);
+    public void checkNicknameDuplication(String nickname) {
+        boolean isPresent = memberRepository.existsByProfile_Nickname(nickname);
+
+        if (isPresent) throw new CustomException(ErrorCode.CONFLICT_EXCEPTION, "이미 존재하는 닉네임입니다.");
     }
 
     @Override
-    public MeDetailResponse getMyDetail(String username) {
-        Member member = memberRepository.findById(Long.valueOf(username)).orElseThrow(
+    public MeDetailResponse getMyDetail(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_USER)
         );
         Profile profile = member.getProfile();
@@ -139,7 +150,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public DonationStateResponse getDonationState(Long memberId) {
+    public DonationStatusResponse getMyTotalDonationStatus(Long memberId) {
         if (!memberRepository.existsById(memberId))
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
@@ -160,7 +171,7 @@ public class MemberServiceImpl implements MemberService {
         Long donationAmount = directDonationAmount + indirectDonationAmount;
         Long donationCount = directDonationCount + commentDonationCount;
 
-        return DonationStateResponse.builder()
+        return DonationStatusResponse.builder()
                 .donationAmount(donationAmount)
                 .donationCount(donationCount)
                 .directDonationCount(directDonationCount)
@@ -174,5 +185,53 @@ public class MemberServiceImpl implements MemberService {
     public Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("not present member"));
+    }
+
+    @Override
+    @Transactional
+    public void handleSignupRequest(SignupByEmailRequest request) {
+
+        if (memberRepository.existsByEmail(request.getEmail()))
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+
+        createMember(request);
+
+        String code = mailService.sendSignupMail(request.getEmail());
+
+        cacheService.setData(generateEmailKey(code), request.getEmail(), 60 * 30);
+    }
+
+    @Override
+    @Transactional
+    public void activateMember(String code) {
+
+        String email = null;
+
+        try {
+            email = cacheService.getData(generateEmailKey(code));
+        } catch (RedisServiceException e) {
+            log.error("신규 멤버 계정 활성화를 위한 캐시에서 인증 코드 조회 중 문제발생; 캐시 서버에 문제가 발생", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        if (email == null) {
+            throw new CustomException(ErrorCode.CODE_EXPIRED);
+        }
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        try {
+            member.activateMember();
+        } catch (IllegalStateException e) {
+            log.warn("이미 활성화된 멤버 활성화 시도; memberId={}", member.getId());
+            throw new CustomException(ErrorCode.CONFLICT_EXCEPTION, e.getMessage());
+        }
+
+        eventPublisher.publishEvent(new MemberSignupCompleteEvent(generateEmailKey(code)));
+    }
+
+    private String generateEmailKey(String key) {
+        return EMAIL_PREFIX + key;
     }
 }

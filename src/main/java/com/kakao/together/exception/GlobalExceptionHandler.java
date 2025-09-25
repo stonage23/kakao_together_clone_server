@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
             String fieldName = ((FieldError) error).getField();
             log.debug(fieldName + " : " + error.getDefaultMessage());
         });
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUES, e.getBindingResult());
+        ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST, e.getBindingResult());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         e.getConstraintViolations().stream().forEach(cv -> {
             log.debug(cv.getPropertyPath().toString());
         });
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUES, e.getConstraintViolations());
+        ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST, e.getConstraintViolations());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 

@@ -38,6 +38,7 @@ public class Donation extends BaseTimeEntity {
     @JoinColumn(name = "fundraising_id", nullable = false)
     private Fundraising fundraising;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private DonationType type;
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_transaction_id", unique = true, nullable = true)

@@ -1,4 +1,4 @@
-package com.kakao.together.controller.token.dto;
+package com.kakao.together.token;
 
 public class TokenContainer {
 

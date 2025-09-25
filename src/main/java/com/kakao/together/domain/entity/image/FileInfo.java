@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Builder
@@ -31,7 +32,9 @@ public class FileInfo extends BaseTimeEntity {
     private Long size;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private FileStatus status;
+    @Builder.Default
+    @ColumnDefault("'PENDING'")
+    private FileStatus status = FileStatus.PENDING;
 
     public void updateStatusToUsed() {
         if (!isValidConstraints()) throw new IllegalStateException("파일이 USED 상태가 되기 위해서는 모든 필드가 null이 아니어야 합니다. file_info_id=" + id);

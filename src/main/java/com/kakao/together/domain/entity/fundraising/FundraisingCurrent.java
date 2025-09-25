@@ -16,17 +16,22 @@ public class FundraisingCurrent {
 
     @Builder.Default
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer currentAmount = 0;
     @Builder.Default
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer directDonorCount = 0;
     @Builder.Default
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer indirectDonorCount = 0;
     @Builder.Default
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer directDonationAmount = 0;
     @Builder.Default
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer indirectDonationAmount = 0;
 }

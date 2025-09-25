@@ -21,6 +21,7 @@ public class MemberDto {
     }
 
     @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
     @Getter
     public static class ProfileUpdateRequest {
@@ -33,10 +34,10 @@ public class MemberDto {
         private String address;
     }
 
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    @Builder
     public static class MeDetailResponse {
 
         private Long id;
@@ -86,12 +87,20 @@ public class MemberDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class DonationStateResponse {
+    public static class DonationStatusResponse {
         private Long directDonationAmount;
         private Long directDonationCount;
         private Long donationAmount;
         private Long donationCount;
         private Long indirectDonationAmount;
         private Long commentDonationCount;
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class SendPasswordResetMailRequest {
+        private String email;
     }
 }

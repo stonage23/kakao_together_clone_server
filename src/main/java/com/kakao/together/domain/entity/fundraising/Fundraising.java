@@ -48,11 +48,13 @@ public class Fundraising extends BaseTimeEntity {
     @Builder.Default
     @ColumnDefault("'DRAFT'")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private DraftStatus draftStatus = DraftStatus.DRAFT;
 
     @Builder.Default
     @ColumnDefault("'PAUSE'")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private FundraisingStatus fundraisingStatus = FundraisingStatus.PAUSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
