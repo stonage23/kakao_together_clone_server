@@ -17,11 +17,11 @@
 ### [인증](#인증)
 - SpringSecurity 인증, 인가
 - JWT 토큰(accessToken, refreshToken) 기반 사용자 인증
-### Redis 캐싱
+### [Redis캐싱](#Redis캐싱)
 - 회원가입, 비밀번호 수정 시 본인확인용 코드 캐싱
-### 메일 발송
+### [메일발송](#메일발송)
 - SMTP 메일 기능 모듈화
-### 결제
+### [결제](#결제]
 - 결제 위조 방지 및 사용자 경험 향상 지향
 ### 게시글
 - 임시저장 기능으로 사용자 경험 향상
@@ -32,12 +32,11 @@
 - 유저 
 - 기부
 - 모금
-### 예외 처리
+### [예외처리](#예외처리)
 
 <br><br><br>
 ---
-## 🏷️인증
-## 🏷️가나바
+## 인증
 ### 📌 로그인 및 토큰 발급 흐름
 🔗 관련 디렉토리
 - 로그인 요청 처리[AuthService](src/main/java/com/kakao/together/service/auth/impl/AuthServiceImpl.java)
@@ -125,7 +124,7 @@ sequenceDiagram
 ```
 <br><br><br>
 
-## Redis 캐싱
+## Redis캐싱
  🔗 [RedisService](src/main/java/com/kakao/together/external/redis/RedisService.java)
  - DB에 접속하지 않고 빠른 조회를 위해 Redis을 사용하여 캐시 기능을 구현했습니다.
  - Redis서버에 데이터를 저장하는 setData 함수는 일반 문자열 뿐 아니라 일반 객체도 저장할 수 있도록 메소드를 구분했습니다.
@@ -135,7 +134,7 @@ sequenceDiagram
     - [refresh토큰 캐싱](src/main/java/com/kakao/together/external/redis/RedisTokenRepository.java)
 <br><br><br>
 
-## 메일 발송
+## 메일발송
 🔗 [SmtpMAilService](src/main/java/com/kakao/together/external/mail/SmtpMailService.java)<br>
 🔗 [EmailTemplate](src/main/java/com/kakao/together/util/EmailTemplate.java)
 - 메일 내용에 해당하는 부분은 별도의 Template 클래스로 분리하여 메일 발송 기능만 책임지도록 하였습니다.
@@ -209,6 +208,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
