@@ -11,7 +11,7 @@
 
 ---
 <br><br><br>
-[가나바](#-가나바)
+[가나바](#https://github.com/stonage23/kakao_together_clone_server/blob/stonage23-patch-1/README.md#-%ED%86%A0%ED%81%B0-%EC%9E%AC%EB%B0%9C%EA%B8%89-%ED%9D%90%EB%A6%84)
 
 ## 🔎 주요 기능
 ### [인증](#인증)
@@ -209,6 +209,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
