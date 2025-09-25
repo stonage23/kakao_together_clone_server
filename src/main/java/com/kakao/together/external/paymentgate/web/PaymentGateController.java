@@ -20,8 +20,7 @@ public class PaymentGateController {
 
     @PostMapping("/validation")
     public ResponseEntity<Void> validatePayment(@RequestBody PortOneRequest request) {
-        boolean success = paymentVerificationHandlerImpl.verifyPayment(request.getImpUid(), request.getMerchantUid());
-        if (!success) return ResponseEntity.internalServerError().build();
+        paymentVerificationHandlerImpl.verifyPayment(request.getImpUid(), request.getMerchantUid());
         return ResponseEntity.ok().build();
     }
 }

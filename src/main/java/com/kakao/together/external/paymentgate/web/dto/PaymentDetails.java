@@ -8,7 +8,5 @@ public interface PaymentDetails {
 
     BigDecimal getAmount();
 
-    default boolean isApprovalPayment() {
-        return true;
-    }
+    default boolean isRequiredVerification() { return true; };
 }

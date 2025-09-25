@@ -54,6 +54,7 @@ public class SecurityConfig {
                                 "/api/auth/password-reset",
                                 "/api/auth/refresh",
                                 "/api/members/password",
+                                "/api/payments/validation",
                                 "/api/fundraisings/**",
                                 "/api/token/**",
                                 "/admin/**", // 테스트 전용 주석은 배포환경에서는 지우기

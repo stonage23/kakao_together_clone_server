@@ -78,12 +78,11 @@ public enum ErrorCode {
     REDIS_EXCEPTION("redis 데이터 조작 중 예외가 발생하였습니다.", "REDIS_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // 결제
-    // 결제 로직은 서버 내부 혹은 외부 api 문제에 의한 실패일 가능성이 크기 때문에 INTERNAL_SERVER_ERROR 처리
     DUPLICATE_PAYMENT("해당 merchantUid을 가진 결제 내역이 이미 DB에 존재합니다.", "DUPLICATE_PAYMENT", HttpStatus.CONFLICT),
-    FAILED_VERIFY_PAYMENT("PG사 결제 검증에 실패하였습니다. 서버 관리자에게 문의해주세요", "FAILED_VERIFY_PAYMENT", HttpStatus.INTERNAL_SERVER_ERROR),
+    BAD_PG_RESPONSE("결제 검증에 시간이 걸립니다. 잠시후 결제 내역을 확인해주세요.", "BAD_PG_RESPONSE", HttpStatus.BAD_REQUEST),
+    FAILED_VERIFY_PAYMENT("결제 검증에 실패하였습니다. 일정 시간 후 자동 환불처리됩니다.", "FAILED_VERIFY_PAYMENT", HttpStatus.BAD_REQUEST),
     FAILED_PAYMENT_CANCEL("결제 취소에 실패했습니다. 관리자에게 문의해주세요", "FAILED_PAYMENT_CANCEL", HttpStatus.INTERNAL_SERVER_ERROR),
     FAILED_COMPLETE_PAYMENT("결제완료 처리에 실패하였습니다. 관리자에게 문의해주세요", "FAILED_COMPLETE_PAYMENT", HttpStatus.INTERNAL_SERVER_ERROR),
-    FAILED_PAYMENT("결제에 실패하였습니다. 관리자에게 문의해주세요.", "FAILED_PAYMENT", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     private final String message;

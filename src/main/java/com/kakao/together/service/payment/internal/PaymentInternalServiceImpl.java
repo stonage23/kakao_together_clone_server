@@ -45,6 +45,7 @@ public class PaymentInternalServiceImpl implements PaymentInternalService {
     }
 
     @Override
+    @Transactional
     public void failPayment(String merchantUid, String failReason, Instant failedAt) {
         PaymentType type = null;
         try {
