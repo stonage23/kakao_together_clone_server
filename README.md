@@ -6,7 +6,7 @@
 <br><br><br>
 
 ---
-## ERD Structure
+## 🔎 ERD Structure
 <img width="1397" height="754" alt="image" src="https://github.com/user-attachments/assets/cef6db98-c4d4-45e3-9e4f-d37e7dbd6d82" />
 
 ---
@@ -207,6 +207,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
