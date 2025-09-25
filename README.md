@@ -14,7 +14,7 @@
 [가나바](#가나바)
 
 ## 🔎 주요 기능
-### [인증](#인증)
+[인증](#인증)
 - SpringSecurity 인증, 인가
 - JWT 토큰(accessToken, refreshToken) 기반 사용자 인증
 ### [Redis캐싱](#Redis캐싱)
@@ -36,7 +36,7 @@
 
 <br><br><br>
 ---
-## 인증
+## 🏷️인증
 ### 📌 로그인 및 토큰 발급 흐름
 🔗 관련 디렉토리
 - 로그인 요청 처리[AuthService](src/main/java/com/kakao/together/service/auth/impl/AuthServiceImpl.java)
@@ -208,6 +208,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
 
 
 
