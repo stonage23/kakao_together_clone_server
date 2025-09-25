@@ -38,6 +38,10 @@
 ## 🏷️보안
 
 ### 📌 로그인 및 토큰 발급 흐름
+🔗 관련 디렉토리
+- 로그인 요청 처리[AuthService.java](src/main/java/com/kakao/together/service/auth/impl/AuthServiceImpl.java)
+- 토큰 생성[JwtTokenProvider.java](src/main/java/com/kakao/together/token/JwtTokenProvider.java)
+- 토근관련[token](src/main/java/com/kakao/together/token)
 ```mermaid
 sequenceDiagram
     participant Client
@@ -65,6 +69,10 @@ sequenceDiagram
 ```
 
 ### 📌 access token 기반 인증 흐름
+🔗 관련 파일
+- accessToken 인증 필터 [JwtAuthenticationFilter.java](src/main/java/com/kakao/together/filter/JwtAuthenticationFilter.java)
+- access토큰 파싱 및 인증객체 반환 클래스 [JwtTokenProvider.java](src/main/java/com/kakao/together/token/JwtTokenProvider.java)
+- 토근관련[token](src/main/java/com/kakao/together/token)
 ```mermaid
 sequenceDiagram
     participant Client
@@ -86,6 +94,10 @@ sequenceDiagram
 ```
 
 ### 📌 토큰 재발급 흐름
+🔗 관련 디렉토리
+- 로그인 요청 처리[AuthService.java](src/main/java/com/kakao/together/service/auth/impl/AuthServiceImpl.java)
+- 토큰 생성[JwtTokenProvider.java](src/main/java/com/kakao/together/token/JwtTokenProvider.java)
+- 토큰관련[token](src/main/java/com/kakao/together/token)
 ```mermaid
 sequenceDiagram
     participant Client
@@ -114,9 +126,15 @@ sequenceDiagram
 
 ## 예외처리
 ### 📌 중점을 둔 요소
-- 일관성 있는 응답
 - 유지보수성 향상
-- 디버깅 시 예외 추적
+  - 전역예외처리 클래스에서 일괄 예외 응답 처리를 담당하여 예외 응답 방식 수정은 이 파일에서만 책임지도록 하였습니다. 🔗[GlobalExceptionHandler.java](src/main/java/com/kakao/together/exception/GlobalExceptionHandler.java)
+- 일관성 있는 응답
+  - 발생가능 예외를 ErrorCode에 사전에 정의하였습니다. 🔗[ErrorCode.java](src/main/java/com/kakao/together/exception/ErrorCode.java)
+  - 예외 유형에 따른 예외 응답 객체(ErrorResponse) 다르게 생성합니다. 🔗 [ErrorResponse.java](src/main/java/com/kakao/together/exception/ErrorResponse.java)
+- 디버깅 용이성
+  - 던져진 예외는 상단에서 CustomException으로 감싸서 전역 예외처리로 던져집니다. 🔗 [CustomException.java](src/main/java/com/kakao/together/exception/CustomException.java)
+  - 저수준 모듈에서 발생한 예외들의 cause을 CustomException이 catch할 때까지 넘겨주어 예외 추적을 용이하게 만들었습니다. 
+
 
 ```mermaid
 graph LR
@@ -127,4 +145,7 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
+
+
 
