@@ -3,13 +3,18 @@
 🔗https://together.kakao.com/
 
 카카오 같이 가치 핵심 기능을 RESTful API으로 클론 코딩한 백엔드 서버 프로젝트입니다.
-<br><br><br>
 
----
-## 🔎 ERD Structure
-<img width="1397" height="754" alt="image" src="https://github.com/user-attachments/assets/cef6db98-c4d4-45e3-9e4f-d37e7dbd6d82" />
+기간 : 2025. 07. 17 ~ 2025. 09. 24
 
----
+<div> 
+  <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white"> 
+  <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
+  <img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> 
+  <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">
+  <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white">
+  <img src="https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens">
+  <img src="https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white">
+</div>
 <br><br><br>
 
 ## 🔎 주요 기능
@@ -24,7 +29,7 @@
   - 결제 위조 방지 및 사용자 경험 향상 지향
 - [🏷️ 게시글](#게시글)
   - 임시저장 기능으로 사용자 경험 향상
-- 🏷️ 파일 업로드
+- 🏷️ [파일업로드](#파일업로드)
   - 파일 스토리지 분리
   - 데이터 정합성을 위한 파일의 전체 생명주기 관리
 - 🏷️ 애플리케이션 비즈니스
@@ -33,6 +38,13 @@
   - 모금
 - [🏷️ 예외 처리](#예외처리)
 
+<br><br><br>
+
+---
+## 🔎 ERD Structure
+<img width="1397" height="754" alt="image" src="https://github.com/user-attachments/assets/cef6db98-c4d4-45e3-9e4f-d37e7dbd6d82" />
+
+---
 <br><br><br>
 ---
 ## 인증
@@ -170,7 +182,7 @@ flowchart TD
 - 결제 검증 실패 시 트랜잭션 처리
   - 결제 검증 실패 시 서버 내부 결제 상태를 '실패'상태로 바꾸는 로직은 다른 트랜잭션의 영향에 받지 않도록 Propagation.REQUIRES_NEW 속성을 부여함.
     ```
-     @Override
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failCancelDonation(Long donationId) {
         Donation donation = donationRepository.findById(donationId)
@@ -183,6 +195,31 @@ flowchart TD
     - PaymentGateResponseException, PaymentGateTokenException 등..
   - PaymentException(결제관련 예외)
     - PaymentVerificationException, PaymentCompleteException 등..
+
+ <br><br><br>
+
+ ## 파일업로드
+ ```mermaid
+
+    graph LR
+    A[사용자: 파일 업로드] --> B{임시 저장소<br/>FileInfo 상태: TEMP};
+
+    subgraph "사용자 최종 결정"
+        B -- 최종 저장 --> C[본문 저장 요청];
+        B -- 저장 안함 / 이탈 --> D[방치된 임시 파일];
+    end
+
+    C --> E{실제 저장소<br/>FileInfo 상태: USED};
+
+    subgraph "스케줄러 (자동 정리 프로세스)"
+        D -.-> F[Batch: TEMP 상태 파일<br/>주기적으로 완전 삭제];
+        H -.-> I[Batch: DELETED 상태 파일<br/>유예 기간 후 완전 삭제];
+    end
+    
+    E -- 삭제 요청 --> G{FileInfo 상태: DELETED};
+    G --> H[삭제 유예 기간 시작];
+
+```
     
     
 
@@ -207,6 +244,38 @@ graph LR
     --> E["5. 최종 응답 생성<br/>일관된 JSON 응답 (ErrorResponse)"]
     --> F["클라이언트"]
 ```
+
+응답 예시<br>
+🖼️ 로그인이 필요한 경우
+```
+{
+  "message": "로그인이 필요합니다. 로그인해주세요",
+  "status": 401,
+  "code": "REQUIRE_AUTHENTICATION",
+  "errors": {}
+}
+```
+🖼️ 유효성 검사 오류 시 
+```
+{
+  "message": "적절하지 못한 요청입니다.",
+  "status": 400,
+  "code": "BAD_REQUEST",
+  "errors": {
+    "email": "이메일 형식이 올바르지 않습니다."
+  }
+}
+```
+🖼️ refresh 토큰이 만료된 경우
+```
+{
+  "message": "만료된 토큰입니다. 재로그인해주세요.",
+  "status": 401,
+  "code": "EXPIRED_TOKEN",
+  "errors": {}
+}
+```
+
 
 
 
