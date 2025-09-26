@@ -190,15 +190,20 @@ flowchart TD
         donation.failCancelDonation();
     }
     ```
-- 다른 서비스와 마찬가지로 커스텀 예외를 정의해서 각 상황별로 대처할 수 있도록 하였습니다. [PaymentGateException](src/main/java/com/kakao/together/external/paymentgate/exception) [PaymentException](src/main/java/com/kakao/together/exception/payment)
-  - PaymentGateException(PG사 통신 예외)
+- 다른 서비스와 마찬가지로 커스텀 예외를 정의해서 각 상황별로 대처할 수 있도록 하였습니다. 
+  - [PaymentGateException](src/main/java/com/kakao/together/external/paymentgate/exception)(PG사 통신 예외)
     - PaymentGateResponseException, PaymentGateTokenException 등..
-  - PaymentException(결제관련 예외)
+  - [PaymentException](src/main/java/com/kakao/together/exception/payment)(결제관련 예외)
     - PaymentVerificationException, PaymentCompleteException 등..
 
  <br><br><br>
 
  ## 파일업로드
+파일 데이터의 정합성을 보장, 효율적인 관리를 위해 파일의 전체 생명주기를 관리하는 아키텍처를 설계했습니다.
+- 클라이언트단 업로드 요청부터 파일의 최종 삭제까지 모든 단계를 추적 및 제어
+- 고아 파일 발생을 원천적으로 차단하기 위한 노력(데이터 무결성 지향)
+
+🖼️ 업로드 - 삭제까지의 파일 생명주기 흐름도
  ```mermaid
 
     graph LR
@@ -220,8 +225,27 @@ flowchart TD
     G --> H[삭제 유예 기간 시작];
 
 ```
-    
-    
+단계(파일상태)
+- 임시업로드(TEMP)<br>
+  사용자가 파일을 업로드하면 우선 임시 저장 디렉토리에 저장. 파일의 메타 데이터 생성
+  - orphan 데이터 방지<br>
+    사용자가 도중에 페이지를 이탈하거나 업로드를 정상적으로 완료하지 않아도 실제 저장소에 영향을 미치지 않습니다. 임시 저장소 내부 파일들은 스케줄러에 의해 주기적으로 정리됩니다.
+- 영구저장(USED)<br>
+  사용자가 실제 업로드 요청을 보내면 파일 메타데이터 상태를 USED으로 업데이트하고, 실제 파일을 임시 저장소 -> 실제 저장소로 이동시킵니다.
+  - 정합성 보장<br>
+    상태 변경과 파일 이동을 하나의 논리적 단위로 묶어 DB상태와 실제 파일의 위치 일치
+- 삭제유예(DELETED)<br>
+  해당 파일과 의존성을 가진 데이터가 삭제되는 경우 서버는 해당 파일을 바로 삭제하지 않고 DELETE 상태로 업데이트.
+  - 시스템 안정성<br>
+    복구가 필요하거나 의도치 않게 파일이 삭제된 경우 복원 가능성을 높여줍니다.
+- 스케줄링을 통한 삭제<br>
+  주기적으로 동작하는 스케줄러로 TEMP 상태의 파일, 삭제 유예기간이 지난 DELETED 상태의 파일을 물리적으로 영구 삭제합니다.
+  - 자원 관리 자동화<br>
+    서버 스스로 필요없는 파일을 정리
+  - 시스템 부하 분산<br>
+    시스템 부하가 큰 처리를 사용자 요청이 적은 시간대에 몰아서 수행하는 것을 가능하게 합니다. 
+
+<br><br><br>
 
 ## 예외처리
 ### 📌 중점을 둔 요소
@@ -275,6 +299,7 @@ graph LR
   "errors": {}
 }
 ```
+
 
 
 
