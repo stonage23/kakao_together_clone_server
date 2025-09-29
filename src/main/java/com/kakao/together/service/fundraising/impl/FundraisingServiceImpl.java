@@ -2,10 +2,13 @@ package com.kakao.together.service.fundraising.impl;
 
 import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.*;
+import com.kakao.together.controller.post.dto.ContentDto.ContentResponse;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.comment.Comment;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
+import com.kakao.together.domain.entity.content.extend.SubTitleContent;
+import com.kakao.together.domain.entity.content.extend.TextContent;
 import com.kakao.together.domain.entity.fundraising.DraftStatus;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.fundraising.FundraisingStatus;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -144,9 +148,23 @@ public class FundraisingServiceImpl implements FundraisingService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<FundraisingResponse> findFundraisingsNearingGoal(int limit) {
+        return fundraisingRepository.findFundraisingsWithNearingGoal(limit).stream()
+                .map(this::resolveFundraisingResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FundraisingResponse> findFundraisingsOngoingRandom(int limit) {
+        return fundraisingRepository.findFundraisingsWithOngoingAndNotExpired(limit).stream()
+                .map(this::resolveFundraisingResponse)
+                .collect(Collectors.toList());
+    }
+
     private FundraisingResponse resolveFundraisingResponse(Fundraising fundraising) {
         FileInfo image = fundraising.getThumbnail();
-        String thumbnailUrl = filePathResolver.resolveUploadPath(image.getSavedName(), image.getContentType()).toString();
+        String thumbnailUrl = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType()).toString();
         return FundraisingMapper.toFundraisingResponse(fundraising, thumbnailUrl);
     }
 
@@ -191,8 +209,14 @@ public class FundraisingServiceImpl implements FundraisingService {
         fundraising.updateDraftToCreated();
     }
 
+    /**
+     * 에디터 html 반환 메소드
+     *
+     * @param fundraisingId
+     * @return
+     */
     @Override
-    public FundraisingPostResponse findFundraisingStory(Long fundraisingId) {
+    public FundraisingPostEditResponse findFundraisingStoryHtml(Long fundraisingId) {
 
         Fundraising fundraising = fundraisingRepository.findById(fundraisingId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId)
@@ -201,10 +225,39 @@ public class FundraisingServiceImpl implements FundraisingService {
         Post post = fundraising.getPost();
         String content = postService.resolveContent(fundraising.getPost().getId());
 
-        return FundraisingPostResponse.builder()
+        return FundraisingPostEditResponse.builder()
                 .postId(post.getId())
                 .postType(post.getType().getValue())
                 .html(content)
+                .build();
+    }
+
+    @Override
+    public FundraisingPostResponse findFundraisingStory(Long fundraisingId) {
+        Fundraising fundraising = fundraisingRepository.findById(fundraisingId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_ENTITY, "요청한 엔티티가 존재하지 않습니다; fundraisingId: " + fundraisingId)
+        );
+
+        Post post = fundraising.getPost();
+
+        List<ContentResponse> contents = new ArrayList<>();
+
+        post.getContents().forEach(
+                content -> {
+                    if (content instanceof TextContent textContent) {
+                        contents.add(ContentResponse.fromText(textContent));
+                    } else if (content instanceof SubTitleContent subTitleContent) {
+                        contents.add(ContentResponse.fromSubtitle(subTitleContent));
+                    } else if (content instanceof ImageContent imageContent) {
+                        FileInfo image = imageContent.getImage();
+                        String url = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType());
+                        contents.add(ContentResponse.fromImage(imageContent, url));
+                    }
+                });
+        return FundraisingPostResponse.builder()
+                .postId(post.getId())
+                .postType(post.getType().getValue())
+                .contents(contents)
                 .build();
     }
 

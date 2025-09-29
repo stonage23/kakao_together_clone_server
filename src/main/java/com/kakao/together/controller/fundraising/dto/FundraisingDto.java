@@ -1,6 +1,7 @@
 package com.kakao.together.controller.fundraising.dto;
 
 import com.kakao.together.controller.agency.dto.AgencyDto;
+import com.kakao.together.controller.post.dto.ContentDto.ContentResponse;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.fundraising.FundraisingCurrent;
@@ -17,6 +18,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 public class FundraisingDto {
 
@@ -30,14 +33,15 @@ public class FundraisingDto {
         private String title;
         private String thumbnailUrl;
         private Integer targetAmount;
-        private LocalDate startDate;
-        private LocalDate endDate;
+        private LocalDateTime startDate;
+        private LocalDateTime endDate;
         private AgencyDto agency;
         private Integer currentAmount;
-        private Integer directDonorCount;
-        private Integer indirectDonorCount;
+        private Integer directDonationCount;
+        private Integer indirectDonationCount;
         private Integer directDonationAmount;
         private Integer indirectDonationAmount;
+        private String summary;
     }
 
     @Builder
@@ -69,8 +73,8 @@ public class FundraisingDto {
         public Fundraising toEntity(Agency agency, @Nullable FileInfo thumbnail, @Nullable Post post) {
             return Fundraising.builder()
                     .title(this.title)
-                    .startDate(this.startDate)
-                    .endDate(this.endDate)
+                    .startDate(this.startDate.atTime(LocalTime.MIN))
+                    .endDate(this.endDate.atTime(LocalTime.MAX))
                     .agency(agency)
                     .post(post)
                     .thumbnail(thumbnail)
@@ -89,8 +93,8 @@ public class FundraisingDto {
 
         private Long fundraisingId;
         private String title;
-        private LocalDate startDate;
-        private LocalDate endDate;
+        private LocalDateTime startDate;
+        private LocalDateTime endDate;
         private Integer targetAmount;
         private Long thumbnailId;
         private String html;
@@ -140,9 +144,19 @@ public class FundraisingDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    public static class FundraisingPostResponse {
+    public static class FundraisingPostEditResponse {
         private Long postId;
         private String postType;
         private String html;
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public static class FundraisingPostResponse {
+        private Long postId;
+        private String postType;
+        private List<ContentResponse> contents;
     }
 }

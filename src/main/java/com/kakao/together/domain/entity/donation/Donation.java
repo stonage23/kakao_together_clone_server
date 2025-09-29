@@ -15,10 +15,15 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * 최초 생성 이후 status 컬럼에 수정이 발생할 때에만 업데이트된다.
+ */
 @Entity
+@Table(indexes = @Index(name = "idx_updated_at_status", columnList = "updated_at, status"))
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+// TODO test에서만
 @Getter
 public class Donation extends BaseTimeEntity {
 
@@ -40,6 +45,7 @@ public class Donation extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DonationType type;
+    private LocalDateTime completedAt;
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_transaction_id", unique = true, nullable = true)
     private PaymentTransaction paymentTransaction;
@@ -58,6 +64,7 @@ public class Donation extends BaseTimeEntity {
             throw new IllegalStateException("payment transaction is null");
         }
         this.status = DonationStatus.COMPLETE;
+        this.completedAt = LocalDateTime.now();
     }
 
     public void linkPaymentTransaction(PaymentTransaction paymentTransaction) {

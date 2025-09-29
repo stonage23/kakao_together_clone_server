@@ -4,13 +4,13 @@ import com.kakao.together.controller.agency.dto.AgencyCommand;
 import com.kakao.together.controller.comment.dto.CommentCommand;
 import com.kakao.together.controller.image.dto.ImageCommand;
 import com.kakao.together.controller.post.dto.PostCommand;
-import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.fundraising.DraftStatus;
+import com.kakao.together.domain.entity.fundraising.Fundraising;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +21,8 @@ public class FundraisingCommand {
 
     private Long id;
     private String title;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private Integer targetAmount;
     private DraftStatus draftStatus;
     private AgencyCommand agency;

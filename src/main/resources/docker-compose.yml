@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis_kakao_clone
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    ports:
+      - "6379:6379"
+
+# username: root
+  mysql:
+    image: mysql:latest
+    container_name: mysqlTogether
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=mysqlTogether
+      - TZ=Asia/Seoul
+    ports:
+      - "3306:3306"

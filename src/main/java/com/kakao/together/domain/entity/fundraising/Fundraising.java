@@ -10,11 +10,14 @@ import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import java.util.List;
  * FundraisingCurrent 데이터 조작은 Fundraising과 독립적으로 이뤄진다.
  */
 @Entity
+@Table(indexes = @Index(name = "idx_fundraising_status", columnList = "fundraising_status"))
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,11 +41,9 @@ public class Fundraising extends BaseTimeEntity {
     @NotBlank
     private String title;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     private Integer targetAmount;
 
@@ -80,8 +82,8 @@ public class Fundraising extends BaseTimeEntity {
 
     public void updateFundraising(EditFundraisingRequest dto, Agency agency, FileInfo thumbnail) {
         this.title = dto.getTitle();
-        this.startDate = dto.getStartDate();
-        this.endDate = dto.getEndDate();
+        this.startDate = dto.getStartDate().atTime(LocalTime.MIN);
+        this.endDate = dto.getEndDate().atTime(LocalTime.MAX);
         this.targetAmount = dto.getTargetAmount();
         this.agency = agency;
         this.thumbnail = thumbnail;

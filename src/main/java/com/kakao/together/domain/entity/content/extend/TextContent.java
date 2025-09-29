@@ -3,6 +3,7 @@ package com.kakao.together.domain.entity.content.extend;
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.post.Post;
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
@@ -15,6 +16,7 @@ import lombok.*;
 public class TextContent extends Content {
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @Builder

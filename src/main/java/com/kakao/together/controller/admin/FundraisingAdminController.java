@@ -60,8 +60,7 @@ public class FundraisingAdminController {
 
     @Admin
     @PatchMapping("/{id}/fundraising-status")
-    public ResponseEntity<Void> changeFundraisingStatus(@PathVariable Long id, @RequestBody FundraisingStatusUpdateRequest request) {
-        fundraisingAdminFacade.changeFundraisingStatus(id, request.getStatus());
+    public ResponseEntity<Void> changeFundraisingStatus(@PathVariable Long id, @RequestBody FundraisingStatusUpdateRequest request) {fundraisingAdminFacade.changeFundraisingStatus(id, request.getStatus());
         return ResponseEntity.ok().build();
     }
 
