@@ -19,6 +19,8 @@ public interface FundraisingService {
 
     List<FundraisingResponse> findFundraisingsTopLimit(int limit);
 
+    List<FundraisingResponse> findFundraisingsOngoingRandom(int limit);
+
     void deleteIfExists(Long fundraisingId);
 
     EditFundraisingResponse findDraftFundraising(Long fundraisingId);
@@ -27,9 +29,13 @@ public interface FundraisingService {
 
     void updateDraftToPublished(Long fundraisingId);
 
-    FundraisingPostResponse findFundraisingStory(Long fundraisingId);
+    FundraisingPostEditResponse findFundraisingStoryHtml(Long fundraisingId);
 
     List<CommentResponse> findAllComments(Long fundraisingId);
 
     EditFundraisingResponse findFundraising(Long fundraisingId);
+
+    List<FundraisingResponse> findFundraisingsNearingGoal(int limit);
+
+    FundraisingPostResponse findFundraisingStory(Long fundraisingId);
 }

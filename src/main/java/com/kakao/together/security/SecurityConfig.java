@@ -47,7 +47,12 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(authz -> authz
+//                        .requestMatchers(
+//                            "/admin/**"
+//                        ).hasRole(Role.ADMIN.getRole())
                         .requestMatchers(
+                                "swagger-ui/**",
+                                "/v3/api-docs/**",
                                 "/api/members",
                                 "/api/members/{code}",
                                 "/api/auth/login",
@@ -62,10 +67,6 @@ public class SecurityConfig {
                                 "/images/**", // 테스트
                                 "/api/fundraisings/donation/**" // 테스트
                         ).permitAll()
-                        // 배포환경에서는 주석해제
-//                        .requestMatchers(
-//                            "/admin/**"
-//                        ).hasRole(Role.ADMIN.getRole())
                         .anyRequest().authenticated()
                 )
                 ;

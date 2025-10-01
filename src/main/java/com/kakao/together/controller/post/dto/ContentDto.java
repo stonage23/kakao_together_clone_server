@@ -8,6 +8,7 @@ import com.kakao.together.domain.entity.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Builder
 @AllArgsConstructor
@@ -92,30 +93,32 @@ public class ContentDto {
         private String type;
         private Object value;
 
+        @NoArgsConstructor
         @AllArgsConstructor
+        @Getter
         private static class ImageValue {
             private String url;
             private String caption;
         }
 
-        public static ContentResponse fromText(String type, String value) {
+        public static ContentResponse fromText(TextContent content) {
             return ContentResponse.builder()
-                    .type(type)
-                    .value(value)
+                    .type(content.getType().getValue())
+                    .value(content.getText())
                     .build();
         }
 
-        public static ContentResponse fromImage(String type, String url, String caption) {
+        public static ContentResponse fromImage(ImageContent content, String url) {
             return ContentResponse.builder()
-                    .type(type)
-                    .value(new ImageValue(url, caption))
+                    .type(content.getType().getValue())
+                    .value(new ImageValue(url, content.getCaption()))
                     .build();
         }
 
-        public static ContentResponse fromSubtitle(String type, String value) {
+        public static ContentResponse fromSubtitle(SubTitleContent content) {
             return ContentResponse.builder()
-                    .type(type)
-                    .value(value)
+                    .type(content.getType().getValue())
+                    .value(content.getSubtitle())
                     .build();
         }
     }

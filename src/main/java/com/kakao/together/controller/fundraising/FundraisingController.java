@@ -4,7 +4,7 @@ import com.kakao.together.controller.comment.dto.CommentDto.CommentResponse;
 import com.kakao.together.controller.donation.dto.DonationDto;
 import com.kakao.together.controller.donation.dto.DonationDto.DonationPendingRequest;
 import com.kakao.together.controller.donation.dto.DonationDto.DonationPendingResponse;
-import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingPostResponse;
+import com.kakao.together.controller.fundraising.dto.FundraisingDto;
 import com.kakao.together.controller.fundraising.dto.FundraisingDto.FundraisingResponse;
 import com.kakao.together.security.CustomUserDetails;
 import com.kakao.together.service.fundraising.FundraisingService;
@@ -30,17 +30,27 @@ public class FundraisingController {
     }
 
     @GetMapping("/expiring-soon")
-    public ResponseEntity<List<FundraisingResponse>> getExpiringSoonFundraising(@RequestParam(defaultValue = "3") int limit) {
+    public ResponseEntity<List<FundraisingResponse>> getExpiringSoonFundraising(@RequestParam(defaultValue = "1") int limit) {
         return ResponseEntity.ok(fundraisingService.findFundraisingsExpiringInDays(limit));
     }
 
-    @GetMapping("/total-donations")
+    @GetMapping("/hot")
     public ResponseEntity<List<FundraisingResponse>> getTopFundraising(@RequestParam(defaultValue = "3") int limit) {
         return ResponseEntity.ok(fundraisingService.findFundraisingsTopLimit(limit));
     }
 
+    @GetMapping("/nearing-goal")
+    public ResponseEntity<List<FundraisingResponse>> getNearingGoalFundraising(@RequestParam(defaultValue = "1") int limit) {
+        return ResponseEntity.ok(fundraisingService.findFundraisingsNearingGoal(limit));
+    }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<FundraisingResponse>> getRandomOngoingFundraising(@RequestParam(defaultValue = "6") int limit) {
+        return ResponseEntity.ok(fundraisingService.findFundraisingsOngoingRandom(limit));
+    }
+
     @GetMapping("/{id}/story")
-    public ResponseEntity<FundraisingPostResponse> getFundraisingStory(@PathVariable Long id) {
+    public ResponseEntity<FundraisingDto.FundraisingPostResponse> getFundraisingStory(@PathVariable Long id) {
         return ResponseEntity.ok(fundraisingService.findFundraisingStory(id));
     }
 
@@ -49,12 +59,12 @@ public class FundraisingController {
         return ResponseEntity.ok(fundraisingService.findAllComments(id));
     }
 
-    @PostMapping("/donation/direct/pending")
+    @PostMapping("/donations/direct")
     public ResponseEntity<DonationPendingResponse> createPendingDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DonationPendingRequest request) {
         return ResponseEntity.ok(donationCreationService.createDirectDonation(userDetails, request));
     }
 
-    @PostMapping("/donation/comment")
+    @PostMapping("/donations/comment")
     public ResponseEntity<Void> createCommentDonation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody DonationDto.DonationCreateWithCommentWrapper request) {
         donationCreationService.createCommentDonation(userDetails, request);
         return ResponseEntity.ok().build();

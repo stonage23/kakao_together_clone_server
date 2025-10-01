@@ -52,9 +52,7 @@ public class PortOneVerificationService implements PaymentVerificationService {
         try {
 
             pgResponse = paymentGateVerificationHandler.verify(impUid, paymentDetails);
-            if (true) {
-                throw new PaymentVerificationException("강제 발생");
-            }
+
             paymentInternalService.completePayment(pgResponse);
 
 

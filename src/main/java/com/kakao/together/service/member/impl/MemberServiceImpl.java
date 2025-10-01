@@ -30,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -139,11 +138,8 @@ public class MemberServiceImpl implements MemberService {
         FileInfo preImage = member.getProfile().getProfileImage();
         if (preImage != null) {
             fileInfoRepository.delete(preImage);
-            try {
-                fileStorageService.deleteFile(preImage.getSavedName(), preImage.getContentType());
-            } catch (IOException e) {
-                throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
-            }
+            fileStorageService.deleteFile(preImage.getSavedName(), preImage.getContentType());
+            throw new CustomException(ErrorCode.FAILED_DELETE_FILE);
         }
 
         member.updateProfile(request.getNickname(), image, request.getBirth(), request.getAddress());
