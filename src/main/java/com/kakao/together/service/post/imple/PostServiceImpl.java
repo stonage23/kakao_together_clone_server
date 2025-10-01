@@ -24,8 +24,8 @@ import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.exception.file.FileException;
 import com.kakao.together.helper.JsoupHtmlParser;
 import com.kakao.together.mapper.TagMapper;
+import com.kakao.together.service.file.FileStorageService;
 import com.kakao.together.service.file.impl.FilePathResolver;
-import com.kakao.together.service.file.impl.FileStorageServiceImpl;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class PostServiceImpl implements PostService {
     private final ContentRepository contentRepository;
     private final FileInfoRepository fileInfoRepository;
     private final FilePathResolver filePathResolver;
-    private final FileStorageServiceImpl fileStorageServiceImpl;
+    private final FileStorageService fileStorageServiceImpl;
 
     @Override
     public Post findPostById(Long postId) {

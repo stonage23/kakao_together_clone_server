@@ -11,7 +11,6 @@ public class RawMultipartFile {
     private String originalFilename;
     private String savedFileName;
     private String extension;
-    private String url;
     private String contentType;
     private Long size;
 }

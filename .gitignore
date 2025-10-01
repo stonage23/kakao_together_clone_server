@@ -40,3 +40,8 @@ out/
 
 # 설정파일
 application*.yml
+
+
+# 미디어 파일 로컬 스토리지
+**/src/main/resources/files/
+**/src/main/resources/imgs/

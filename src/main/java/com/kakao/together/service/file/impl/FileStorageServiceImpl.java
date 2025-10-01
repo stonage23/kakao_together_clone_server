@@ -5,8 +5,10 @@ import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.exception.file.FileIOException;
 import com.kakao.together.service.file.FileStorageService;
+import com.kakao.together.util.FileManageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,12 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile("local-storage")
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final FileValidator fileValidator;
@@ -42,7 +44,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     private RawMultipartFile uploadTempFile(MultipartFile file) {
-        String extension = extractExtension(file.getOriginalFilename());
+        String extension = FileManageUtil.extractExtension(file.getOriginalFilename());
         String createdFileName = createRealFilename() + extension;
 
         Path storagePath = filePathResolver.resolveTempPath(createdFileName, file.getContentType());
@@ -59,7 +61,6 @@ public class FileStorageServiceImpl implements FileStorageService {
                 .extension(extension)
                 .contentType(file.getContentType())
                 .size(file.getSize())
-                .url(storagePath.toString())
                 .build();
     }
 
@@ -67,16 +68,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         return UUID.randomUUID().toString();
     }
 
-    private String extractExtension(String fileName) {
-        return Optional.ofNullable(fileName)
-                .filter(ofn -> ofn.contains("."))
-                .map(ofn -> ofn.substring(fileName.lastIndexOf(".")))
-                .filter(ofn -> ofn.length() != 0)
-                .orElseThrow(() -> {
-                    log.info("파일형식이 존재하지 않는 파일. filename: {}", fileName);
-                    return new CustomException(ErrorCode.UNSUPPORTED_FILE_FORMAT);
-                });
-    }
+
 
     @Override
     public void moveToStorageUpload(String url, String contentType) {

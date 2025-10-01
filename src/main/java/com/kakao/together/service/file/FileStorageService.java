@@ -8,7 +8,7 @@ import java.io.IOException;
 public interface FileStorageService {
     RawMultipartFile processTempFileUpload(MultipartFile file) throws IOException;
 
-    void moveToStorageUpload(String url, String contentType) throws IOException;
+    void moveToStorageUpload(String url, String contentType);
 
-    void deleteFile(String realFileName, String contentType) throws IOException;
+    void deleteFile(String realFileName, String contentType);
 }

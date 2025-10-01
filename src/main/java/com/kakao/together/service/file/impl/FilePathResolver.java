@@ -4,6 +4,7 @@ import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.util.FileManageUtil;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -29,11 +30,16 @@ public class FilePathResolver {
         }
     }
 
-    private static final String FILE_UPLOAD_DIR = "src/main/resources/files/content";
-    private static final String FILE_TEMP_DIR = "src/main/resources/files/temporary";
-    private static final String IMAGE_UPLOAD_DIR = "src/main/resources/imgs/content";
-    private static final String IMAGE_TEMP_DIR = "src/main/resources/imgs/temporary";
-    private static final String IMAGE_SERVER_DIR = "http://localhost:9090/images/content";
+    @Value("${storage.file.upload}")
+    private String FILE_UPLOAD_DIR;
+    @Value("${storage.file.temporary}")
+    private String FILE_TEMP_DIR;
+    @Value("${storage.image.upload}")
+    private String IMAGE_UPLOAD_DIR;
+    @Value("${storage.image.temporary}")
+    private String IMAGE_TEMP_DIR;
+    @Value("${storage.image.server}")
+    private String IMAGE_SERVER_DIR;
 
     private final Map<FileType, String> uploadDirMap = new EnumMap<>(FileType.class);
     private final Map<FileType, String> tempDirMap = new EnumMap<>(FileType.class);
