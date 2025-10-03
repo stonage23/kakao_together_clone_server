@@ -1,7 +1,7 @@
-package com.kakao.together.controller.file;
+package com.kakao.together.file.controller;
 
-import com.kakao.together.controller.file.dto.FileDto.FileResponse;
-import com.kakao.together.service.file.FileService;
+import com.kakao.together.file.controller.dto.FileDto.FileResponse;
+import com.kakao.together.file.service.FileTempUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,12 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-public class FileUploadController {
+public class FileTempUploadController {
 
-    private final FileService fileService;
+    private final FileTempUploadService fileTempUploadService;
 
     @PostMapping("/files/temp")
     public ResponseEntity<FileResponse> uploadTempFile(@RequestParam MultipartFile file) {
-        return ResponseEntity.ok(fileService.processTempUpload(file));
+        return ResponseEntity.ok(fileTempUploadService.processTempUpload(file));
     }
 }

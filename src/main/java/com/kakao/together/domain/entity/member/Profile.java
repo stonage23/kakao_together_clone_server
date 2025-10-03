@@ -1,12 +1,11 @@
 package com.kakao.together.domain.entity.member;
 
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Embeddable
 @Builder

@@ -4,7 +4,7 @@ import com.kakao.together.controller.fundraising.dto.FundraisingDto.EditFundrais
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.comment.Comment;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;

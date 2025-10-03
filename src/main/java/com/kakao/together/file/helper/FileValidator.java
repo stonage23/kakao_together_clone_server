@@ -1,4 +1,4 @@
-package com.kakao.together.service.file.impl;
+package com.kakao.together.file.helper;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

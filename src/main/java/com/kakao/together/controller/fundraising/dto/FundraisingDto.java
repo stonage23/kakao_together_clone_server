@@ -5,7 +5,7 @@ import com.kakao.together.controller.post.dto.ContentDto.ContentResponse;
 import com.kakao.together.domain.entity.agency.Agency;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.fundraising.FundraisingCurrent;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
@@ -73,8 +73,8 @@ public class FundraisingDto {
         public Fundraising toEntity(Agency agency, @Nullable FileInfo thumbnail, @Nullable Post post) {
             return Fundraising.builder()
                     .title(this.title)
-                    .startDate(this.startDate.atTime(LocalTime.MIN))
-                    .endDate(this.endDate.atTime(LocalTime.MAX))
+                    .startDate(this.startDate != null ? this.startDate.atTime(LocalTime.MIN) : null)
+                    .endDate(this.startDate != null ? this.endDate.atTime(LocalTime.MAX) : null)
                     .agency(agency)
                     .post(post)
                     .thumbnail(thumbnail)

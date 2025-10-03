@@ -12,13 +12,14 @@ import com.kakao.together.domain.entity.content.extend.TextContent;
 import com.kakao.together.domain.entity.fundraising.DraftStatus;
 import com.kakao.together.domain.entity.fundraising.Fundraising;
 import com.kakao.together.domain.entity.fundraising.FundraisingStatus;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.domain.repository.*;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
+import com.kakao.together.file.repository.FileInfoRepository;
 import com.kakao.together.mapper.FundraisingMapper;
-import com.kakao.together.service.file.impl.FilePathResolver;
+import com.kakao.together.file.resolver.ResourceUrlResolver;
 import com.kakao.together.service.fundraising.FundraisingService;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class FundraisingServiceImpl implements FundraisingService {
     private final AgencyRepository agencyRepository;
     private final FileInfoRepository fileInfoRepository;
     private final PostRepository postRepository;
-    private final FilePathResolver filePathResolver;
+    private final ResourceUrlResolver resourceUrlResolver;
     private final CommentRepository commentRepository;
     private final PostService postService;
 
@@ -164,7 +165,7 @@ public class FundraisingServiceImpl implements FundraisingService {
 
     private FundraisingResponse resolveFundraisingResponse(Fundraising fundraising) {
         FileInfo image = fundraising.getThumbnail();
-        String thumbnailUrl = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType()).toString();
+        String thumbnailUrl = resourceUrlResolver.resolveUploadUrl(image.getSavedName(), image.getContentType()).toString();
         return FundraisingMapper.toFundraisingResponse(fundraising, thumbnailUrl);
     }
 
@@ -250,7 +251,7 @@ public class FundraisingServiceImpl implements FundraisingService {
                         contents.add(ContentResponse.fromSubtitle(subTitleContent));
                     } else if (content instanceof ImageContent imageContent) {
                         FileInfo image = imageContent.getImage();
-                        String url = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType());
+                        String url = resourceUrlResolver.resolveUploadUrl(image.getSavedName(), image.getContentType());
                         contents.add(ContentResponse.fromImage(imageContent, url));
                     }
                 });
@@ -268,7 +269,7 @@ public class FundraisingServiceImpl implements FundraisingService {
         return comments.stream().map(
                         comment -> {
                             FileInfo profileImage = comment.getWriter().getProfile().getProfileImage();
-                            String profileImageUrl = filePathResolver.resolveUploadPath(profileImage.getSavedName(), profileImage.getContentType()).toString();
+                            String profileImageUrl = resourceUrlResolver.resolveUploadUrl(profileImage.getSavedName(), profileImage.getContentType());
                             return CommentResponse.fromEntity(comment, profileImageUrl);
                         }
                 )

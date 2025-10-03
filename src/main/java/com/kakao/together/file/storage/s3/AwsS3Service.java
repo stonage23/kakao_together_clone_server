@@ -1,25 +1,24 @@
-package com.kakao.together.external.s3;
+package com.kakao.together.file.storage.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.kakao.together.controller.file.dto.RawMultipartFile;
+import com.kakao.together.file.controller.dto.RawMultipartFile;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.properties.AwsS3Properties;
-import com.kakao.together.service.file.FileStorageService;
-import com.kakao.together.service.file.impl.FileValidator;
+import com.kakao.together.file.storage.FileStorageService;
+import com.kakao.together.file.helper.FileValidator;
+import com.kakao.together.file.helper.LogicalPathMapper;
 import com.kakao.together.util.FileManageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -31,11 +30,7 @@ public class AwsS3Service implements FileStorageService {
     private final AwsS3Properties awsS3Properties;
     private final AmazonS3 s3Client;
     private final FileValidator fileValidator;
-
-    @Value("${storage.image.temporary}")
-    private String IMAGE_TEMPORARY;
-    @Value("${storage.image.upload}")
-    private String IMAGE_UPLOAD;
+    private final LogicalPathMapper logicalPathMapper;
 
 
     public RawMultipartFile processTempFileUpload(MultipartFile file) {
@@ -51,10 +46,10 @@ public class AwsS3Service implements FileStorageService {
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
-        String bucketPath = awsS3Properties.getS3().getBucket() + awsS3Properties.getImgs().getTemporary();
+        String path = logicalPathMapper.getTempPrefix(file.getContentType()) + "/" + createdFileName;
 
         try {
-            s3Client.putObject(bucketPath, createdFileName, file.getInputStream(), metadata);
+            s3Client.putObject(awsS3Properties.getS3().getBucket(), path, file.getInputStream(), metadata);
         } catch (IOException e) {
             log.warn("AWS S3 스토리지에 파일 업로드 실패.", e);
             throw new CustomException(ErrorCode.FAILED_UPLOAD_FILE);
@@ -74,11 +69,10 @@ public class AwsS3Service implements FileStorageService {
     }
 
     @Override
-    public void moveToStorageUpload(String url, String contentType) {
-        String fileName = Paths.get(url).getFileName().toString();
+    public void moveToStorageUpload(String fileName, String contentType) {
 
-        String from = removeBucket(IMAGE_TEMPORARY) + "/" + fileName;
-        String to = removeBucket(IMAGE_UPLOAD) + "/" + fileName;
+        String from = logicalPathMapper.getTempPrefix(contentType) + "/" + fileName;
+        String to  = logicalPathMapper.getUploadPrefix(contentType) + "/" + fileName;
 
         CopyObjectRequest copyObjRequest = new CopyObjectRequest(
                 awsS3Properties.getS3().getBucket(), from, awsS3Properties.getS3().getBucket(), to
@@ -91,15 +85,12 @@ public class AwsS3Service implements FileStorageService {
     }
 
     @Override
-    public void deleteFile(String realFileName, String contentType) {
+    public void deleteFile(String filename, String contentType) {
 
-        String path = removeBucket(awsS3Properties.getImgs().getTemporary()) + "/" + realFileName;
+        String pathPrefix = logicalPathMapper.getUploadPrefix(contentType);
+        String key = pathPrefix + "/" + filename;
 
-        DeleteObjectRequest deleteObjRequest = new DeleteObjectRequest(awsS3Properties.getS3().getBucket(), path);
+        DeleteObjectRequest deleteObjRequest = new DeleteObjectRequest(awsS3Properties.getS3().getBucket(), key);
         s3Client.deleteObject(deleteObjRequest);
-    }
-
-    private String removeBucket(String sourcePath) {
-        return sourcePath.substring(sourcePath.indexOf('/') + 1);
     }
 }

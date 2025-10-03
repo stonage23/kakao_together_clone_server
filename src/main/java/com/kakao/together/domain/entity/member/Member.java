@@ -2,7 +2,7 @@ package com.kakao.together.domain.entity.member;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
 import com.kakao.together.domain.entity.comment.Comment;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

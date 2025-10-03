@@ -1,13 +1,16 @@
-package com.kakao.together.service.file.impl;
+package com.kakao.together.file.storage.local;
 
-import com.kakao.together.controller.file.dto.RawMultipartFile;
+import com.kakao.together.file.controller.dto.RawMultipartFile;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.exception.file.FileIOException;
-import com.kakao.together.service.file.FileStorageService;
+import com.kakao.together.file.storage.FileStorageService;
+import com.kakao.together.file.helper.FileValidator;
+import com.kakao.together.file.helper.LogicalPathMapper;
 import com.kakao.together.util.FileManageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
@@ -23,16 +25,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Profile("local-storage")
-public class FileStorageServiceImpl implements FileStorageService {
+public class LocalStorageService implements FileStorageService {
 
     private final FileValidator fileValidator;
-    private final FilePathResolver filePathResolver;
+    private final LogicalPathMapper logicalPathMapper;
 
-    /**
-     * 확장자 검증을 거치고 파일 업로드
-     * @param file
-     * @return
-     */
+    @Value("${storage.local.root_dir}")
+    private String ROOT_DIR;
+
     @Override
     public RawMultipartFile processTempFileUpload(MultipartFile file) {
         String name = file.getOriginalFilename();
@@ -47,7 +47,8 @@ public class FileStorageServiceImpl implements FileStorageService {
         String extension = FileManageUtil.extractExtension(file.getOriginalFilename());
         String createdFileName = createRealFilename() + extension;
 
-        Path storagePath = filePathResolver.resolveTempPath(createdFileName, file.getContentType());
+
+        Path storagePath = Path.of(ROOT_DIR).resolve(logicalPathMapper.getTempPrefix(file.getContentType())).resolve(createdFileName);
 
         try {
             file.transferTo(storagePath);
@@ -68,15 +69,13 @@ public class FileStorageServiceImpl implements FileStorageService {
         return UUID.randomUUID().toString();
     }
 
-
-
     @Override
-    public void moveToStorageUpload(String url, String contentType) {
+    public void moveToStorageUpload(String filename, String contentType) {
 
-        String fileName = Paths.get(url).getFileName().toString();
-        Path targetPath = filePathResolver.resolveUploadPath(fileName, contentType);
+        Path fromPath = Path.of(ROOT_DIR).resolve(logicalPathMapper.getTempPrefix(contentType)).resolve(filename);
+        Path targetPath = Path.of(ROOT_DIR).resolve(logicalPathMapper.getUploadPrefix(contentType)).resolve(filename);
         try {
-            Files.move(Path.of(url), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(fromPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new FileIOException("파일 이동 도중 예외 발생", e);
         }
@@ -85,7 +84,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void deleteFile(String filename, String contentType) {
 
-        Path targetPath = filePathResolver.resolveUploadPath(filename, contentType);
+        Path targetPath = Path.of(ROOT_DIR).resolve(logicalPathMapper.getUploadPrefix(contentType)).resolve(filename);
+
         boolean isDeleted = false;
         try {
             isDeleted = Files.deleteIfExists(targetPath);

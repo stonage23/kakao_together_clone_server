@@ -1,6 +1,6 @@
 package com.kakao.together.domain.entity.content.extend;
 
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.content.Content;
 import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.post.Post;

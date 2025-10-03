@@ -13,22 +13,22 @@ import com.kakao.together.domain.entity.content.ContentType;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import com.kakao.together.domain.entity.post.PostType;
 import com.kakao.together.domain.repository.ContentRepository;
-import com.kakao.together.domain.repository.FileInfoRepository;
+import com.kakao.together.file.repository.FileInfoRepository;
 import com.kakao.together.domain.repository.PostRepository;
+import com.kakao.together.event.PostProcessCompleteEvent;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
-import com.kakao.together.exception.file.FileException;
 import com.kakao.together.helper.JsoupHtmlParser;
 import com.kakao.together.mapper.TagMapper;
-import com.kakao.together.service.file.FileStorageService;
-import com.kakao.together.service.file.impl.FilePathResolver;
+import com.kakao.together.file.resolver.ResourceUrlResolver;
 import com.kakao.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +43,8 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final ContentRepository contentRepository;
     private final FileInfoRepository fileInfoRepository;
-    private final FilePathResolver filePathResolver;
-    private final FileStorageService fileStorageServiceImpl;
+    private final ResourceUrlResolver resourceUrlResolver;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Post findPostById(Long postId) {
@@ -94,6 +94,7 @@ public class PostServiceImpl implements PostService {
         }
 
         final Post finalCreatedPost = post;
+        final List<Long> fileInfoIds = new ArrayList<>();
 
         List<Content> contents = postCommand.getContents().stream()
                 .map(contentCommand -> {
@@ -101,13 +102,8 @@ public class PostServiceImpl implements PostService {
                 FileInfo image = fileInfoRepository.findById(imageContentCommand.getImageId())
                         .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ENTITY));
                 image.updateStatusToUsed();
-                String fromUrl = filePathResolver.resolveTempPath(image.getSavedName(), image.getContentType()).toString();
-                try {
-                    fileStorageServiceImpl.moveToStorageUpload(fromUrl, image.getContentType());
-                } catch (FileException e) {
-                    log.error("파일 처리도중 발생한 예외로 게시글 작성 실패", e);
-                    throw new CustomException(ErrorCode.FILE_HANDLING_EXCEPTION);
-                }
+
+                fileInfoIds.add(image.getId());
 
                 return imageContentCommand.toEntity(finalCreatedPost, image);
             } else if (contentCommand instanceof TextContentCommand textContentCommand) {
@@ -118,6 +114,8 @@ public class PostServiceImpl implements PostService {
         }).collect(Collectors.toList());
 
         finalCreatedPost.updatePost(contents);
+
+        eventPublisher.publishEvent(new PostProcessCompleteEvent(fileInfoIds));
         return finalCreatedPost.getId();
     }
 
@@ -195,7 +193,7 @@ public class PostServiceImpl implements PostService {
                         contentBuilder.append("<p>").append(textContent.getText()).append("</p>");
                     else if (content instanceof ImageContent imageContent) {
                         FileInfo image = imageContent.getImage();
-                        String url = filePathResolver.resolveServerPath(image.getSavedName(), image.getContentType());
+                        String url = resourceUrlResolver.resolveUploadUrl(image.getSavedName(), image.getContentType());
                         contentBuilder.append("<figure class='image-container'><img alt='image' src='").append(url).append("' imageid='").append(image.getId()).append("'></img></figure>");
                     } else {
                         log.warn("모금 Story내 content가 허용하는 타입 이외 다른 타입을 갖음; contentId: " + content.getId());

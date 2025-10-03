@@ -8,9 +8,11 @@ import com.kakao.together.properties.AwsS3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("s3")
 public class AwsS3Config {
 
     private final AwsS3Properties awsS3Properties;

@@ -1,7 +1,6 @@
-package com.kakao.together.domain.entity.image;
+package com.kakao.together.file.domain;
 
 import com.kakao.together.domain.entity.BaseTimeEntity;
-import com.kakao.together.domain.entity.file.FileStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

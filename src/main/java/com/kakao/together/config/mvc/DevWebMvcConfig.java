@@ -15,7 +15,7 @@ public class DevWebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:///C:/Users/Stonage/Desktop/kakao_together_clone/server/kakao_together_clone/src/main/resources/imgs/");
+                .addResourceLocations("file:///C:/Users/Stonage/Desktop/kakao_together_clone/server/kakao_together_clone/src/main/resources/images/");
     }
 
     @Override

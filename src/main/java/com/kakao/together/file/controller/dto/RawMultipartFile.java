@@ -1,4 +1,4 @@
-package com.kakao.together.controller.file.dto;
+package com.kakao.together.file.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

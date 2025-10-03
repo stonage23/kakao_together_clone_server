@@ -62,6 +62,7 @@ public enum ErrorCode {
     FAILED_UPLOAD_FILE("파일 업로드에 실패했습니다", "FAILED_UPLOAD_FILE", HttpStatus.INTERNAL_SERVER_ERROR),
     // TODO 구체적인 예외처리
     FAILED_DELETE_FILE("파일 삭제에 실패했습니다.", "FAILED_DELETE_FILE", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAILED_URL_CREATION("URL 경로 파싱 도중 문제가 발생하였습니다.", "FAILED_URL_CREATION", HttpStatus.BAD_REQUEST),
 
     // 토큰
     REQUIRE_AUTHENTICATION("로그인이 필요합니다. 로그인해주세요", "REQUIRE_AUTHENTICATION", HttpStatus.UNAUTHORIZED),

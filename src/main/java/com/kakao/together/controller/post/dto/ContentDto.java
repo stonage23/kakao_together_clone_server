@@ -3,7 +3,7 @@ package com.kakao.together.controller.post.dto;
 import com.kakao.together.domain.entity.content.extend.ImageContent;
 import com.kakao.together.domain.entity.content.extend.SubTitleContent;
 import com.kakao.together.domain.entity.content.extend.TextContent;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

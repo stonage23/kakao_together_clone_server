@@ -12,7 +12,6 @@ public class AwsS3Properties {
     private final Credentials credentials;
     private final S3 s3;
     private final Region region;
-    private final Imgs imgs;
 
     @Getter
     @RequiredArgsConstructor
@@ -31,12 +30,5 @@ public class AwsS3Properties {
     @Getter
     public static class Region {
         private final String statics;
-    }
-
-    @RequiredArgsConstructor
-    @Getter
-    public static class Imgs {
-        private final String temporary;
-        private final String content;
     }
 }

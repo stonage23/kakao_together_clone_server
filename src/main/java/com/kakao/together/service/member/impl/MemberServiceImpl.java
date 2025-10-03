@@ -8,19 +8,19 @@ import com.kakao.together.controller.member.dto.MemberDto.ProfileUpdateRequest;
 import com.kakao.together.domain.entity.donation.Donation;
 import com.kakao.together.domain.entity.donation.DonationStatus;
 import com.kakao.together.domain.entity.donation.DonationType;
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import com.kakao.together.domain.entity.member.Member;
 import com.kakao.together.domain.entity.member.Profile;
 import com.kakao.together.domain.repository.DonationRepository;
-import com.kakao.together.domain.repository.FileInfoRepository;
+import com.kakao.together.file.repository.FileInfoRepository;
 import com.kakao.together.domain.repository.MemberRepository;
 import com.kakao.together.event.MemberSignupCompleteEvent;
 import com.kakao.together.exception.CustomException;
 import com.kakao.together.exception.ErrorCode;
 import com.kakao.together.external.redis.exception.RedisServiceException;
 import com.kakao.together.service.cache.CacheService;
-import com.kakao.together.service.file.FileStorageService;
-import com.kakao.together.service.file.impl.FilePathResolver;
+import com.kakao.together.file.resolver.ResourceUrlResolver;
+import com.kakao.together.file.storage.FileStorageService;
 import com.kakao.together.service.mail.MailService;
 import com.kakao.together.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileInfoRepository fileInfoRepository;
-    private final FilePathResolver filePathResolver;
+    private final ResourceUrlResolver resourceUrlResolver;
     private final FileStorageService fileStorageService;
     private final DonationRepository donationRepository;
     private final MailService mailService;
@@ -118,7 +118,7 @@ public class MemberServiceImpl implements MemberService {
             return MeDetailResponse.fromEntity(member, defaultUrl);
         } else {
             FileInfo profileImage = profile.getProfileImage();
-            String url = filePathResolver.resolveUploadPath(profileImage.getSavedName(), profileImage.getContentType()).toString();
+            String url = resourceUrlResolver.resolveUploadUrl(profileImage.getSavedName(), profileImage.getContentType());
             return MeDetailResponse.fromEntity(member, url);
         }
     }

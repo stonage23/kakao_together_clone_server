@@ -1,4 +1,4 @@
-package com.kakao.together.domain.entity.file;
+package com.kakao.together.file.domain;
 
 public enum FileStatus {
     PENDING("PENDING"),

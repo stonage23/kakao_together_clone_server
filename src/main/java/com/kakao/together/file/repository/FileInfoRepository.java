@@ -1,6 +1,6 @@
-package com.kakao.together.domain.repository;
+package com.kakao.together.file.repository;
 
-import com.kakao.together.domain.entity.image.FileInfo;
+import com.kakao.together.file.domain.FileInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
